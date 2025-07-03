@@ -1,4 +1,4 @@
-import Image from "next/image";
+/* import Image from "next/image";
 
 export default function Home() {
   return (
@@ -99,5 +99,26 @@ export default function Home() {
         </a>
       </footer>
     </div>
+  );
+}
+ */
+
+// app/page.tsx
+'use client';
+
+import Link from 'next/link';
+
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
+      <h1 className="text-3xl font-bold">Qurʼan Tutor Demo</h1>
+
+      <Link
+        href="/scholar/classes"
+        className="rounded bg-emerald-600 px-6 py-3 text-white hover:bg-emerald-700"
+      >
+        Go to Scholar Classes
+      </Link>
+    </main>
   );
 }
