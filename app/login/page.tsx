@@ -24,8 +24,11 @@ export default function LoginPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
+      },
     });
+    
     setLoading(false);
     if (error) setMessage(error.message);
     else setMessage('📩  Check your email for a login link!');
