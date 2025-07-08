@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Database } from '@/types_db'; // optional—remove if you haven't generated types
+//import { Database } from '@/types_db'; // optional—remove if you haven't generated types
 
 export default async function Dashboard() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = createServerComponentClient({ cookies });
 
   const {
     data: { user },
