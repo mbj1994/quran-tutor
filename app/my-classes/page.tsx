@@ -33,40 +33,35 @@ export default async function MyClasses() {
       ascending: true,
     });
 
-  if (error)
+  if (error) {
     return <p className="p-4 text-red-600">{error.message}</p>;
+  }
 
   return (
     <main className="mx-auto max-w-2xl p-4">
-      <h1 className="mb-4 text-2xl font-semibold">
-        My Booked Classes
-      </h1>
+      <h1 className="mb-4 text-2xl font-semibold">My Booked Classes</h1>
 
       {enrolments?.length === 0 && <p>No bookings yet.</p>}
 
       <ul className="space-y-4">
-        {enrolments?.map((e) => (
-          <li
-            key={e.id}
-            className="rounded border p-4 shadow-sm"
-          >
-            <div className="font-medium">
-              {e.class?.title ?? 'Unknown class'}
-            </div>
-            <div className="text-sm text-gray-500">
-              {e.class
-                ? `${new Date(
-                    e.class.start_time
-                  ).toLocaleString()} · ${
-                    e.class.duration_min
-                  } min`
-                : '—'}
-            </div>
-            <div className="mt-1 text-xs text-gray-400">
-              Status: {e.status}
-            </div>
-          </li>
-        ))}
+        {enrolments?.map((e) => {
+          // `class` is an array → take the first (and only) element
+          const c = Array.isArray(e.class) ? e.class[0] : e.class;
+
+          return (
+            <li key={e.id} className="rounded border p-4 shadow-sm">
+              <div className="font-medium">
+                {c ? c.title : 'Unknown class'}
+              </div>
+              <div className="text-sm text-gray-500">
+                {c
+                  ? `${new Date(c.start_time).toLocaleString()} · ${c.duration_min} min`
+                  : '—'}
+              </div>
+              <div className="mt-1 text-xs text-gray-400">Status: {e.status}</div>
+            </li>
+          );
+        })}
       </ul>
     </main>
   );
