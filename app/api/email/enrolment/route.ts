@@ -24,15 +24,22 @@ export async function POST(req: NextRequest) {
       .single(),
   ]);
 
-  // Send email
+  // …inside POST handler, after fetching `user` and `cls`
+  const email = user?.email;
+  if (!email) {
+    console.warn('[email-route] user has no email', record.learner_id);
+    return NextResponse.json({ status: 'no-email' }, { status: 400 });
+  }
+
   await resend.emails.send({
-    from: 'Qurʼan Tutor <noreply@noreply.qurantutor.com>',
-    to: user?.email!,
+    from: 'Qurʼan Tutor <onboarding@resend.dev>',   // or your verified sender
+    to: email,                                      // ← no “!”
     subject: 'Class booking confirmed',
     html: `<p>Assalaamu ʿalaykum!</p>
-           <p>Your booking for <strong>${cls?.title}</strong> on
-           ${new Date(cls!.start_time).toLocaleString()} is confirmed.</p>`,
+          <p>Your booking for <strong>${cls!.title}</strong> on
+          ${new Date(cls!.start_time).toLocaleString()} is confirmed.</p>`,
   });
+
 
   return NextResponse.json({ status: 'sent' });
 }
