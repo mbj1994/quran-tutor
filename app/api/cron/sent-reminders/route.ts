@@ -25,7 +25,7 @@ export async function GET() {
     classes.map((c) =>
       resend.emails.send({
         from: 'Qurʼan Tutor <noreply@noreply.qurantutor.com>',
-        to:   c.profiles.email,
+        to:   c.profiles[0]?.email,
         subject: 'Reminder: Your class starts in 24 h',
         html: `<p>Assalaamu ʿalaykum!</p>
                <p>This is a friendly reminder that your session
