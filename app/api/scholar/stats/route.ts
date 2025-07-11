@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 export async function GET(_req: NextRequest) {
+    //                       ↑ add underscore to silence ESLint
+    
   const sb = createRouteHandlerClient({ cookies });
   const {
     data: { user },
