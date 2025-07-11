@@ -15,7 +15,7 @@ export default async function ScholarOverview() {
   if (!user) redirect('/login');
 
   /* ② build a proper Cookie header from all cookies */
-  const cookieHeader = cookies().toString()
+  const cookieHeader = cookies().toString();
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join('; ');
