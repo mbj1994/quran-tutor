@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
-export async function GET(_req: NextRequest) {
-    //                       ↑ add underscore to silence ESLint
-    
+export async function GET() {      // no parameter; nothing unused
+
   const sb = createRouteHandlerClient({ cookies });
   const {
     data: { user },
