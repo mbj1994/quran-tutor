@@ -1,12 +1,13 @@
 {
-    "cron": {
-      "/api/cron/reminders": {
+    "crons": [
+      {
+        "path": "/api/cron/reminders",
         "schedule": "0 * * * *",
+        "method": "POST",
         "headers": {
-          "x-cron-secret": "your_long_random_string"
-        },
-        "method": "POST"
+          "x-cron-secret": "@CRON_SECRET"
+        }
       }
-    }
+    ]
   }
   

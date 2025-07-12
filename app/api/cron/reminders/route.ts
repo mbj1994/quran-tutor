@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { resend } from '@/lib/resend';
 
-// Protect route with a secret header
 const CRON_SECRET = process.env.CRON_SECRET!;
 
 export async function POST(req: NextRequest) {
-  if (req.headers.get('x-cron-secret') !== CRON_SECRET)
+  const secret = new URL(req.url).searchParams.get('secret');
+  if (secret !== CRON_SECRET)
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
 
   const sb = createRouteHandlerClient({ cookies: () => '' });
