@@ -1,13 +1,8 @@
 {
-    "crons": [
-      {
-        "path": "/api/cron/reminders",
-        "schedule": "0 * * * *",
-        "method": "POST",
-        "headers": {
-          "x-cron-secret": "@CRON_SECRET"
-        }
-      }
-    ]
-  }
-  
+  "crons": [
+    {
+      "path": "/api/cron/reminders?cron_secret=@CRON_SECRET",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
