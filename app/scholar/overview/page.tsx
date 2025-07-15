@@ -1,29 +1,24 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export const dynamic = 'force-dynamic'; // always fresh
-
 export default async function ScholarOverview() {
-  /* ① wrap cookies() in a function */
+  /* ① Verify scholar is signed in */
   const sb = createServerComponentClient({ cookies });
-
   const {
     data: { user },
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
 
-  /* ② build a proper Cookie header from all cookies */
-  const cookieHeader = cookies().toString();   // ✅ one-liner
-
+  /* ② Call internal API — same-origin, cookies sent automatically */
   const res = await fetch('/api/scholar/stats', {
-    headers: { Cookie: cookies().toString() },
-    next: { revalidate: 60 }
+    next: { revalidate: 60 }, // cache 1 min
   });
 
   const stats = await res.json();
 
+  /* ③ Render metrics */
   return (
     <main className="mx-auto max-w-md p-6">
       <h1 className="mb-6 text-2xl font-semibold">Overview</h1>
