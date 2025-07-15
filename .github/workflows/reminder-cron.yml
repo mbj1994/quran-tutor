@@ -1,0 +1,16 @@
+name: Hourly Reminder Emails
+
+# ───── Schedule: every hour on the hour ─────
+on:
+  schedule:
+    - cron:  '0 * * * *'
+  workflow_dispatch:      # allows manual run from Actions tab
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/cron/reminders
+        run: |
+          curl -X POST "https://quran-tutor-sigma.vercel.app/api/cron/reminders" \
+               -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
