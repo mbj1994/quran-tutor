@@ -15,19 +15,16 @@ export default async function ScholarOverview() {
   if (!user) redirect('/login');
 
   /* ② build a proper Cookie header from all cookies */
-  const cookieHeader = cookies()
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join('; ');
+  const cookieHeader = cookies().toString();   // ✅ one-liner
 
-  // Fetch stats via internal API route
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/scholar/stats`,
     {
-      headers: { cookie: cookieHeader },
-      next: { revalidate: 60 }, // cache 1 min
+      headers: { Cookie: cookieHeader },
+      next: { revalidate: 60 },   // cache for 1 min
     }
   );
+
   const stats = await res.json();
 
   return (
