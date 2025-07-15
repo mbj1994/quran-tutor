@@ -17,13 +17,10 @@ export default async function ScholarOverview() {
   /* ② build a proper Cookie header from all cookies */
   const cookieHeader = cookies().toString();   // ✅ one-liner
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/scholar/stats`,
-    {
-      headers: { Cookie: cookieHeader },
-      next: { revalidate: 60 },   // cache for 1 min
-    }
-  );
+  const res = await fetch('/api/scholar/stats', {
+    headers: { Cookie: cookies().toString() },
+    next: { revalidate: 60 }
+  });
 
   const stats = await res.json();
 

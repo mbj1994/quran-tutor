@@ -13,4 +13,4 @@ jobs:
       - name: Call /api/cron/reminders
         run: |
           curl -X POST "https://quran-tutor-sigma.vercel.app/api/cron/reminders" \
-               -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+               -H "x-cron-secret:${{ secrets.CRON_SECRET }}"
