@@ -21,10 +21,17 @@ export async function POST(req: NextRequest) {
   });
 
   /* ③ Time window: 23 h 50 m → 24 h 10 m ahead */
-  const now = new Date();
+  /* const now = new Date();
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const windowStart = new Date(in24h.getTime() - 10 * 60 * 1000).toISOString();
-  const windowEnd   = new Date(in24h.getTime() + 10 * 60 * 1000).toISOString();
+  const windowEnd   = new Date(in24h.getTime() + 10 * 60 * 1000).toISOString(); */
+
+  const now = new Date();
+  
+  const windowStart = new Date(now.getTime() + 1 * 60 * 1000).toISOString(); // +1 min
+  const windowEnd   = new Date(now.getTime() + 2 * 60 * 1000).toISOString(); // +2 min
+ 
+
 
   /* ④ Fetch classes in that window + booked learners */
   const { data: classes, error } = await sb
