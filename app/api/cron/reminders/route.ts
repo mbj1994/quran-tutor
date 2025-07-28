@@ -21,21 +21,16 @@ export async function POST(req: NextRequest) {
   });
 
   /* ③ Time window: 23 h 50 m → 24 h 10 m ahead */
-  /* const now = new Date();
+  const now = new Date();
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const windowStart = new Date(in24h.getTime() - 10 * 60 * 1000).toISOString();
-  const windowEnd   = new Date(in24h.getTime() + 10 * 60 * 1000).toISOString(); */
+  const windowEnd   = new Date(in24h.getTime() + 10 * 60 * 1000).toISOString(); 
 
-  /* ③ Time window */
-  const now = new Date();
-  const windowStart = new Date(now.getTime() + 1 * 60 * 1000).toISOString(); // TEMP 1–2-min window
-  const windowEnd   = new Date(now.getTime() + 2 * 60 * 1000).toISOString();
-
-  /* ─── DEBUG LOG ───────────────────────────────────────── */
-  console.log('REMINDER WINDOW', { windowStart, windowEnd, now: now.toISOString() });
-  /* ─────────────────────────────────────────────────────── */
-
- 
+  /* const now = new Date();
+  
+  const windowStart = new Date(now.getTime() + 1 * 60 * 1000).toISOString(); // +1 min
+  const windowEnd   = new Date(now.getTime() + 2 * 60 * 1000).toISOString(); // +2 min
+  */
 
 
   /* ④ Fetch classes in that window + booked learners */
@@ -48,13 +43,6 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  /* ─── DEBUG LOG ───────────────── */
-  console.log('CLASSES FOUND', classes?.map((c) => ({
-    id: c.id,
-    start_time: c.start_time,
-  })));
-  /* ─────────────────────────────── */
-
   if (!classes?.length) return NextResponse.json({ sent: 0 });
 
   /* ⑤ Map userId → email (single admin call) */
