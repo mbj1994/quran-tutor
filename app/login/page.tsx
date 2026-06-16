@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const session = useSession();               // returns session if already logged in
   const supabase = supabaseBrowser();
+  const expiredLink = searchParams.get('error') === 'expired_link';
 
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -16,22 +18,26 @@ export default function LoginPage() {
 
   // Redirect logged-in users away from /login
   useEffect(() => {
-    if (session) router.replace('/dashboard');
-  }, [session, router]);
+    if (session && !expiredLink) router.replace('/dashboard');
+  }, [session, expiredLink, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
+    setMessage(null);
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
       },
     });
-    
+
     setLoading(false);
     if (error) setMessage(error.message);
-    else setMessage('📩  Check your email for a login link!');
+    else setMessage('Check your email for a login link.');
   };
 
   return (
@@ -45,6 +51,7 @@ export default function LoginPage() {
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
           className="w-full rounded border p-2"
         />
         <button
@@ -52,11 +59,24 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full rounded bg-emerald-600 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {loading ? 'Sending…' : 'Send magic link'}
+          {loading ? 'Sending...' : 'Send magic link'}
         </button>
       </form>
 
       {message && <p className="mt-4 text-center text-sm">{message}</p>}
+      {expiredLink && (
+        <p className="mt-4 text-center text-sm text-red-600">
+          This login link is invalid or has expired. Please request a new link.
+        </p>
+      )}
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
