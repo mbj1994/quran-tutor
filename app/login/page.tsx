@@ -13,8 +13,11 @@ function LoginForm() {
   const expiredLink = searchParams.get('error') === 'expired_link';
 
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Redirect logged-in users away from /login
   useEffect(() => {
@@ -38,6 +41,45 @@ function LoginForm() {
     setLoading(false);
     if (error) setMessage(error.message);
     else setMessage('Check your email for a login link.');
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordLoading) return;
+
+    setPasswordLoading(true);
+    setPasswordMessage(null);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (!signInError) {
+      setPasswordMessage('Signed in successfully.');
+      router.replace('/dashboard');
+      return;
+    }
+
+    if (signInError.message.toLowerCase().includes('invalid login credentials')) {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (signUpError) {
+        setPasswordMessage(signUpError.message);
+        setPasswordLoading(false);
+        return;
+      }
+
+      setPasswordMessage('Account created. You can now continue.');
+      router.replace('/dashboard');
+      return;
+    }
+
+    setPasswordMessage(signInError.message);
+    setPasswordLoading(false);
   };
 
   return (
@@ -64,6 +106,39 @@ function LoginForm() {
       </form>
 
       {message && <p className="mt-4 text-center text-sm">{message}</p>}
+
+      <section className="mt-8 w-full max-w-xs border-t pt-6">
+        <h2 className="mb-4 text-lg font-semibold">Developer email/password login</h2>
+        <form onSubmit={handlePasswordLogin} className="space-y-4">
+          <input
+            type="email"
+            required
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={passwordLoading}
+            className="w-full rounded border p-2"
+          />
+          <input
+            type="password"
+            required
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={passwordLoading}
+            className="w-full rounded border p-2"
+          />
+          <button
+            type="submit"
+            disabled={passwordLoading}
+            className="w-full rounded bg-slate-700 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          >
+            {passwordLoading ? 'Working...' : 'Create account / Sign in'}
+          </button>
+        </form>
+        {passwordMessage && <p className="mt-4 text-center text-sm">{passwordMessage}</p>}
+      </section>
+
       {expiredLink && (
         <p className="mt-4 text-center text-sm text-red-600">
           This login link is invalid or has expired. Please request a new link.
