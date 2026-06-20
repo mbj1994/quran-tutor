@@ -142,6 +142,12 @@ export default function Home() {
       >
         Go to Scholar Classes
       </Link>
+      <Link
+        href="/payments"
+        className="rounded bg-purple-600 px-6 py-3 text-white"
+      >
+        Payments & Donations
+      </Link>
     </main>
   );
 }
