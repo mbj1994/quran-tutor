@@ -148,6 +148,12 @@ export default function Home() {
       >
         Payments & Donations
       </Link>
+      <Link
+        href="/subscription"
+        className="rounded bg-emerald-700 px-6 py-3 text-white"
+      >
+        Subscription Status
+      </Link>
     </main>
   );
 }
