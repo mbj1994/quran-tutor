@@ -1,13 +1,15 @@
-import Link from 'next/link';
+import { PaymentSuccessClient } from './PaymentSuccessClient';
 
-export default function PaymentSuccessPage() {
-  return (
-    <main className="mx-auto max-w-md p-6 text-center space-y-4">
-      <h1 className="text-2xl font-semibold">Payment successful</h1>
-      <p>Thank you. Your payment was completed successfully.</p>
-      <Link href="/" className="underline">
-        Go back home
-      </Link>
-    </main>
-  );
+type PaymentSuccessPageProps = {
+  searchParams: Promise<{
+    session_id?: string;
+  }>;
+};
+
+export default async function PaymentSuccessPage({
+  searchParams,
+}: PaymentSuccessPageProps) {
+  const { session_id: sessionId } = await searchParams;
+
+  return <PaymentSuccessClient sessionId={sessionId} />;
 }

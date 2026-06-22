@@ -43,22 +43,21 @@ export async function POST(req: NextRequest) {
     }
 
     let user: { id: string; email?: string | null } | null = null;
+    const sb = createRouteHandlerClient({ cookies });
+    const {
+      data: { user: authenticatedUser },
+    } = await sb.auth.getUser();
 
     if (type === 'subscription') {
-      const sb = createRouteHandlerClient({ cookies });
-      const {
-        data: { user: authenticatedUser },
-      } = await sb.auth.getUser();
-
       if (!authenticatedUser) {
         return NextResponse.json(
           { error: 'Please log in first.' },
           { status: 401 }
         );
       }
-
-      user = authenticatedUser;
     }
+
+    user = authenticatedUser;
 
     const origin =
       req.headers.get('origin') ||
@@ -73,7 +72,7 @@ export async function POST(req: NextRequest) {
         user_id: user?.id ?? '',
         type,
       },
-      success_url: `${origin}/payments/success`,
+      success_url: `${origin}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/payments/cancel`,
     });
 
