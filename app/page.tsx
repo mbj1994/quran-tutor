@@ -133,6 +133,13 @@ export default function Home() {
         >
           My Classes
         </Link>
+
+        <Link
+          href="/learners"
+          className="rounded bg-emerald-700 px-6 py-3 text-white hover:bg-emerald-800"
+        >
+          My Learners
+        </Link>
       </div>
 
       {/* Scholar route (kept for convenience during development) */}
