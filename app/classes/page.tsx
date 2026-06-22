@@ -4,8 +4,31 @@ import ClientBookButton from './BookButton';
 
 export const dynamic = 'force-dynamic';
 
+type Subscription = {
+  status: string | null;
+};
+
 export default async function ClassesPage() {
   const sb = createServerComponentClient({ cookies });
+
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
+  let hasActiveSubscription = false;
+
+  if (user) {
+    const { data: subscription } = await sb
+      .from('subscriptions')
+      .select('status')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle<Subscription>();
+
+    hasActiveSubscription =
+      subscription?.status === 'active' || subscription?.status === 'trialing';
+  }
 
   const { data: classes } = await sb
     .from('classes')
@@ -35,6 +58,7 @@ export default async function ClassesPage() {
                 <ClientBookButton
                   classId={c.id}
                   disabled={spots === 0}
+                  hasActiveSubscription={hasActiveSubscription}
                 />
               </div>
             </li>

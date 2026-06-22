@@ -7,20 +7,31 @@ import { supabaseBrowser } from '@/lib/supabaseClient';
 export default function ClientBookButton({
   classId,
   disabled,
+  hasActiveSubscription,
 }: {
   classId: string;
   disabled?: boolean;
+  hasActiveSubscription: boolean;
 }) {
   const sb = supabaseBrowser();
   const router = useRouter();
   const [status, setStatus] = useState<'idle' | 'saving' | 'done'>('idle');
 
   async function book() {
+    if (!hasActiveSubscription) {
+      alert('Please subscribe before booking a class.');
+      router.push('/payments');
+      return;
+    }
+
     setStatus('saving');
 
-    const { data: { user } } = await sb.auth.getUser();
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+
     if (!user) {
-      alert('Please log in first.');      // shouldn’t happen, but safe-guard
+      alert('Please log in first.');
       return setStatus('idle');
     }
 
@@ -33,7 +44,6 @@ export default function ClientBookButton({
       return setStatus('idle');
     }
 
-    // booking OK → jump to My Classes
     router.push('/my-classes');
   }
 
@@ -43,7 +53,11 @@ export default function ClientBookButton({
       disabled={disabled || status === 'saving'}
       className="rounded bg-emerald-600 px-3 py-1 text-white disabled:opacity-50"
     >
-      {status === 'saving' ? 'Booking…' : 'Book'}
+      {status === 'saving'
+        ? 'Booking...'
+        : hasActiveSubscription
+          ? 'Book'
+          : 'Subscribe to Book'}
     </button>
   );
 }
