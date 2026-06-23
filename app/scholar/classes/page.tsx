@@ -2,17 +2,21 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export const dynamic = 'force-dynamic'; // show new rows immediately
+export const dynamic = 'force-dynamic';
 
 export default async function ScholarClasses() {
   const sb = createServerComponentClient({ cookies });
 
-  const { data: { user } } = await sb.auth.getUser();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
   if (!user) return <p className="p-4">Please log in.</p>;
 
   const { data: classes, error } = await sb
     .from('classes')
     .select('*')
+    .eq('scholar_id', user.id)
     .order('start_time', { ascending: true });
 
   if (error) return <p className="p-4 text-red-600">{error.message}</p>;
@@ -32,14 +36,23 @@ export default async function ScholarClasses() {
       {classes?.length === 0 && <p>No classes yet.</p>}
 
       <ul className="space-y-3">
-        {classes?.map((c) => (
+        {classes?.map((classRow) => (
           <li
-            key={c.id}
+            key={classRow.id}
             className="rounded border p-3 shadow-sm hover:bg-gray-50"
           >
-            <div className="font-medium">{c.title}</div>
+            <div className="font-medium">{classRow.title}</div>
             <div className="text-sm text-gray-500">
-              {new Date(c.start_time).toLocaleString()} · {c.duration_min} min
+              {new Date(classRow.start_time).toLocaleString()} -{' '}
+              {classRow.duration_min} min
+            </div>
+            <div className="mt-3">
+              <Link
+                href={`/scholar/classes/${classRow.id}/roster`}
+                className="text-sm text-emerald-700 underline"
+              >
+                Roster
+              </Link>
             </div>
           </li>
         ))}
