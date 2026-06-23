@@ -8,6 +8,11 @@ type Subscription = {
   status: string | null;
 };
 
+type Learner = {
+  id: string;
+  full_name: string;
+};
+
 export default async function ClassesPage() {
   const sb = createServerComponentClient({ cookies });
 
@@ -16,6 +21,7 @@ export default async function ClassesPage() {
   } = await sb.auth.getUser();
 
   let hasActiveSubscription = false;
+  let learners: Learner[] = [];
 
   if (user) {
     const { data: subscription } = await sb
@@ -28,6 +34,14 @@ export default async function ClassesPage() {
 
     hasActiveSubscription =
       subscription?.status === 'active' || subscription?.status === 'trialing';
+
+    const { data: learnerRows } = await sb
+      .from('learners')
+      .select('id, full_name')
+      .eq('parent_id', user.id)
+      .order('full_name', { ascending: true });
+
+    learners = (learnerRows ?? []) as Learner[];
   }
 
   const { data: classes } = await sb
@@ -59,6 +73,7 @@ export default async function ClassesPage() {
                   classId={c.id}
                   disabled={spots === 0}
                   hasActiveSubscription={hasActiveSubscription}
+                  learners={learners}
                 />
               </div>
             </li>
