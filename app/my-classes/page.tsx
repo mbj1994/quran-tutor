@@ -18,9 +18,18 @@ type Learner = {
 
 type Enrolment = {
   id: string;
+  learner_profile_id: string | null;
   status: string | null;
   class: BookedClass | BookedClass[] | null;
   learner: Learner | Learner[] | null;
+};
+
+type LessonProgress = {
+  class_id: string;
+  learner_profile_id: string;
+  attendance_status: string;
+  notes: string | null;
+  homework: string | null;
 };
 
 export default async function MyClasses() {
@@ -36,6 +45,7 @@ export default async function MyClasses() {
     .select(
       `
         id,
+        learner_profile_id,
         status,
         class:classes (
           id,
@@ -60,6 +70,37 @@ export default async function MyClasses() {
   }
 
   const enrolments = (data ?? []) as Enrolment[];
+  const classIds = enrolments
+    .map((enrolment) => {
+      const bookedClass = Array.isArray(enrolment.class)
+        ? enrolment.class[0]
+        : enrolment.class;
+
+      return bookedClass?.id;
+    })
+    .filter((classId): classId is string => Boolean(classId));
+  const learnerProfileIds = enrolments
+    .map((enrolment) => enrolment.learner_profile_id)
+    .filter((learnerId): learnerId is string => Boolean(learnerId));
+
+  let progressRows: LessonProgress[] = [];
+
+  if (classIds.length > 0 && learnerProfileIds.length > 0) {
+    const { data: progressData } = await sb
+      .from('lesson_progress')
+      .select('class_id, learner_profile_id, attendance_status, notes, homework')
+      .in('class_id', classIds)
+      .in('learner_profile_id', learnerProfileIds);
+
+    progressRows = (progressData ?? []) as LessonProgress[];
+  }
+
+  const progressByBooking = new Map(
+    progressRows.map((progress) => [
+      `${progress.class_id}:${progress.learner_profile_id}`,
+      progress,
+    ])
+  );
 
   return (
     <main className="mx-auto max-w-2xl p-4">
@@ -77,6 +118,12 @@ export default async function MyClasses() {
           const learner = Array.isArray(enrolment.learner)
             ? enrolment.learner[0]
             : enrolment.learner;
+          const progress =
+            bookedClass && enrolment.learner_profile_id
+              ? progressByBooking.get(
+                  `${bookedClass.id}:${enrolment.learner_profile_id}`
+                )
+              : undefined;
 
           return (
             <li key={enrolment.id} className="rounded border p-4 shadow-sm">
@@ -94,6 +141,13 @@ export default async function MyClasses() {
               {enrolment.status && (
                 <div className="mt-1 text-xs text-gray-400">
                   Status: {enrolment.status}
+                </div>
+              )}
+              {progress && (
+                <div className="mt-3 space-y-1 rounded bg-gray-50 p-3 text-sm text-gray-700">
+                  <div>Attendance: {progress.attendance_status}</div>
+                  {progress.notes && <div>Notes: {progress.notes}</div>}
+                  {progress.homework && <div>Homework: {progress.homework}</div>}
                 </div>
               )}
             </li>

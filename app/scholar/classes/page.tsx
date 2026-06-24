@@ -46,12 +46,18 @@ export default async function ScholarClasses() {
               {new Date(classRow.start_time).toLocaleString()} -{' '}
               {classRow.duration_min} min
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex gap-4">
               <Link
                 href={`/scholar/classes/${classRow.id}/roster`}
                 className="text-sm text-emerald-700 underline"
               >
                 Roster
+              </Link>
+              <Link
+                href={`/scholar/classes/${classRow.id}/progress`}
+                className="text-sm text-emerald-700 underline"
+              >
+                Progress
               </Link>
             </div>
           </li>
