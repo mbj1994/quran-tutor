@@ -123,6 +123,13 @@ export default function Home() {
           Browse Classes
         </Link>
 
+        <Link
+          href="/dashboard"
+          className="rounded bg-emerald-700 px-6 py-3 text-white hover:bg-emerald-800"
+        >
+          Parent Dashboard
+        </Link>
+
         <Link href="/scholar/overview" className="rounded bg-indigo-600 px-6 py-3 text-white">
         Scholar Overview
         </Link>
