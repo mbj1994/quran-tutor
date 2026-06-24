@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LogoutButton from './LogoutButton';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -31,6 +32,7 @@ export default function SiteNav() {
               {link.label}
             </Link>
           ))}
+          <LogoutButton />
         </div>
       </nav>
     </header>
