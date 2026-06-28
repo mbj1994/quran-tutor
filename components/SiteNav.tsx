@@ -1,7 +1,25 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import LogoutButton from './LogoutButton';
 
-const links = [
+type NavLink = {
+  href: string;
+  label: string;
+};
+
+type ProfileRole = {
+  role: { code: string | null } | { code: string | null }[] | null;
+};
+
+const publicLinks: NavLink[] = [
+  { href: '/', label: 'Home' },
+  { href: '/classes', label: 'Browse Classes' },
+  { href: '/payments', label: 'Payments' },
+  { href: '/login', label: 'Login' },
+];
+
+const parentLinks: NavLink[] = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Parent Dashboard' },
   { href: '/classes', label: 'Browse Classes' },
@@ -9,12 +27,42 @@ const links = [
   { href: '/learners', label: 'My Learners' },
   { href: '/subscription', label: 'Subscription' },
   { href: '/payments', label: 'Payments' },
-  { href: '/scholar/classes', label: 'Scholar Classes' },
-  { href: '/scholar/overview', label: 'Scholar Overview' },
-  { href: '/login', label: 'Login' },
 ];
 
-export default function SiteNav() {
+const scholarLinks: NavLink[] = [
+  { href: '/scholar/classes', label: 'Scholar Classes' },
+  { href: '/scholar/overview', label: 'Scholar Overview' },
+];
+
+function getRoleCode(profile: ProfileRole | null) {
+  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
+  return role?.code ?? null;
+}
+
+export default async function SiteNav() {
+  const sb = createServerComponentClient({ cookies });
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
+  let links = publicLinks;
+  let isLoggedIn = false;
+
+  if (user) {
+    isLoggedIn = true;
+    links = parentLinks;
+
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('role:roles(code)')
+      .eq('id', user.id)
+      .maybeSingle<ProfileRole>();
+
+    if (getRoleCode(profile) === 'scholar') {
+      links = [...parentLinks, ...scholarLinks];
+    }
+  }
+
   return (
     <header className="border-b bg-white">
       <nav className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
@@ -32,7 +80,7 @@ export default function SiteNav() {
               {link.label}
             </Link>
           ))}
-          <LogoutButton />
+          {isLoggedIn && <LogoutButton />}
         </div>
       </nav>
     </header>
