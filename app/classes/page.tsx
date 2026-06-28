@@ -46,7 +46,9 @@ export default async function ClassesPage() {
 
   const { data: classes } = await sb
     .from('classes')
-    .select('id,title,start_time,duration_min,capacity, enrolments(count)')
+    .select(
+      'id,title,subject,level,language,start_time,duration_min,capacity, enrolments(count)'
+    )
     .order('start_time', { ascending: true });
 
   return (
@@ -61,6 +63,11 @@ export default async function ClassesPage() {
           return (
             <li key={c.id} className="rounded border p-4 shadow-sm">
               <div className="font-medium">{c.title}</div>
+              <div className="mt-1 space-y-1 text-sm text-gray-600">
+                {c.subject && <p>Subject: {c.subject}</p>}
+                {c.level && <p>Level: {c.level}</p>}
+                {c.language && <p>Language: {c.language}</p>}
+              </div>
               <div className="text-sm text-gray-500">
                 {new Date(c.start_time).toLocaleString()} · {c.duration_min} min
               </div>

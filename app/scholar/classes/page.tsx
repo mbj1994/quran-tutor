@@ -42,11 +42,22 @@ export default async function ScholarClasses() {
             className="rounded border p-3 shadow-sm hover:bg-gray-50"
           >
             <div className="font-medium">{classRow.title}</div>
+            <div className="mt-1 space-y-1 text-sm text-gray-600">
+              {classRow.subject && <p>Subject: {classRow.subject}</p>}
+              {classRow.level && <p>Level: {classRow.level}</p>}
+              {classRow.language && <p>Language: {classRow.language}</p>}
+            </div>
             <div className="text-sm text-gray-500">
               {new Date(classRow.start_time).toLocaleString()} -{' '}
               {classRow.duration_min} min
             </div>
             <div className="mt-3 flex gap-4">
+              <Link
+                href={`/scholar/classes/${classRow.id}/edit`}
+                className="text-sm text-emerald-700 underline"
+              >
+                Edit
+              </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/roster`}
                 className="text-sm text-emerald-700 underline"

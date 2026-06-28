@@ -10,6 +10,8 @@ type Learner = {
   full_name: string;
   age: number | null;
   preferred_language: string | null;
+  quran_level: string | null;
+  learning_goals: string | null;
   notes: string | null;
 };
 
@@ -24,7 +26,9 @@ export default async function LearnersPage() {
 
   const { data, error } = await sb
     .from('learners')
-    .select('id, full_name, age, preferred_language, notes')
+    .select(
+      'id, full_name, age, preferred_language, quran_level, learning_goals, notes'
+    )
     .eq('parent_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -57,6 +61,12 @@ export default async function LearnersPage() {
               {learner.age !== null && <p>Age: {learner.age}</p>}
               {learner.preferred_language && (
                 <p>Preferred language: {learner.preferred_language}</p>
+              )}
+              {learner.quran_level && (
+                <p>Qur&apos;an level: {learner.quran_level}</p>
+              )}
+              {learner.learning_goals && (
+                <p>Learning goals: {learner.learning_goals}</p>
               )}
               {learner.notes && <p>Notes: {learner.notes}</p>}
             </div>

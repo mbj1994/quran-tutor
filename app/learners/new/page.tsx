@@ -6,6 +6,15 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 export const dynamic = 'force-dynamic';
 
 const languages = ['English', 'Wolof', 'Mandinka', 'Fula', 'Arabic'] as const;
+const quranLevels = [
+  'Beginner Arabic letters',
+  'Qaida / Noorani Qaida',
+  'Quran reading beginner',
+  'Quran reading intermediate',
+  'Tajweed beginner',
+  'Memorization beginner',
+  'Memorization ongoing',
+] as const;
 
 type NewLearnerPageProps = {
   searchParams?: Promise<{
@@ -29,6 +38,8 @@ async function createLearner(formData: FormData) {
   const preferredLanguage = String(
     formData.get('preferred_language') ?? ''
   ).trim();
+  const quranLevel = String(formData.get('quran_level') ?? '').trim();
+  const learningGoals = String(formData.get('learning_goals') ?? '').trim();
   const notes = String(formData.get('notes') ?? '').trim();
 
   if (!fullName) {
@@ -46,6 +57,8 @@ async function createLearner(formData: FormData) {
     full_name: fullName,
     age,
     preferred_language: preferredLanguage || null,
+    quran_level: quranLevel || null,
+    learning_goals: learningGoals || null,
     notes: notes || null,
   });
 
@@ -113,6 +126,31 @@ export default async function NewLearnerPage({
               </option>
             ))}
           </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">
+            Qur&apos;an learning level
+          </span>
+          <select name="quran_level" className="w-full rounded border p-2">
+            <option value="">Not sure yet</option>
+            {quranLevels.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">
+            Learning goals
+          </span>
+          <textarea
+            name="learning_goals"
+            className="min-h-24 w-full rounded border p-2"
+            placeholder="Optional"
+          />
         </label>
 
         <label className="block">

@@ -14,6 +14,7 @@ type Subscription = {
 type Learner = {
   id: string;
   full_name: string;
+  quran_level: string | null;
 };
 
 type BookedClass = {
@@ -81,7 +82,7 @@ export default async function DashboardPage() {
         .maybeSingle<Subscription>(),
       sb
         .from('learners')
-        .select('id, full_name')
+        .select('id, full_name, quran_level')
         .eq('parent_id', user.id)
         .order('full_name', { ascending: true }),
     ]);
@@ -210,7 +211,10 @@ export default async function DashboardPage() {
         {learners.length > 0 ? (
           <ul className="mt-3 list-inside list-disc space-y-1">
             {learners.map((learner) => (
-              <li key={learner.id}>{learner.full_name}</li>
+              <li key={learner.id}>
+                {learner.full_name}
+                {learner.quran_level ? ` - ${learner.quran_level}` : ''}
+              </li>
             ))}
           </ul>
         ) : (

@@ -4,13 +4,39 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 
+const subjects = [
+  'Arabic letters',
+  'Qaida / Noorani Qaida',
+  'Quran reading',
+  'Tajweed',
+  'Memorization',
+  'Revision',
+  'Islamic basics',
+] as const;
+
+const levels = [
+  'Beginner Arabic letters',
+  'Qaida / Noorani Qaida',
+  'Quran reading beginner',
+  'Quran reading intermediate',
+  'Tajweed beginner',
+  'Memorization beginner',
+  'Memorization ongoing',
+] as const;
+
+const languages = ['English', 'Mandinka', 'Wolof', 'Fula', 'Arabic'] as const;
+
 export default function NewClassPage() {
   const sb = supabaseBrowser();
   const router = useRouter();
 
   const [title, setTitle] = useState('');
+  const [subject, setSubject] = useState('');
+  const [level, setLevel] = useState('');
+  const [language, setLanguage] = useState('');
   const [start, setStart] = useState('');
   const [duration, setDuration] = useState(60);
+  const [capacity, setCapacity] = useState(20);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -20,8 +46,12 @@ export default function NewClassPage() {
 
     const { error } = await sb.from('classes').insert({
       title,
+      subject: subject || null,
+      level: level || null,
+      language: language || null,
       start_time: new Date(start).toISOString(),
       duration_min: duration,
+      capacity,
     });
 
     setLoading(false);
@@ -43,6 +73,45 @@ export default function NewClassPage() {
           onChange={(e) => setTitle(e.target.value)}
         />
 
+        <select
+          className="w-full rounded border p-2"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+        >
+          <option value="">Subject</option>
+          {subjects.map((subjectOption) => (
+            <option key={subjectOption} value={subjectOption}>
+              {subjectOption}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="w-full rounded border p-2"
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+        >
+          <option value="">Level</option>
+          {levels.map((levelOption) => (
+            <option key={levelOption} value={levelOption}>
+              {levelOption}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="w-full rounded border p-2"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="">Language</option>
+          {languages.map((languageOption) => (
+            <option key={languageOption} value={languageOption}>
+              {languageOption}
+            </option>
+          ))}
+        </select>
+
         <input
           required
           type="datetime-local"
@@ -59,6 +128,15 @@ export default function NewClassPage() {
           className="w-full rounded border p-2"
           value={duration}
           onChange={(e) => setDuration(Number(e.target.value))}
+        />
+
+        <input
+          type="number"
+          min={1}
+          max={100}
+          className="w-full rounded border p-2"
+          value={capacity}
+          onChange={(e) => setCapacity(Number(e.target.value))}
         />
 
         <button
