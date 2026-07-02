@@ -15,6 +15,9 @@ type Learner = {
   id: string;
   full_name: string;
   quran_level: string | null;
+  points: number | null;
+  lessons_completed: number | null;
+  current_badge: string | null;
 };
 
 type BookedClass = {
@@ -22,6 +25,7 @@ type BookedClass = {
   title: string;
   start_time: string;
   duration_min: number | null;
+  meeting_url: string | null;
 };
 
 type Enrolment = {
@@ -29,7 +33,7 @@ type Enrolment = {
   learner_profile_id: string | null;
   status: string | null;
   class: BookedClass | BookedClass[] | null;
-  learner: Learner | Learner[] | null;
+  learner: Pick<Learner, 'id' | 'full_name'> | Pick<Learner, 'id' | 'full_name'>[] | null;
 };
 
 type LessonProgress = {
@@ -62,6 +66,14 @@ function formatDateTime(value: string) {
   });
 }
 
+function badgeForLessons(lessonsCompleted: number, savedBadge?: string | null) {
+  if (savedBadge) return savedBadge;
+  if (lessonsCompleted >= 10) return 'Rising Reciter';
+  if (lessonsCompleted >= 5) return 'Consistent Learner';
+  if (lessonsCompleted >= 1) return "Qur'an Starter";
+  return 'New Learner';
+}
+
 export default async function DashboardPage() {
   const sb = createServerComponentClient({ cookies });
 
@@ -82,7 +94,9 @@ export default async function DashboardPage() {
         .maybeSingle<Subscription>(),
       sb
         .from('learners')
-        .select('id, full_name, quran_level')
+        .select(
+          'id, full_name, quran_level, points, lessons_completed, current_badge'
+        )
         .eq('parent_id', user.id)
         .order('full_name', { ascending: true }),
     ]);
@@ -116,7 +130,8 @@ export default async function DashboardPage() {
                 id,
                 title,
                 start_time,
-                duration_min
+                duration_min,
+                meeting_url
               ),
               learner:learners!enrolments_learner_profile_id_fkey (
                 id,
@@ -169,12 +184,12 @@ export default async function DashboardPage() {
     subscription?.status === 'active' || subscription?.status === 'trialing';
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 p-4">
-      <h1 className="text-2xl font-semibold">Parent Dashboard</h1>
+    <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4">
+      <h1 className="text-2xl font-semibold text-gray-950">Parent Dashboard</h1>
 
-      <section className="rounded border p-4 shadow-sm">
-        <h2 className="text-lg font-medium">Subscription</h2>
-        <p className="mt-2">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-950">Subscription</h2>
+        <p className="mt-2 text-gray-700">
           Subscription: {hasActiveSubscription ? 'Active' : 'Not active'}
         </p>
         {subscription?.current_period_end && (
@@ -192,11 +207,14 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded border p-4 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-medium">Learners</h2>
+          <h2 className="text-lg font-semibold text-gray-950">Learners</h2>
           <div className="flex gap-2">
-            <Link href="/learners" className="rounded border px-3 py-2 text-sm hover:bg-gray-50">
+            <Link
+              href="/learners"
+              className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+            >
               View Learners
             </Link>
             <Link
@@ -209,23 +227,56 @@ export default async function DashboardPage() {
         </div>
         <p className="mt-3 text-sm text-gray-600">Total learners: {learners.length}</p>
         {learners.length > 0 ? (
-          <ul className="mt-3 list-inside list-disc space-y-1">
-            {learners.map((learner) => (
-              <li key={learner.id}>
-                {learner.full_name}
-                {learner.quran_level ? ` - ${learner.quran_level}` : ''}
-              </li>
-            ))}
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {learners.map((learner) => {
+              const lessonsCompleted = learner.lessons_completed ?? 0;
+
+              return (
+                <li
+                  key={learner.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                >
+                  <div className="font-semibold text-gray-950">
+                    {learner.full_name}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs uppercase text-gray-500">Lessons</p>
+                      <p className="font-medium text-gray-900">
+                        {lessonsCompleted}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase text-gray-500">Points</p>
+                      <p className="font-medium text-gray-900">
+                        {learner.points ?? 0}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm text-gray-700">
+                    Level: {learner.quran_level ?? 'Not set yet'}
+                  </p>
+                  <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                    {badgeForLessons(lessonsCompleted, learner.current_badge)}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="mt-3 text-sm text-gray-600">No learners added yet.</p>
         )}
       </section>
 
-      <section className="rounded border p-4 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-medium">Upcoming Booked Classes</h2>
-          <Link href="/my-classes" className="rounded border px-3 py-2 text-sm hover:bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-950">
+            Upcoming Booked Classes
+          </h2>
+          <Link
+            href="/my-classes"
+            className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+          >
             My Classes
           </Link>
         </div>
@@ -237,8 +288,11 @@ export default async function DashboardPage() {
               const learner = firstOrNull(enrolment.learner);
 
               return (
-                <li key={enrolment.id} className="rounded bg-gray-50 p-3">
-                  <div className="font-medium">
+                <li
+                  key={enrolment.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                >
+                  <div className="font-semibold text-gray-950">
                     {bookedClass?.title ?? 'Unknown class'}
                   </div>
                   <div className="text-sm text-gray-600">
@@ -250,6 +304,16 @@ export default async function DashboardPage() {
                   <div className="text-xs text-gray-500">
                     Status: {enrolment.status ?? 'booked'}
                   </div>
+                  {bookedClass?.meeting_url && (
+                    <a
+                      href={bookedClass.meeting_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                    >
+                      Join Live Class
+                    </a>
+                  )}
                 </li>
               );
             })}
@@ -267,8 +331,10 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded border p-4 shadow-sm">
-        <h2 className="text-lg font-medium">Latest Progress and Homework</h2>
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-950">
+          Latest Progress and Homework
+        </h2>
 
         {progressRows.length > 0 ? (
           <ul className="mt-4 space-y-3">
@@ -276,8 +342,11 @@ export default async function DashboardPage() {
               const progressClass = firstOrNull(progress.class);
 
               return (
-                <li key={progress.id} className="rounded bg-gray-50 p-3">
-                  <div className="font-medium">
+                <li
+                  key={progress.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                >
+                  <div className="font-semibold text-gray-950">
                     {learnerNames.get(progress.learner_profile_id) ?? 'Unknown learner'}
                   </div>
                   <div className="text-sm text-gray-600">

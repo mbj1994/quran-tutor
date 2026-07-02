@@ -9,6 +9,7 @@ type BookedClass = {
   title: string;
   start_time: string;
   duration_min: number;
+  meeting_url: string | null;
 };
 
 type Learner = {
@@ -51,7 +52,8 @@ export default async function MyClasses() {
           id,
           title,
           start_time,
-          duration_min
+          duration_min,
+          meeting_url
         ),
         learner:learners!enrolments_learner_profile_id_fkey (
           id,
@@ -103,11 +105,15 @@ export default async function MyClasses() {
   );
 
   return (
-    <main className="mx-auto max-w-2xl p-4">
-      <h1 className="mb-4 text-2xl font-semibold">My Booked Classes</h1>
+    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
+      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
+        My Booked Classes
+      </h1>
 
       {enrolments.length === 0 && (
-        <p>No bookings yet. When you book a class for a learner, it will appear here.</p>
+        <p className="text-gray-600">
+          No bookings yet. When you book a class for a learner, it will appear here.
+        </p>
       )}
 
       <ul className="space-y-4">
@@ -126,13 +132,18 @@ export default async function MyClasses() {
               : undefined;
 
           return (
-            <li key={enrolment.id} className="rounded border p-4 shadow-sm">
-              <div className="font-medium">
+            <li
+              key={enrolment.id}
+              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            >
+              <div className="text-lg font-semibold text-gray-950">
                 {bookedClass ? bookedClass.title : 'Unknown class'}
               </div>
               <div className="text-sm text-gray-500">
                 {bookedClass
-                  ? `${new Date(bookedClass.start_time).toLocaleString()} - ${bookedClass.duration_min} min`
+                  ? `${new Date(bookedClass.start_time).toLocaleString()} - ${
+                      bookedClass.duration_min
+                    } min`
                   : '-'}
               </div>
               <div className="mt-2 text-sm text-gray-600">
@@ -143,8 +154,18 @@ export default async function MyClasses() {
                   Status: {enrolment.status}
                 </div>
               )}
+              {bookedClass?.meeting_url && (
+                <a
+                  href={bookedClass.meeting_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                  Join Live Class
+                </a>
+              )}
               {progress && (
-                <div className="mt-3 space-y-1 rounded bg-gray-50 p-3 text-sm text-gray-700">
+                <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                   <div>Attendance: {progress.attendance_status}</div>
                   {progress.notes && <div>Notes: {progress.notes}</div>}
                   {progress.homework && <div>Homework: {progress.homework}</div>}

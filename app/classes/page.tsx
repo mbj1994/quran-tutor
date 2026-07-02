@@ -13,6 +13,23 @@ type Learner = {
   full_name: string;
 };
 
+type BookedClassLink = {
+  class:
+    | {
+        id: string;
+        meeting_url: string | null;
+      }
+    | {
+        id: string;
+        meeting_url: string | null;
+      }[]
+    | null;
+};
+
+function firstOrNull<T>(value: T | T[] | null) {
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
+
 export default async function ClassesPage() {
   const sb = createServerComponentClient({ cookies });
 
@@ -22,6 +39,7 @@ export default async function ClassesPage() {
 
   let hasActiveSubscription = false;
   let learners: Learner[] = [];
+  const bookedClassLinks = new Map<string, string>();
 
   if (user) {
     const { data: subscription } = await sb
@@ -42,6 +60,30 @@ export default async function ClassesPage() {
       .order('full_name', { ascending: true });
 
     learners = (learnerRows ?? []) as Learner[];
+
+    if (learners.length > 0) {
+      const { data: bookedRows } = await sb
+        .from('enrolments')
+        .select(
+          `
+            class:classes (
+              id,
+              meeting_url
+            )
+          `
+        )
+        .in(
+          'learner_profile_id',
+          learners.map((learner) => learner.id)
+        );
+
+      ((bookedRows ?? []) as BookedClassLink[]).forEach((row) => {
+        const bookedClass = firstOrNull(row.class);
+        if (bookedClass?.id && bookedClass.meeting_url) {
+          bookedClassLinks.set(bookedClass.id, bookedClass.meeting_url);
+        }
+      });
+    }
   }
 
   const { data: classes } = await sb
@@ -52,36 +94,57 @@ export default async function ClassesPage() {
     .order('start_time', { ascending: true });
 
   return (
-    <main className="mx-auto max-w-2xl p-4">
-      <h1 className="mb-4 text-2xl font-semibold">Available Classes</h1>
+    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
+      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
+        Available Classes
+      </h1>
 
       <ul className="space-y-4">
-        {classes?.map((c) => {
-          const booked = c.enrolments[0]?.count ?? 0;
-          const spots = c.capacity - booked;
+        {classes?.map((classRow) => {
+          const booked = classRow.enrolments[0]?.count ?? 0;
+          const spots = classRow.capacity - booked;
+          const meetingUrl = bookedClassLinks.get(classRow.id);
 
           return (
-            <li key={c.id} className="rounded border p-4 shadow-sm">
-              <div className="font-medium">{c.title}</div>
-              <div className="mt-1 space-y-1 text-sm text-gray-600">
-                {c.subject && <p>Subject: {c.subject}</p>}
-                {c.level && <p>Level: {c.level}</p>}
-                {c.language && <p>Language: {c.language}</p>}
+            <li
+              key={classRow.id}
+              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            >
+              <div className="text-lg font-semibold text-gray-950">
+                {classRow.title}
               </div>
-              <div className="text-sm text-gray-500">
-                {new Date(c.start_time).toLocaleString()} · {c.duration_min} min
+              <div className="mt-1 space-y-1 text-sm text-gray-600">
+                {classRow.subject && <p>Subject: {classRow.subject}</p>}
+                {classRow.level && <p>Level: {classRow.level}</p>}
+                {classRow.language && <p>Language: {classRow.language}</p>}
+              </div>
+              <div className="mt-2 text-sm text-gray-500">
+                {new Date(classRow.start_time).toLocaleString()} -{' '}
+                {classRow.duration_min} min
               </div>
 
-              <div className="mt-2 flex items-center justify-between">
-                <span className="text-sm">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
                   {spots > 0 ? `${spots} spots left` : 'Full'}
                 </span>
-                <ClientBookButton
-                  classId={c.id}
-                  disabled={spots === 0}
-                  hasActiveSubscription={hasActiveSubscription}
-                  learners={learners}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  {meetingUrl && (
+                    <a
+                      href={meetingUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                    >
+                      Join Live Class
+                    </a>
+                  )}
+                  <ClientBookButton
+                    classId={classRow.id}
+                    disabled={spots === 0}
+                    hasActiveSubscription={hasActiveSubscription}
+                    learners={learners}
+                  />
+                </div>
               </div>
             </li>
           );

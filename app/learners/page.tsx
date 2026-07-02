@@ -39,9 +39,9 @@ export default async function LearnersPage() {
   const learners = (data ?? []) as Learner[];
 
   return (
-    <main className="mx-auto max-w-2xl p-4">
+    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
       <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">My Learners</h1>
+        <h1 className="text-2xl font-semibold text-gray-950">My Learners</h1>
         <Link
           href="/learners/new"
           className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
@@ -50,14 +50,21 @@ export default async function LearnersPage() {
         </Link>
       </div>
 
-      {learners.length === 0 && <p>No learners added yet.</p>}
+      {learners.length === 0 && (
+        <p className="text-gray-600">No learners added yet.</p>
+      )}
 
-      <ul className="space-y-4">
+      <ul className="grid gap-4 sm:grid-cols-2">
         {learners.map((learner) => (
-          <li key={learner.id} className="rounded border p-4 shadow-sm">
-            <div className="font-medium">{learner.full_name}</div>
+          <li
+            key={learner.id}
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          >
+            <div className="text-lg font-semibold text-gray-950">
+              {learner.full_name}
+            </div>
 
-            <div className="mt-2 space-y-1 text-sm text-gray-600">
+            <div className="mt-3 space-y-1 text-sm text-gray-600">
               {learner.age !== null && <p>Age: {learner.age}</p>}
               {learner.preferred_language && (
                 <p>Preferred language: {learner.preferred_language}</p>

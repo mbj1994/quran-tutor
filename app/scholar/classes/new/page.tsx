@@ -34,6 +34,8 @@ export default function NewClassPage() {
   const [subject, setSubject] = useState('');
   const [level, setLevel] = useState('');
   const [language, setLanguage] = useState('');
+  const [description, setDescription] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [start, setStart] = useState('');
   const [duration, setDuration] = useState(60);
   const [capacity, setCapacity] = useState(20);
@@ -49,6 +51,8 @@ export default function NewClassPage() {
       subject: subject || null,
       level: level || null,
       language: language || null,
+      description: description || null,
+      meeting_url: meetingUrl || null,
       start_time: new Date(start).toISOString(),
       duration_min: duration,
       capacity,
@@ -61,14 +65,19 @@ export default function NewClassPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-4">
-      <h1 className="mb-4 text-2xl font-semibold">Create a Class</h1>
+    <main className="mx-auto max-w-md bg-gray-50 p-4">
+      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
+        Create a Class
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+      >
         <input
           required
           className="w-full rounded border p-2"
-          placeholder="Title e.g., Surah Al-Fātiḥah"
+          placeholder="Title e.g., Surah Al-Fatihah"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -112,6 +121,29 @@ export default function NewClassPage() {
           ))}
         </select>
 
+        <textarea
+          className="min-h-28 w-full rounded border p-2"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">
+            Live class link / video meeting URL
+          </span>
+          <input
+            type="url"
+            className="w-full rounded border p-2"
+            placeholder="https://..."
+            value={meetingUrl}
+            onChange={(e) => setMeetingUrl(e.target.value)}
+          />
+          <span className="mt-1 block text-xs text-gray-500">
+            Use Zoom, Google Meet, or Jitsi for now. Built-in video can be added later.
+          </span>
+        </label>
+
         <input
           required
           type="datetime-local"
@@ -143,7 +175,7 @@ export default function NewClassPage() {
           disabled={loading}
           className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {loading ? 'Saving…' : 'Save'}
+          {loading ? 'Saving...' : 'Save'}
         </button>
 
         {msg && <p className="text-sm text-red-600">{msg}</p>}

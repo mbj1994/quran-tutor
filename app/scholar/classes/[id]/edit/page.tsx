@@ -125,10 +125,10 @@ export default async function EditClassPage({
   const paramsValue = await searchParams;
 
   return (
-    <main className="mx-auto max-w-md p-4">
+    <main className="mx-auto max-w-md bg-gray-50 p-4">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Edit Class</h1>
+          <h1 className="text-2xl font-semibold text-gray-950">Edit Class</h1>
           <p className="text-sm text-gray-600">{classRow.title}</p>
         </div>
         <Link
@@ -139,7 +139,10 @@ export default async function EditClassPage({
         </Link>
       </div>
 
-      <form action={updateClass} className="space-y-4">
+      <form
+        action={updateClass}
+        className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+      >
         <input type="hidden" name="class_id" value={classRow.id} />
 
         <label className="block">
@@ -200,7 +203,9 @@ export default async function EditClassPage({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Meeting URL</span>
+          <span className="mb-1 block text-sm font-medium">
+            Live class link / video meeting URL
+          </span>
           <input
             name="meeting_url"
             type="url"
@@ -208,6 +213,9 @@ export default async function EditClassPage({
             className="w-full rounded border p-2"
             placeholder="https://..."
           />
+          <span className="mt-1 block text-xs text-gray-500">
+            Use Zoom, Google Meet, or Jitsi for now. Built-in video can be added later.
+          </span>
         </label>
 
         <button className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700">
