@@ -48,6 +48,17 @@ type ClassRow = {
   meeting_url: string | null;
 };
 
+function looksLikeUrl(value: string) {
+  if (!value) return true;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 async function updateClass(formData: FormData) {
   'use server';
 
@@ -67,6 +78,14 @@ async function updateClass(formData: FormData) {
   const meetingUrl = String(formData.get('meeting_url') ?? '').trim();
 
   if (!classId) redirect('/scholar/classes');
+
+  if (!looksLikeUrl(meetingUrl)) {
+    redirect(
+      `/scholar/classes/${classId}/edit?error=${encodeURIComponent(
+        'Please enter a full video meeting URL, starting with https://.'
+      )}`
+    );
+  }
 
   const { error } = await sb
     .from('classes')

@@ -33,6 +33,13 @@ type LessonProgress = {
   homework: string | null;
 };
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
 export default async function MyClasses() {
   const sb = createServerComponentClient({ cookies });
 
@@ -141,9 +148,7 @@ export default async function MyClasses() {
               </div>
               <div className="text-sm text-gray-500">
                 {bookedClass
-                  ? `${new Date(bookedClass.start_time).toLocaleString()} - ${
-                      bookedClass.duration_min
-                    } min`
+                  ? `${formatDateTime(bookedClass.start_time)} - ${bookedClass.duration_min} min`
                   : '-'}
               </div>
               <div className="mt-2 text-sm text-gray-600">
@@ -154,15 +159,21 @@ export default async function MyClasses() {
                   Status: {enrolment.status}
                 </div>
               )}
-              {bookedClass?.meeting_url && (
-                <a
-                  href={bookedClass.meeting_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-                >
-                  Join Live Class
-                </a>
+              {bookedClass && (
+                bookedClass.meeting_url ? (
+                  <a
+                    href={bookedClass.meeting_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                  >
+                    Join Live Class
+                  </a>
+                ) : (
+                  <p className="mt-3 text-sm font-medium text-gray-600">
+                    Live link will be added before class.
+                  </p>
+                )
               )}
               {progress && (
                 <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">

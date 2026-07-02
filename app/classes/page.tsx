@@ -30,6 +30,13 @@ function firstOrNull<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
 export default async function ClassesPage() {
   const sb = createServerComponentClient({ cookies });
 
@@ -39,7 +46,7 @@ export default async function ClassesPage() {
 
   let hasActiveSubscription = false;
   let learners: Learner[] = [];
-  const bookedClassLinks = new Map<string, string>();
+  const bookedClassLinks = new Map<string, string | null>();
 
   if (user) {
     const { data: subscription } = await sb
@@ -79,7 +86,7 @@ export default async function ClassesPage() {
 
       ((bookedRows ?? []) as BookedClassLink[]).forEach((row) => {
         const bookedClass = firstOrNull(row.class);
-        if (bookedClass?.id && bookedClass.meeting_url) {
+        if (bookedClass?.id) {
           bookedClassLinks.set(bookedClass.id, bookedClass.meeting_url);
         }
       });
@@ -103,6 +110,7 @@ export default async function ClassesPage() {
         {classes?.map((classRow) => {
           const booked = classRow.enrolments[0]?.count ?? 0;
           const spots = classRow.capacity - booked;
+          const bookedByCurrentFamily = bookedClassLinks.has(classRow.id);
           const meetingUrl = bookedClassLinks.get(classRow.id);
 
           return (
@@ -119,16 +127,23 @@ export default async function ClassesPage() {
                 {classRow.language && <p>Language: {classRow.language}</p>}
               </div>
               <div className="mt-2 text-sm text-gray-500">
-                {new Date(classRow.start_time).toLocaleString()} -{' '}
-                {classRow.duration_min} min
+                {formatDateTime(classRow.start_time)} - {classRow.duration_min} min
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
+                <span className="rounded-full bg-gray-100 px-3 py-1">
+                  Capacity: {classRow.capacity}
+                </span>
+                <span className="rounded-full bg-gray-100 px-3 py-1">
+                  {spots > 0 ? `${spots} spaces available` : 'No spaces available'}
+                </span>
               </div>
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                  {spots > 0 ? `${spots} spots left` : 'Full'}
+                <span className="text-sm text-gray-600">
+                  {bookedByCurrentFamily ? 'Already booked' : 'Choose a learner to book'}
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {meetingUrl && (
+                  {bookedByCurrentFamily && meetingUrl && (
                     <a
                       href={meetingUrl}
                       target="_blank"

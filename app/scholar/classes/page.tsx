@@ -4,6 +4,13 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export const dynamic = 'force-dynamic';
 
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
 export default async function ScholarClasses() {
   const sb = createServerComponentClient({ cookies });
 
@@ -51,20 +58,20 @@ export default async function ScholarClasses() {
               {classRow.description && <p>{classRow.description}</p>}
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              {new Date(classRow.start_time).toLocaleString()} -{' '}
-              {classRow.duration_min} min
+              {formatDateTime(classRow.start_time)} - {classRow.duration_min} min
             </div>
-            {classRow.meeting_url && (
-              <a
-                href={classRow.meeting_url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            <div className="mt-3">
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                  classRow.meeting_url
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-amber-50 text-amber-700'
+                }`}
               >
-                Join Live Class
-              </a>
-            )}
-            <div className="mt-3 flex gap-4">
+                {classRow.meeting_url ? 'Live link ready' : 'No live link yet'}
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-4">
               <Link
                 href={`/scholar/classes/${classRow.id}/edit`}
                 className="text-sm text-emerald-700 underline"

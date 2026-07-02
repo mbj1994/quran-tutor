@@ -26,6 +26,17 @@ const levels = [
 
 const languages = ['English', 'Mandinka', 'Wolof', 'Fula', 'Arabic'] as const;
 
+function looksLikeUrl(value: string) {
+  if (!value) return true;
+
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export default function NewClassPage() {
   const sb = supabaseBrowser();
   const router = useRouter();
@@ -44,7 +55,15 @@ export default function NewClassPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const trimmedMeetingUrl = meetingUrl.trim();
+
+    if (!looksLikeUrl(trimmedMeetingUrl)) {
+      setMsg('Please enter a full video meeting URL, starting with https://.');
+      return;
+    }
+
     setLoading(true);
+    setMsg(null);
 
     const { error } = await sb.from('classes').insert({
       title,
@@ -52,7 +71,7 @@ export default function NewClassPage() {
       level: level || null,
       language: language || null,
       description: description || null,
-      meeting_url: meetingUrl || null,
+      meeting_url: trimmedMeetingUrl || null,
       start_time: new Date(start).toISOString(),
       duration_min: duration,
       capacity,
