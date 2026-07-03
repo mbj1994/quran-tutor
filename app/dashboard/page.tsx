@@ -42,6 +42,9 @@ type LessonProgress = {
   attendance_status: string;
   notes: string | null;
   homework: string | null;
+  covered: string | null;
+  revision: string | null;
+  parent_note: string | null;
   updated_at: string | null;
   created_at: string | null;
   class: Pick<BookedClass, 'id' | 'title'> | Pick<BookedClass, 'id' | 'title'>[] | null;
@@ -155,6 +158,9 @@ export default async function DashboardPage() {
               attendance_status,
               notes,
               homework,
+              covered,
+              revision,
+              parent_note,
               updated_at,
               created_at,
               class:classes (
@@ -182,6 +188,13 @@ export default async function DashboardPage() {
 
   const hasActiveSubscription =
     subscription?.status === 'active' || subscription?.status === 'trialing';
+  const latestProgressByLearner = new Map<string, LessonProgress>();
+
+  progressRows.forEach((progress) => {
+    if (!latestProgressByLearner.has(progress.learner_profile_id)) {
+      latestProgressByLearner.set(progress.learner_profile_id, progress);
+    }
+  });
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4">
@@ -230,6 +243,9 @@ export default async function DashboardPage() {
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {learners.map((learner) => {
               const lessonsCompleted = learner.lessons_completed ?? 0;
+              const latestProgress = latestProgressByLearner.get(learner.id);
+              const latestNote =
+                latestProgress?.parent_note ?? latestProgress?.notes ?? null;
 
               return (
                 <li
@@ -254,11 +270,16 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   <p className="mt-3 text-sm text-gray-700">
-                    Level: {learner.quran_level ?? 'Not set yet'}
+                    Qur&apos;an level: {learner.quran_level ?? 'Not set yet'}
                   </p>
                   <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
                     {badgeForLessons(lessonsCompleted, learner.current_badge)}
                   </p>
+                  {latestNote && (
+                    <p className="mt-3 text-sm text-gray-700">
+                      Latest note: {latestNote}
+                    </p>
+                  )}
                 </li>
               );
             })}
@@ -355,12 +376,19 @@ export default async function DashboardPage() {
                   <div className="text-sm text-gray-600">
                     Attendance: {progress.attendance_status}
                   </div>
-                  {progress.notes && (
-                    <div className="mt-2 text-sm text-gray-700">Notes: {progress.notes}</div>
+                  {(progress.covered ?? progress.notes) && (
+                    <div className="mt-2 text-sm text-gray-700">
+                      Covered: {progress.covered ?? progress.notes}
+                    </div>
                   )}
-                  {progress.homework && (
+                  {(progress.revision ?? progress.homework) && (
                     <div className="mt-1 text-sm text-gray-700">
-                      Homework: {progress.homework}
+                      To revise: {progress.revision ?? progress.homework}
+                    </div>
+                  )}
+                  {progress.parent_note && (
+                    <div className="mt-1 text-sm text-gray-700">
+                      Parent note: {progress.parent_note}
                     </div>
                   )}
                 </li>

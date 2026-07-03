@@ -15,6 +15,10 @@ type BookedClass = {
 type Learner = {
   id: string;
   full_name: string;
+  quran_level: string | null;
+  lessons_completed: number | null;
+  points: number | null;
+  current_badge: string | null;
 };
 
 type Enrolment = {
@@ -31,6 +35,9 @@ type LessonProgress = {
   attendance_status: string;
   notes: string | null;
   homework: string | null;
+  covered: string | null;
+  revision: string | null;
+  parent_note: string | null;
 };
 
 function formatDateTime(value: string) {
@@ -64,7 +71,11 @@ export default async function MyClasses() {
         ),
         learner:learners!enrolments_learner_profile_id_fkey (
           id,
-          full_name
+          full_name,
+          quran_level,
+          lessons_completed,
+          points,
+          current_badge
         )
       `
     )
@@ -97,7 +108,9 @@ export default async function MyClasses() {
   if (classIds.length > 0 && learnerProfileIds.length > 0) {
     const { data: progressData } = await sb
       .from('lesson_progress')
-      .select('class_id, learner_profile_id, attendance_status, notes, homework')
+      .select(
+        'class_id, learner_profile_id, attendance_status, notes, homework, covered, revision, parent_note'
+      )
       .in('class_id', classIds)
       .in('learner_profile_id', learnerProfileIds);
 
@@ -154,6 +167,22 @@ export default async function MyClasses() {
               <div className="mt-2 text-sm text-gray-600">
                 Learner: {learner?.full_name ?? 'Unknown learner'}
               </div>
+              {learner && (
+                <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
+                  <span className="rounded-full bg-gray-100 px-3 py-1">
+                    Level: {learner.quran_level ?? 'Not set yet'}
+                  </span>
+                  <span className="rounded-full bg-gray-100 px-3 py-1">
+                    Lessons: {learner.lessons_completed ?? 0}
+                  </span>
+                  <span className="rounded-full bg-gray-100 px-3 py-1">
+                    Points: {learner.points ?? 0}
+                  </span>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                    {learner.current_badge ?? 'New Learner'}
+                  </span>
+                </div>
+              )}
               {enrolment.status && (
                 <div className="mt-1 text-xs text-gray-400">
                   Status: {enrolment.status}
@@ -178,8 +207,15 @@ export default async function MyClasses() {
               {progress && (
                 <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                   <div>Attendance: {progress.attendance_status}</div>
-                  {progress.notes && <div>Notes: {progress.notes}</div>}
-                  {progress.homework && <div>Homework: {progress.homework}</div>}
+                  {(progress.covered ?? progress.notes) && (
+                    <div>Covered: {progress.covered ?? progress.notes}</div>
+                  )}
+                  {(progress.revision ?? progress.homework) && (
+                    <div>To revise: {progress.revision ?? progress.homework}</div>
+                  )}
+                  {progress.parent_note && (
+                    <div>Parent note: {progress.parent_note}</div>
+                  )}
                 </div>
               )}
             </li>
