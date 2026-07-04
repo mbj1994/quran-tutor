@@ -27,6 +27,16 @@ export default function ClientBookButton({
   const [selectedLearnerId, setSelectedLearnerId] = useState('');
 
   async function book() {
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+
+    if (!user) {
+      alert('Please log in first.');
+      router.push('/login');
+      return;
+    }
+
     if (!hasActiveSubscription) {
       alert('Please subscribe before booking a class.');
       router.push('/payments');
@@ -39,15 +49,6 @@ export default function ClientBookButton({
     }
 
     setStatus('saving');
-
-    const {
-      data: { user },
-    } = await sb.auth.getUser();
-
-    if (!user) {
-      alert('Please log in first.');
-      return setStatus('idle');
-    }
 
     const { error } = await sb
       .from('enrolments')

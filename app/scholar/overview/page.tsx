@@ -3,29 +3,34 @@ import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default async function ScholarOverview() {
-  /* ① Get current user */
   const sb = createServerComponentClient({ cookies });
-  const { data: { user } } = await sb.auth.getUser();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
   if (!user) redirect('/login');
 
-  /* ② Fetch this scholar’s classes */
   const { data: classes } = await sb
     .from('classes')
     .select('id, start_time')
     .eq('scholar_id', user.id);
 
   const totalClasses = classes?.length ?? 0;
-  const upcoming = classes?.filter(
-    c => new Date(c.start_time) > new Date()
-  ).length ?? 0;
+  const upcoming =
+    classes?.filter((classRow) => new Date(classRow.start_time) > new Date())
+      .length ?? 0;
+  const classIds = classes?.map((classRow) => classRow.id) ?? [];
+  let learnerCount = 0;
 
-  /* ③ Count learners across those classes */
-  const { count: learnerCount } = await sb
-    .from('enrolments')
-    .select('id', { count: 'exact', head: true })
-    .in('class_id', classes?.map(c => c.id) as string[] ?? []);
+  if (classIds.length > 0) {
+    const { count } = await sb
+      .from('enrolments')
+      .select('id', { count: 'exact', head: true })
+      .in('class_id', classIds);
 
-  /* ④ Render cards */
+    learnerCount = count ?? 0;
+  }
+
   return (
     <main className="mx-auto max-w-md p-6">
       <h1 className="mb-6 text-2xl font-semibold">Overview</h1>
@@ -40,7 +45,7 @@ export default async function ScholarOverview() {
           <p className="text-sm text-gray-500">Upcoming Classes</p>
         </li>
         <li className="rounded border p-4 shadow-sm">
-          <p className="text-3xl font-bold">{learnerCount ?? 0}</p>
+          <p className="text-3xl font-bold">{learnerCount}</p>
           <p className="text-sm text-gray-500">Learners Booked</p>
         </li>
       </ul>

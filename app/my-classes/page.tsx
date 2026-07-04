@@ -21,6 +21,8 @@ type Learner = {
   current_badge: string | null;
 };
 
+type LearnerSummary = Pick<Learner, 'id'>;
+
 type Enrolment = {
   id: string;
   learner_profile_id: string | null;
@@ -55,6 +57,32 @@ export default async function MyClasses() {
   } = await sb.auth.getUser();
   if (!user) redirect('/login');
 
+  const { data: learnerRows, error: learnerError } = await sb
+    .from('learners')
+    .select('id')
+    .eq('parent_id', user.id);
+
+  if (learnerError) {
+    return <p className="p-4 text-red-600">{learnerError.message}</p>;
+  }
+
+  const ownedLearnerIds = ((learnerRows ?? []) as LearnerSummary[]).map(
+    (learner) => learner.id
+  );
+
+  if (ownedLearnerIds.length === 0) {
+    return (
+      <main className="mx-auto max-w-3xl bg-gray-50 p-4">
+        <h1 className="mb-4 text-2xl font-semibold text-gray-950">
+          My Booked Classes
+        </h1>
+        <p className="text-gray-600">
+          Add a learner profile first, then booked classes will appear here.
+        </p>
+      </main>
+    );
+  }
+
   const { data, error } = await sb
     .from('enrolments')
     .select(
@@ -79,7 +107,7 @@ export default async function MyClasses() {
         )
       `
     )
-    .eq('learner_id', user.id)
+    .in('learner_profile_id', ownedLearnerIds)
     .order('start_time', {
       foreignTable: 'classes',
       ascending: true,

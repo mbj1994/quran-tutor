@@ -45,13 +45,13 @@ export default function PaymentsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6 space-y-6">
+    <main className="mx-auto max-w-2xl space-y-6 p-6">
       <h1 className="text-2xl font-semibold">Payments & Donations</h1>
 
-      <div className="rounded border p-5 space-y-3">
+      <div className="space-y-3 rounded border p-5">
         <h2 className="text-xl font-medium">Family Subscription</h2>
         <p className="text-sm text-gray-600">
-          Subscribe monthly to access Qur’an classes for your child.
+          Subscribe monthly to access Qur&apos;an classes for your child.
         </p>
         <button
           onClick={() => startCheckout('subscription')}
@@ -62,10 +62,10 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      <div className="rounded border p-5 space-y-3">
+      <div className="space-y-3 rounded border p-5">
         <h2 className="text-xl font-medium">Sponsor a Learner</h2>
         <p className="text-sm text-gray-600">
-          Make a donation to help diaspora children access Qur’an learning.
+          Make a donation to help diaspora children access Qur&apos;an learning.
         </p>
         <button
           onClick={() => startCheckout('donation')}
