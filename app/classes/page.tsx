@@ -104,7 +104,7 @@ export default async function ClassesPage() {
     <main className="mx-auto max-w-3xl bg-gray-50 p-4">
       <div className="mb-4">
         <h1 className="text-2xl font-semibold text-gray-950">
-          Live Qur&apos;an Classes
+          Browse Live Qur&apos;an Classes
         </h1>
         <p className="mt-2 text-sm text-gray-600">
           Browse upcoming classes taught by approved Scholars/Ustass.
@@ -155,7 +155,7 @@ export default async function ClassesPage() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <span className="text-sm text-gray-600">
-                  {bookedByCurrentFamily ? 'Already booked' : 'Choose a learner to book'}
+                  {bookedByCurrentFamily ? 'Already booked' : 'Choose a child to book'}
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
                   {bookedByCurrentFamily && meetingUrl && (

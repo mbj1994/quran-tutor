@@ -198,10 +198,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4">
-      <h1 className="text-2xl font-semibold text-gray-950">Parent Dashboard</h1>
+      <h1 className="text-2xl font-semibold text-gray-950">Family Dashboard</h1>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-950">Subscription</h2>
+        <h2 className="text-lg font-semibold text-gray-950">Billing</h2>
         <p className="mt-2 text-gray-700">
           Subscription: {hasActiveSubscription ? 'Active' : 'Not active'}
         </p>
@@ -212,33 +212,33 @@ export default async function DashboardPage() {
         )}
         {!hasActiveSubscription && (
           <Link
-            href="/payments"
+            href="/subscription"
             className="mt-4 inline-block rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
           >
-            Go to Payments
+            Go to Billing
           </Link>
         )}
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-gray-950">Learners</h2>
+          <h2 className="text-lg font-semibold text-gray-950">Children</h2>
           <div className="flex gap-2">
             <Link
               href="/learners"
               className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
             >
-              View Learners
+              View Children
             </Link>
             <Link
               href="/learners/new"
               className="rounded bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700"
             >
-              Add Learner
+              Add Child
             </Link>
           </div>
         </div>
-        <p className="mt-3 text-sm text-gray-600">Total learners: {learners.length}</p>
+        <p className="mt-3 text-sm text-gray-600">Total children: {learners.length}</p>
         {learners.length > 0 ? (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {learners.map((learner) => {
@@ -257,23 +257,25 @@ export default async function DashboardPage() {
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <p className="text-xs uppercase text-gray-500">Lessons</p>
+                      <p className="text-xs uppercase text-gray-500">
+                        My Qur&apos;an Level
+                      </p>
                       <p className="font-medium text-gray-900">
-                        {lessonsCompleted}
+                        {learner.quran_level ?? 'Not set yet'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs uppercase text-gray-500">Points</p>
+                      <p className="text-xs uppercase text-gray-500">My Points</p>
                       <p className="font-medium text-gray-900">
                         {learner.points ?? 0}
                       </p>
                     </div>
                   </div>
                   <p className="mt-3 text-sm text-gray-700">
-                    Qur&apos;an level: {learner.quran_level ?? 'Not set yet'}
+                    Lessons completed: {lessonsCompleted}
                   </p>
                   <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                    {badgeForLessons(lessonsCompleted, learner.current_badge)}
+                    My Badge: {badgeForLessons(lessonsCompleted, learner.current_badge)}
                   </p>
                   {latestNote && (
                     <p className="mt-3 text-sm text-gray-700">
@@ -286,7 +288,7 @@ export default async function DashboardPage() {
           </ul>
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
-            <h3 className="font-medium text-gray-950">No learners yet</h3>
+            <h3 className="font-medium text-gray-950">No children yet</h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Add a child profile with their Qur&apos;an level so you can book
               the right live class and track learning rewards.
@@ -295,7 +297,7 @@ export default async function DashboardPage() {
               href="/learners/new"
               className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Add learner
+              Add child
             </Link>
           </div>
         )}
@@ -310,7 +312,7 @@ export default async function DashboardPage() {
             href="/my-classes"
             className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
           >
-            My Classes
+            My Live Classes
           </Link>
         </div>
 
@@ -362,7 +364,7 @@ export default async function DashboardPage() {
               href="/classes"
               className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Browse classes
+              Browse Classes
             </Link>
           </div>
         )}
@@ -399,7 +401,7 @@ export default async function DashboardPage() {
                   )}
                   {(progress.revision ?? progress.homework) && (
                     <div className="mt-1 text-sm text-gray-700">
-                      To revise: {progress.revision ?? progress.homework}
+                      What to Revise: {progress.revision ?? progress.homework}
                     </div>
                   )}
                   {progress.parent_note && (

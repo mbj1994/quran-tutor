@@ -19,7 +19,13 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const session = useSession();
   const supabase = useMemo(() => supabaseBrowser(), []);
-  const expiredLink = searchParams.get('error') === 'expired_link';
+  const authError = searchParams.get('error');
+  const authErrorCode = searchParams.get('error_code');
+  const authErrorDescription = searchParams.get('error_description') ?? '';
+  const expiredLink =
+    authError === 'expired_link' ||
+    authErrorCode === 'otp_expired' ||
+    authErrorDescription.toLowerCase().includes('expired');
 
   const [passwordEmail, setPasswordEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,10 +33,6 @@ function LoginForm() {
   const [passwordLoading, setPasswordLoading] = useState<
     'sign-in' | 'sign-up' | 'reset' | null
   >(null);
-
-  const [magicEmail, setMagicEmail] = useState('');
-  const [magicMessage, setMagicMessage] = useState<string | null>(null);
-  const [magicLoading, setMagicLoading] = useState(false);
 
   const getPostLoginPath = useCallback(async () => {
     const {
@@ -78,12 +80,12 @@ function LoginForm() {
     if (error) {
       if (error.message.toLowerCase().includes('invalid login credentials')) {
         setPasswordMessage(
-          'Invalid email or password. If this account was created with magic link or you forgot the password, use Reset Password. For local development, you can set a password at /dev/set-password.'
+          'Invalid email or password. If you forgot your password, request a reset link.'
         );
         return;
       }
 
-      setPasswordMessage(error.message);
+      setPasswordMessage('We could not sign you in. Please check your details and try again.');
       return;
     }
 
@@ -117,7 +119,7 @@ function LoginForm() {
         return;
       }
 
-      setPasswordMessage(error.message);
+      setPasswordMessage('We could not create this account. Please try again.');
       return;
     }
 
@@ -149,7 +151,7 @@ function LoginForm() {
     setPasswordLoading(null);
 
     if (error) {
-      setPasswordMessage(error.message);
+      setPasswordMessage('We could not send a reset email. Please try again.');
       return;
     }
 
@@ -158,121 +160,118 @@ function LoginForm() {
     );
   }
 
-  async function handleMagicLink(e: React.FormEvent) {
-    e.preventDefault();
-    if (magicLoading) return;
-
-    setMagicLoading(true);
-    setMagicMessage(null);
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: magicEmail,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/dashboard`,
-      },
-    });
-
-    setMagicLoading(false);
-
-    if (error) {
-      setMagicMessage(error.message);
-      return;
-    }
-
-    setMagicMessage('Check your email for a login link.');
-  }
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-8">
-        <h1 className="text-center text-2xl font-semibold">Sign in</h1>
+    <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-emerald-50 px-4 py-10">
+      <section className="w-full max-w-4xl overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[1fr_1.05fr]">
+          <div className="bg-gray-50 p-6 sm:p-8">
+            <p className="text-sm font-medium text-emerald-700">Quran Tutor</p>
+            <h1 className="mt-3 text-3xl font-semibold text-gray-950">
+              Welcome back
+            </h1>
+            <p className="mt-3 max-w-md text-sm leading-6 text-gray-600">
+              Sign in to continue to your Qur&apos;an learning dashboard.
+            </p>
 
-        {expiredLink && (
-          <p className="rounded border border-red-200 bg-red-50 p-3 text-center text-sm text-red-700">
-            This login link is invalid or has expired. Please request a new link.
-          </p>
-        )}
-
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold">Sign in with email and password</h2>
-          <p className="text-sm text-gray-600">
-            Scholar accounts use the same login page. Their role controls where they go
-            after signing in. Email reset links may expire quickly.
-          </p>
-          <form onSubmit={handlePasswordSignIn} className="space-y-4">
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={passwordEmail}
-              onChange={(e) => setPasswordEmail(e.target.value)}
-              disabled={passwordLoading !== null}
-              className="w-full rounded border p-2"
-            />
-            <input
-              type="password"
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={passwordLoading !== null}
-              className="w-full rounded border p-2"
-            />
-            <div className="grid gap-3 sm:grid-cols-3">
-              <button
-                type="submit"
-                disabled={passwordLoading !== null}
-                className="rounded bg-emerald-600 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {passwordLoading === 'sign-in' ? 'Signing in...' : 'Sign In'}
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateAccount}
-                disabled={passwordLoading !== null || !passwordEmail || !password}
-                className="rounded bg-slate-700 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-              >
-                {passwordLoading === 'sign-up' ? 'Creating...' : 'Create Account'}
-              </button>
-              <button
-                type="button"
-                onClick={handleResetPassword}
-                disabled={passwordLoading !== null}
-                className="rounded border border-emerald-600 py-2 font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
-              >
-                {passwordLoading === 'reset' ? 'Sending...' : 'Reset Password'}
-              </button>
+            <div className="mt-6 grid gap-3">
+              <article className="rounded-xl border border-gray-200 bg-white p-4">
+                <h2 className="font-semibold text-gray-950">Parent / Student</h2>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  Book classes, join live lessons, and follow progress.
+                </p>
+              </article>
+              <article className="rounded-xl border border-gray-200 bg-white p-4">
+                <h2 className="font-semibold text-gray-950">Scholar / Ustass</h2>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  Manage classes, attendance, and learner progress.
+                </p>
+              </article>
             </div>
-          </form>
-          {passwordMessage && <p className="text-center text-sm">{passwordMessage}</p>}
-        </section>
+          </div>
 
-        <section className="space-y-4 border-t pt-6">
-          <h2 className="text-lg font-semibold">Alternative: Magic link</h2>
-          <p className="text-sm text-gray-600">
-            Magic links expire quickly and can only be used once.
-          </p>
-          <form onSubmit={handleMagicLink} className="space-y-4">
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={magicEmail}
-              onChange={(e) => setMagicEmail(e.target.value)}
-              disabled={magicLoading}
-              className="w-full rounded border p-2"
-            />
-            <button
-              type="submit"
-              disabled={magicLoading}
-              className="w-full rounded border border-emerald-600 py-2 font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
-            >
-              {magicLoading ? 'Sending...' : 'Send magic link'}
-            </button>
-          </form>
-          {magicMessage && <p className="text-center text-sm">{magicMessage}</p>}
-        </section>
-      </div>
+          <div className="p-6 sm:p-8">
+            <div className="mx-auto max-w-sm space-y-5">
+              <h2 className="text-xl font-semibold text-gray-950">Sign in</h2>
+
+              {(expiredLink || authError) && (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-800">
+                  This sign-in link expired. Please sign in with your email and
+                  password, or request a new password reset.
+                </p>
+              )}
+
+              <form onSubmit={handlePasswordSignIn} className="space-y-4">
+                <label className="block">
+                  <span className="mb-1 block text-sm font-medium text-gray-800">
+                    Email
+                  </span>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    value={passwordEmail}
+                    onChange={(e) => setPasswordEmail(e.target.value)}
+                    disabled={passwordLoading !== null}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-sm font-medium text-gray-800">
+                    Password
+                  </span>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={passwordLoading !== null}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={passwordLoading !== null}
+                  className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {passwordLoading === 'sign-in' ? 'Signing in...' : 'Sign in'}
+                </button>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={handleCreateAccount}
+                    disabled={
+                      passwordLoading !== null || !passwordEmail || !password
+                    }
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {passwordLoading === 'sign-up'
+                      ? 'Creating...'
+                      : 'Create account'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    disabled={passwordLoading !== null}
+                    className="rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                  >
+                    {passwordLoading === 'reset'
+                      ? 'Sending...'
+                      : 'Forgot password'}
+                  </button>
+                </div>
+              </form>
+              {passwordMessage && (
+                <p className="rounded-lg bg-gray-50 p-3 text-center text-sm leading-6 text-gray-700">
+                  {passwordMessage}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

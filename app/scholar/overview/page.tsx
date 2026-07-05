@@ -51,7 +51,7 @@ export default async function ScholarOverview() {
   return (
     <main className="mx-auto max-w-md bg-gray-50 p-6">
       <h1 className="mb-6 text-2xl font-semibold text-gray-950">
-        Scholar Overview
+        Scholar Home
       </h1>
 
       <ul className="space-y-4 text-center">
@@ -65,7 +65,7 @@ export default async function ScholarOverview() {
         </li>
         <li className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
           <p className="text-3xl font-bold text-gray-950">{learnerCount}</p>
-          <p className="text-sm text-gray-500">Learners Booked</p>
+          <p className="text-sm text-gray-500">Children Booked</p>
         </li>
       </ul>
     </main>

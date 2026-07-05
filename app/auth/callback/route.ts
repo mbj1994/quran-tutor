@@ -17,7 +17,24 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=expired_link`);
   }
 
-  // Where to send the user next:
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let redirectTo = searchParams.get('redirect') || '/dashboard';
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role:roles(code)')
+      .eq('id', user.id)
+      .maybeSingle<{
+        role: { code: string | null } | { code: string | null }[] | null;
+      }>();
+    const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
+
+    redirectTo = role?.code === 'scholar' ? '/scholar/overview' : '/dashboard';
+  }
+
   return NextResponse.redirect(`${origin}${redirectTo}`);
 }

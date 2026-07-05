@@ -14,22 +14,21 @@ type ProfileRole = {
 
 const publicLinks: NavLink[] = [
   { href: '/', label: 'Home' },
-  { href: '/classes', label: 'Browse classes' },
+  { href: '/classes', label: 'Browse Classes' },
   { href: '/login', label: 'Login' },
 ];
 
 const parentLinks: NavLink[] = [
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/learners', label: 'Learners' },
-  { href: '/classes', label: 'Classes' },
-  { href: '/my-classes', label: 'My Classes' },
-  { href: '/subscription', label: 'Subscription' },
-  { href: '/payments', label: 'Payments' },
+  { href: '/learners', label: 'Children' },
+  { href: '/classes', label: 'Browse Classes' },
+  { href: '/my-classes', label: 'My Live Classes' },
+  { href: '/subscription', label: 'Billing' },
 ];
 
 const scholarLinks: NavLink[] = [
-  { href: '/scholar/overview', label: 'Scholar Overview' },
-  { href: '/scholar/classes', label: 'Scholar Classes' },
+  { href: '/scholar/overview', label: 'Scholar Home' },
+  { href: '/scholar/classes', label: 'Teaching Classes' },
 ];
 
 function getRoleCode(profile: ProfileRole | null) {

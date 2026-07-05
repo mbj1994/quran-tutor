@@ -51,7 +51,7 @@ export default async function ScholarClasses() {
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
-            Scholar Classes
+            Teaching Classes
           </h1>
           <p className="mt-1 text-sm text-gray-600">
             Manage live classes, rosters, and revision notes.
@@ -68,7 +68,7 @@ export default async function ScholarClasses() {
       {classes?.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No scholar classes yet
+            No teaching classes yet
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Create your first live class so parents can book a place for their

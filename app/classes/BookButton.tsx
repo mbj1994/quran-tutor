@@ -39,7 +39,7 @@ export default function ClientBookButton({
 
     if (!hasActiveSubscription) {
       alert('Please start a family subscription before booking a class.');
-      router.push('/payments');
+      router.push('/subscription');
       return;
     }
 
@@ -72,7 +72,7 @@ export default function ClientBookButton({
         href="/learners/new"
         className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
       >
-        Add learner first
+        Add child first
       </Link>
     );
   }
@@ -83,10 +83,10 @@ export default function ClientBookButton({
         <select
           value={selectedLearnerId}
           onChange={(event) => setSelectedLearnerId(event.target.value)}
-          disabled={disabled || status === 'saving'}
-          className="rounded-lg border px-2 py-2 text-sm"
-        >
-          <option value="">Choose learner</option>
+        disabled={disabled || status === 'saving'}
+        className="rounded-lg border px-2 py-2 text-sm"
+      >
+          <option value="">Choose child</option>
           {learners.map((learner) => (
             <option key={learner.id} value={learner.id}>
               {learner.full_name}

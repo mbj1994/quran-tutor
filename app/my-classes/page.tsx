@@ -75,10 +75,10 @@ export default async function MyClasses() {
     return (
       <main className="mx-auto max-w-3xl bg-gray-50 p-4">
         <h1 className="mb-4 text-2xl font-semibold text-gray-950">
-          My Booked Classes
+          My Live Classes
         </h1>
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-gray-950">Add a learner first</h2>
+          <h2 className="font-semibold text-gray-950">Add a child first</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Create a child profile with their Qur&apos;an level before booking
             live classes.
@@ -87,7 +87,7 @@ export default async function MyClasses() {
             href="/learners/new"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Add learner
+            Add child
           </Link>
         </section>
       </main>
@@ -166,7 +166,7 @@ export default async function MyClasses() {
   return (
     <main className="mx-auto max-w-3xl bg-gray-50 p-4">
       <h1 className="mb-4 text-2xl font-semibold text-gray-950">
-        My Booked Classes
+        My Live Classes
       </h1>
 
       {enrolments.length === 0 && (
@@ -182,7 +182,7 @@ export default async function MyClasses() {
             href="/classes"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Browse classes
+            Browse Classes
           </Link>
         </section>
       )}
@@ -216,21 +216,21 @@ export default async function MyClasses() {
                   : '-'}
               </div>
               <div className="mt-2 text-sm text-gray-600">
-                Learner: {learner?.full_name ?? 'Unknown learner'}
+                Child: {learner?.full_name ?? 'Unknown child'}
               </div>
               {learner && (
                 <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
                   <span className="rounded-full bg-gray-100 px-3 py-1">
-                    Level: {learner.quran_level ?? 'Not set yet'}
+                    My Qur&apos;an Level: {learner.quran_level ?? 'Not set yet'}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
                     Lessons: {learner.lessons_completed ?? 0}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
-                    Points: {learner.points ?? 0}
+                    My Points: {learner.points ?? 0}
                   </span>
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                    {learner.current_badge ?? 'New Learner'}
+                    My Badge: {learner.current_badge ?? 'New Learner'}
                   </span>
                 </div>
               )}
@@ -262,7 +262,7 @@ export default async function MyClasses() {
                     <div>Covered: {progress.covered ?? progress.notes}</div>
                   )}
                   {(progress.revision ?? progress.homework) && (
-                    <div>To revise: {progress.revision ?? progress.homework}</div>
+                    <div>What to Revise: {progress.revision ?? progress.homework}</div>
                   )}
                   {progress.parent_note && (
                     <div>Parent note: {progress.parent_note}</div>

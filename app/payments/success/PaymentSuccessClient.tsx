@@ -84,7 +84,7 @@ export function PaymentSuccessClient({ sessionId }: { sessionId?: string }) {
           View subscription
         </Link>
         <Link href="/classes" className="underline">
-          Browse classes
+          Browse Classes
         </Link>
         <Link href="/" className="underline">
           Go back home
