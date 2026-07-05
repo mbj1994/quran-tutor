@@ -14,24 +14,22 @@ type ProfileRole = {
 
 const publicLinks: NavLink[] = [
   { href: '/', label: 'Home' },
-  { href: '/classes', label: 'Browse Classes' },
-  { href: '/payments', label: 'Payments' },
+  { href: '/classes', label: 'Browse classes' },
   { href: '/login', label: 'Login' },
 ];
 
 const parentLinks: NavLink[] = [
-  { href: '/', label: 'Home' },
-  { href: '/dashboard', label: 'Parent Dashboard' },
-  { href: '/classes', label: 'Browse Classes' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/learners', label: 'Learners' },
+  { href: '/classes', label: 'Classes' },
   { href: '/my-classes', label: 'My Classes' },
-  { href: '/learners', label: 'My Learners' },
   { href: '/subscription', label: 'Subscription' },
   { href: '/payments', label: 'Payments' },
 ];
 
 const scholarLinks: NavLink[] = [
-  { href: '/scholar/classes', label: 'Scholar Classes' },
   { href: '/scholar/overview', label: 'Scholar Overview' },
+  { href: '/scholar/classes', label: 'Scholar Classes' },
 ];
 
 function getRoleCode(profile: ProfileRole | null) {
@@ -59,7 +57,7 @@ export default async function SiteNav() {
       .maybeSingle<ProfileRole>();
 
     if (getRoleCode(profile) === 'scholar') {
-      links = [...parentLinks, ...scholarLinks];
+      links = scholarLinks;
     }
   }
 

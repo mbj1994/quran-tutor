@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 
@@ -26,6 +26,15 @@ const levels = [
 
 const languages = ['English', 'Mandinka', 'Wolof', 'Fula', 'Arabic'] as const;
 
+type ProfileRole = {
+  role: { code: string | null } | { code: string | null }[] | null;
+};
+
+function getRoleCode(profile: ProfileRole | null) {
+  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
+  return role?.code ?? null;
+}
+
 function looksLikeUrl(value: string) {
   if (!value) return true;
 
@@ -38,7 +47,7 @@ function looksLikeUrl(value: string) {
 }
 
 export default function NewClassPage() {
-  const sb = supabaseBrowser();
+  const sb = useMemo(() => supabaseBrowser(), []);
   const router = useRouter();
 
   const [title, setTitle] = useState('');
@@ -52,9 +61,52 @@ export default function NewClassPage() {
   const [capacity, setCapacity] = useState(20);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [roleStatus, setRoleStatus] = useState<'checking' | 'authorized'>(
+    'checking'
+  );
+
+  useEffect(() => {
+    let active = true;
+
+    async function checkScholarAccess() {
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
+
+      if (!active) return;
+
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('role:roles(code)')
+        .eq('id', user.id)
+        .maybeSingle<ProfileRole>();
+
+      if (!active) return;
+
+      if (getRoleCode(profile) !== 'scholar') {
+        router.replace('/dashboard');
+        return;
+      }
+
+      setRoleStatus('authorized');
+    }
+
+    void checkScholarAccess();
+
+    return () => {
+      active = false;
+    };
+  }, [router, sb]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (roleStatus !== 'authorized') return;
+
     const trimmedMeetingUrl = meetingUrl.trim();
 
     if (!looksLikeUrl(trimmedMeetingUrl)) {
@@ -65,7 +117,17 @@ export default function NewClassPage() {
     setLoading(true);
     setMsg(null);
 
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
     const { error } = await sb.from('classes').insert({
+      scholar_id: user.id,
       title,
       subject: subject || null,
       level: level || null,
@@ -81,6 +143,16 @@ export default function NewClassPage() {
     if (error) return setMsg(error.message);
 
     router.replace('/scholar/classes');
+  }
+
+  if (roleStatus === 'checking') {
+    return (
+      <main className="mx-auto max-w-md bg-gray-50 p-4">
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="text-sm text-gray-600">Checking scholar access...</p>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -159,7 +231,7 @@ export default function NewClassPage() {
             onChange={(e) => setMeetingUrl(e.target.value)}
           />
           <span className="mt-1 block text-xs text-gray-500">
-            Use Zoom, Google Meet, or Jitsi for now. Built-in video can be added later.
+            Use an approved Zoom, Google Meet, or Jitsi link for this live class.
           </span>
         </label>
 
@@ -194,7 +266,7 @@ export default function NewClassPage() {
           disabled={loading}
           className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Save'}
+          {loading ? 'Saving...' : 'Save class'}
         </button>
 
         {msg && <p className="text-sm text-red-600">{msg}</p>}

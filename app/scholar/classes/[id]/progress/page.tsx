@@ -205,7 +205,23 @@ export default async function ScholarClassProgressPage({
   }
 
   if (!classRow || classRow.scholar_id !== user.id) {
-    return <p className="p-4 text-red-600">Access denied.</p>;
+    return (
+      <main className="mx-auto max-w-md bg-gray-50 p-4">
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h1 className="font-semibold text-gray-950">Scholar access needed</h1>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Progress notes are only available to the Scholar/Ustass assigned to
+            this class.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Go to dashboard
+          </Link>
+        </section>
+      </main>
+    );
   }
 
   const [{ data: enrolmentData, error: enrolmentError }, { data: progressData }] =
@@ -268,7 +284,22 @@ export default async function ScholarClassProgressPage({
       </div>
 
       {enrolments.length === 0 ? (
-        <p className="text-gray-600">No learners booked yet.</p>
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-950">
+            No progress notes yet
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            No learners are enrolled in this live class yet. Once a parent
+            books a learner, you can record Qur&apos;an level, revision notes,
+            and learning rewards here.
+          </p>
+          <Link
+            href="/scholar/classes"
+            className="mt-4 inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+          >
+            Back to scholar classes
+          </Link>
+        </section>
       ) : (
         <ul className="space-y-4">
           {enrolments.map((enrolment) => {
@@ -382,7 +413,7 @@ export default async function ScholarClassProgressPage({
 
                     <label className="block">
                       <span className="mb-1 block text-sm font-medium">
-                        Progress note for parent
+                        Revision note for parent
                       </span>
                       <textarea
                         name="progress_note"
@@ -394,7 +425,7 @@ export default async function ScholarClassProgressPage({
                     </label>
 
                     <button className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
-                      Save Progress
+                      Save child progress
                     </button>
                   </form>
                 ) : (

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -76,9 +77,19 @@ export default async function MyClasses() {
         <h1 className="mb-4 text-2xl font-semibold text-gray-950">
           My Booked Classes
         </h1>
-        <p className="text-gray-600">
-          Add a learner profile first, then booked classes will appear here.
-        </p>
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-950">Add a learner first</h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Create a child profile with their Qur&apos;an level before booking
+            live classes.
+          </p>
+          <Link
+            href="/learners/new"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Add learner
+          </Link>
+        </section>
       </main>
     );
   }
@@ -159,9 +170,21 @@ export default async function MyClasses() {
       </h1>
 
       {enrolments.length === 0 && (
-        <p className="text-gray-600">
-          No bookings yet. When you book a class for a learner, it will appear here.
-        </p>
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-950">
+            No booked classes yet
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Once you book a live Qur&apos;an class for a learner, the schedule
+            and class link will appear here.
+          </p>
+          <Link
+            href="/classes"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Browse classes
+          </Link>
+        </section>
       )}
 
       <ul className="space-y-4">

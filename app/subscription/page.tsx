@@ -43,12 +43,16 @@ export default async function SubscriptionPage() {
   const isActive = data?.status === 'active' || data?.status === 'trialing';
 
   return (
-    <main className="mx-auto max-w-2xl p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Subscription Status</h1>
+    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
+      <h1 className="text-2xl font-semibold text-gray-950">
+        Subscription Status
+      </h1>
 
       {isActive ? (
-        <div className="rounded border p-5 space-y-3">
-          <p>Your subscription is active.</p>
+        <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <p className="font-medium text-gray-950">
+            Your family subscription is active.
+          </p>
           {data.current_period_end && (
             <p className="text-sm text-gray-600">
               Renews or ends on: {formatDate(data.current_period_end)}
@@ -56,13 +60,21 @@ export default async function SubscriptionPage() {
           )}
         </div>
       ) : (
-        <div className="rounded border p-5 space-y-4">
-          <p>You do not have an active subscription yet.</p>
+        <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <div>
+            <h2 className="font-semibold text-gray-950">
+              No active subscription yet
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Start a family subscription to book live Qur&apos;an classes for
+              your learners.
+            </p>
+          </div>
           <Link
             href="/payments"
-            className="inline-block rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
+            className="inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Go to Payments
+            Start subscription
           </Link>
         </div>
       )}

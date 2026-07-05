@@ -210,7 +210,23 @@ export default async function ScholarClassRosterPage({
   }
 
   if (!classRow || classRow.scholar_id !== user.id) {
-    return <p className="p-4 text-red-600">Access denied.</p>;
+    return (
+      <main className="mx-auto max-w-md bg-gray-50 p-4">
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h1 className="font-semibold text-gray-950">Scholar access needed</h1>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            This roster is only available to the Scholar/Ustass assigned to the
+            class.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Go to dashboard
+          </Link>
+        </section>
+      </main>
+    );
   }
 
   const [{ data, error }, { data: progressData }] = await Promise.all([
@@ -278,7 +294,21 @@ export default async function ScholarClassRosterPage({
       </p>
 
       {enrolments.length === 0 ? (
-        <p className="text-gray-600">No learners booked yet.</p>
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-950">
+            No enrolled learners yet
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            When parents book this live class for their children, the roster
+            will appear here.
+          </p>
+          <Link
+            href="/scholar/classes"
+            className="mt-4 inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+          >
+            Back to scholar classes
+          </Link>
+        </section>
       ) : (
         <ul className="space-y-4">
           {enrolments.map((enrolment) => {
@@ -381,7 +411,7 @@ export default async function ScholarClassRosterPage({
                     </div>
 
                     <button className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
-                      Save Attendance
+                      Save attendance and notes
                     </button>
                   </form>
                 ) : (

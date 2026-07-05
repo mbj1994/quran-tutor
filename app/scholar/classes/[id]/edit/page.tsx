@@ -192,7 +192,22 @@ export default async function EditClassPage({
   }
 
   if (!classRow || classRow.scholar_id !== user.id) {
-    return <p className="p-4 text-red-600">Access denied.</p>;
+    return (
+      <main className="mx-auto max-w-md bg-gray-50 p-4">
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h1 className="font-semibold text-gray-950">Scholar access needed</h1>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            This class can only be edited by the Scholar/Ustass who owns it.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Go to dashboard
+          </Link>
+        </section>
+      </main>
+    );
   }
 
   const paramsValue = await searchParams;
@@ -340,7 +355,7 @@ export default async function EditClassPage({
             placeholder="https://..."
           />
           <span className="mt-1 block text-xs text-gray-500">
-            Use Zoom, Google Meet, or Jitsi for now. Built-in video can be added later.
+            Use an approved Zoom, Google Meet, or Jitsi link for this live class.
           </span>
         </label>
 

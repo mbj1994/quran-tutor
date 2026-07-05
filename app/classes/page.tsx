@@ -102,9 +102,24 @@ export default async function ClassesPage() {
 
   return (
     <main className="mx-auto max-w-3xl bg-gray-50 p-4">
-      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
-        Available Classes
-      </h1>
+      <div className="mb-4">
+        <h1 className="text-2xl font-semibold text-gray-950">
+          Live Qur&apos;an Classes
+        </h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Browse upcoming classes taught by approved Scholars/Ustass.
+        </p>
+      </div>
+
+      {classes?.length === 0 && (
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-950">No classes available yet</h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            New live classes will appear here once the teaching team schedules
+            them.
+          </p>
+        </section>
+      )}
 
       <ul className="space-y-4">
         {classes?.map((classRow) => {

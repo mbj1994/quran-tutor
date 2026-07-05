@@ -32,19 +32,19 @@ export default function ClientBookButton({
     } = await sb.auth.getUser();
 
     if (!user) {
-      alert('Please log in first.');
+      alert('Please log in to book a live class.');
       router.push('/login');
       return;
     }
 
     if (!hasActiveSubscription) {
-      alert('Please subscribe before booking a class.');
+      alert('Please start a family subscription before booking a class.');
       router.push('/payments');
       return;
     }
 
     if (!selectedLearnerId) {
-      alert('Please select a learner first.');
+      alert('Please choose which learner is joining this class.');
       return;
     }
 
@@ -70,9 +70,9 @@ export default function ClientBookButton({
     return (
       <Link
         href="/learners/new"
-        className="rounded bg-emerald-600 px-3 py-1 text-white hover:bg-emerald-700"
+        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
       >
-        Add Learner First
+        Add learner first
       </Link>
     );
   }
@@ -84,9 +84,9 @@ export default function ClientBookButton({
           value={selectedLearnerId}
           onChange={(event) => setSelectedLearnerId(event.target.value)}
           disabled={disabled || status === 'saving'}
-          className="rounded border px-2 py-1 text-sm"
+          className="rounded-lg border px-2 py-2 text-sm"
         >
-          <option value="">Select learner</option>
+          <option value="">Choose learner</option>
           {learners.map((learner) => (
             <option key={learner.id} value={learner.id}>
               {learner.full_name}
@@ -98,13 +98,13 @@ export default function ClientBookButton({
       <button
         onClick={book}
         disabled={disabled || status === 'saving'}
-        className="rounded bg-emerald-600 px-3 py-1 text-white disabled:opacity-50"
+        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {status === 'saving'
           ? 'Booking...'
           : hasActiveSubscription
-            ? 'Book'
-            : 'Subscribe to Book'}
+            ? 'Book class'
+            : 'Subscribe to book'}
       </button>
     </div>
   );

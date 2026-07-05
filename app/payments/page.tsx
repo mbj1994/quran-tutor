@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useSession } from '@supabase/auth-helpers-react';
 
 export default function PaymentsPage() {
+  const session = useSession();
   const [loading, setLoading] = useState<string | null>(null);
 
   async function startCheckout(type: 'subscription' | 'donation') {
@@ -44,33 +47,58 @@ export default function PaymentsPage() {
     }
   }
 
-  return (
-    <main className="mx-auto max-w-2xl space-y-6 p-6">
-      <h1 className="text-2xl font-semibold">Payments & Donations</h1>
+  if (!session) {
+    return (
+      <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
+        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <h1 className="text-2xl font-semibold text-gray-950">
+            Payments &amp; Subscription
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-gray-600">
+            Please log in to start or manage a family subscription for live
+            Qur&apos;an classes.
+          </p>
+          <Link
+            href="/login"
+            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Login
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
-      <div className="space-y-3 rounded border p-5">
-        <h2 className="text-xl font-medium">Family Subscription</h2>
+  return (
+    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
+      <h1 className="text-2xl font-semibold text-gray-950">
+        Payments &amp; Subscription
+      </h1>
+
+      <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-xl font-medium text-gray-950">Family Subscription</h2>
         <p className="text-sm text-gray-600">
-          Subscribe monthly to access Qur&apos;an classes for your child.
+          Subscribe monthly to book live Qur&apos;an classes and support approved
+          Scholars/Ustass.
         </p>
         <button
           onClick={() => startCheckout('subscription')}
           disabled={loading !== null}
-          className="rounded bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
         >
           {loading === 'subscription' ? 'Opening...' : 'Subscribe'}
         </button>
       </div>
 
-      <div className="space-y-3 rounded border p-5">
-        <h2 className="text-xl font-medium">Sponsor a Learner</h2>
+      <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-xl font-medium text-gray-950">Sponsor a Learner</h2>
         <p className="text-sm text-gray-600">
           Make a donation to help diaspora children access Qur&apos;an learning.
         </p>
         <button
           onClick={() => startCheckout('donation')}
           disabled={loading !== null}
-          className="rounded bg-indigo-600 px-4 py-2 text-white disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-white disabled:opacity-50"
         >
           {loading === 'donation' ? 'Opening...' : 'Donate'}
         </button>
