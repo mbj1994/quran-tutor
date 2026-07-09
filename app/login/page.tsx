@@ -5,8 +5,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 
+type AccountMode = 'sign-in' | 'create';
+type SignupRole = 'parent' | 'scholar';
+type LoadingAction = 'sign-in' | 'sign-up' | 'reset' | null;
+
 type ProfileRole = {
   role: { code: string | null } | { code: string | null }[] | null;
+};
+
+type RoleId = {
+  id: string;
 };
 
 function getRoleCode(profile: ProfileRole | null) {
@@ -19,20 +27,19 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const session = useSession();
   const supabase = useMemo(() => supabaseBrowser(), []);
-  const authError = searchParams.get('error');
-  const authErrorCode = searchParams.get('error_code');
-  const authErrorDescription = searchParams.get('error_description') ?? '';
-  const expiredLink =
-    authError === 'expired_link' ||
-    authErrorCode === 'otp_expired' ||
-    authErrorDescription.toLowerCase().includes('expired');
+  const authMessage = searchParams.get('auth_message');
+  const expiredReset = authMessage === 'expired-reset';
 
-  const [passwordEmail, setPasswordEmail] = useState('');
+  const [mode, setMode] = useState<AccountMode>('sign-in');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
-  const [passwordLoading, setPasswordLoading] = useState<
-    'sign-in' | 'sign-up' | 'reset' | null
-  >(null);
+  const [signupRole, setSignupRole] = useState<SignupRole>('parent');
+  const [message, setMessage] = useState<string | null>(
+    expiredReset
+      ? 'This password reset link expired. Please request a new reset link.'
+      : null
+  );
+  const [loading, setLoading] = useState<LoadingAction>(null);
 
   const getPostLoginPath = useCallback(async () => {
     const {
@@ -58,112 +65,146 @@ function LoginForm() {
   }, [getPostLoginPath, router]);
 
   useEffect(() => {
-    if (session && !expiredLink) {
+    if (session && !expiredReset) {
       void redirectAfterLogin();
     }
-  }, [session, expiredLink, redirectAfterLogin]);
+  }, [session, expiredReset, redirectAfterLogin]);
+
+  async function setCurrentUserRole(roleCode: SignupRole) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return false;
+    }
+
+    const { data: role } = await supabase
+      .from('roles')
+      .select('id')
+      .eq('code', roleCode)
+      .maybeSingle<RoleId>();
+
+    if (!role) {
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: user.id, role_id: role.id }, { onConflict: 'id' });
+
+    return !error;
+  }
 
   async function handlePasswordSignIn(e: React.FormEvent) {
     e.preventDefault();
-    if (passwordLoading) return;
+    if (loading) return;
 
-    setPasswordLoading('sign-in');
-    setPasswordMessage(null);
+    setLoading('sign-in');
+    setMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: passwordEmail,
+      email,
       password,
     });
 
-    setPasswordLoading(null);
+    setLoading(null);
 
     if (error) {
       if (error.message.toLowerCase().includes('invalid login credentials')) {
-        setPasswordMessage(
+        setMessage(
           'Invalid email or password. If you forgot your password, request a reset link.'
         );
         return;
       }
 
-      setPasswordMessage('We could not sign you in. Please check your details and try again.');
+      setMessage('We could not sign you in. Please check your details and try again.');
       return;
     }
 
     await redirectAfterLogin();
   }
 
-  async function handleCreateAccount() {
-    if (passwordLoading) return;
+  async function handleCreateAccount(e: React.FormEvent) {
+    e.preventDefault();
+    if (loading) return;
 
     if (password.length < 6) {
-      setPasswordMessage('Password must be at least 6 characters.');
+      setMessage('Password must be at least 6 characters.');
       return;
     }
 
-    setPasswordLoading('sign-up');
-    setPasswordMessage(null);
+    setLoading('sign-up');
+    setMessage(null);
 
     const { data, error } = await supabase.auth.signUp({
-      email: passwordEmail,
+      email,
       password,
+      options: {
+        data: {
+          role: signupRole,
+        },
+      },
     });
 
-    setPasswordLoading(null);
-
     if (error) {
-      const message = error.message.toLowerCase();
-      if (message.includes('already registered') || message.includes('already exists')) {
-        setPasswordMessage(
-          'This email already exists. Use Sign In if you know the password, or Reset Password to create a new password.'
+      setLoading(null);
+      const errorText = error.message.toLowerCase();
+      if (errorText.includes('already registered') || errorText.includes('already exists')) {
+        setMessage(
+          'This email already exists. Use sign in if you know the password, or forgot password to create a new password.'
         );
         return;
       }
 
-      setPasswordMessage('We could not create this account. Please try again.');
+      setMessage('We could not create this account. Please try again.');
       return;
     }
 
     if (data.session) {
+      await setCurrentUserRole(signupRole);
+      setLoading(null);
       await redirectAfterLogin();
       return;
     }
 
-    setPasswordMessage(
-      'Account created. Please check your email to confirm your account, then sign in.'
-    );
+    setLoading(null);
+    setMessage('Account created. Please check your email to confirm your account, then sign in.');
+    setMode('sign-in');
+    setPassword('');
   }
 
   async function handleResetPassword() {
-    if (passwordLoading) return;
+    if (loading) return;
 
-    if (!passwordEmail) {
-      setPasswordMessage('Enter your email first.');
+    if (!email) {
+      setMessage('Enter your email first.');
       return;
     }
 
-    setPasswordLoading('reset');
-    setPasswordMessage(null);
+    setLoading('reset');
+    setMessage(null);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(passwordEmail, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
+    // Supabase Auth redirect URLs must include /auth/callback and /auth/update-password
+    // for local and production domains.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password&type=recovery`,
     });
 
-    setPasswordLoading(null);
+    setLoading(null);
 
     if (error) {
-      setPasswordMessage('We could not send a reset email. Please try again.');
+      setMessage('We could not send a reset email. Please try again.');
       return;
     }
 
-    setPasswordMessage(
-      'Password reset email sent. Open the link and set a new password. Email reset links may expire quickly.'
-    );
+    setMessage('Password reset email sent. Open the newest email from us and use the link soon.');
   }
 
   return (
     <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-emerald-50 px-4 py-10">
       <section className="w-full max-w-4xl overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
-        <div className="grid gap-0 lg:grid-cols-[1fr_1.05fr]">
+        <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
           <div className="bg-gray-50 p-6 sm:p-8">
             <p className="text-sm font-medium text-emerald-700">Quran Tutor</p>
             <h1 className="mt-3 text-3xl font-semibold text-gray-950">
@@ -174,99 +215,187 @@ function LoginForm() {
             </p>
 
             <div className="mt-6 grid gap-3">
-              <article className="rounded-xl border border-gray-200 bg-white p-4">
+              <article className="rounded-lg border border-gray-200 bg-white p-4">
                 <h2 className="font-semibold text-gray-950">Parent / Student</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Book classes, join live lessons, and follow progress.
+                  Book classes, join live lessons, and follow child progress.
                 </p>
               </article>
-              <article className="rounded-xl border border-gray-200 bg-white p-4">
+              <article className="rounded-lg border border-gray-200 bg-white p-4">
                 <h2 className="font-semibold text-gray-950">Scholar / Ustass</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Manage classes, attendance, and learner progress.
+                  Teach live classes, manage attendance, and update learner progress.
                 </p>
               </article>
             </div>
           </div>
 
           <div className="p-6 sm:p-8">
-            <div className="mx-auto max-w-sm space-y-5">
-              <h2 className="text-xl font-semibold text-gray-950">Sign in</h2>
+            <div className="mx-auto max-w-sm">
+              <div className="grid grid-cols-2 rounded-lg bg-gray-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('sign-in');
+                    setMessage(null);
+                  }}
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    mode === 'sign-in'
+                      ? 'bg-white text-gray-950 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-950'
+                  }`}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('create');
+                    setMessage(null);
+                  }}
+                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                    mode === 'create'
+                      ? 'bg-white text-gray-950 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-950'
+                  }`}
+                >
+                  Create account
+                </button>
+              </div>
 
-              {(expiredLink || authError) && (
-                <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-800">
-                  This sign-in link expired. Please sign in with your email and
-                  password, or request a new password reset.
+              {message && (
+                <p className="mt-5 rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-700">
+                  {message}
                 </p>
               )}
 
-              <form onSubmit={handlePasswordSignIn} className="space-y-4">
-                <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-gray-800">
-                    Email
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    placeholder="you@example.com"
-                    value={passwordEmail}
-                    onChange={(e) => setPasswordEmail(e.target.value)}
-                    disabled={passwordLoading !== null}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-gray-800">
-                    Password
-                  </span>
-                  <input
-                    type="password"
-                    required
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={passwordLoading !== null}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-                  />
-                </label>
+              {mode === 'sign-in' ? (
+                <form onSubmit={handlePasswordSignIn} className="mt-5 space-y-4">
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-medium text-gray-800">
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      disabled={loading !== null}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-medium text-gray-800">
+                      Password
+                    </span>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Password"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      disabled={loading !== null}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                    />
+                  </label>
 
-                <button
-                  type="submit"
-                  disabled={passwordLoading !== null}
-                  className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  {passwordLoading === 'sign-in' ? 'Signing in...' : 'Sign in'}
-                </button>
-
-                <div className="grid gap-2 sm:grid-cols-2">
                   <button
-                    type="button"
-                    onClick={handleCreateAccount}
-                    disabled={
-                      passwordLoading !== null || !passwordEmail || !password
-                    }
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                    type="submit"
+                    disabled={loading !== null}
+                    className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
-                    {passwordLoading === 'sign-up'
-                      ? 'Creating...'
-                      : 'Create account'}
+                    {loading === 'sign-in' ? 'Signing in...' : 'Sign in'}
                   </button>
+
                   <button
                     type="button"
                     onClick={handleResetPassword}
-                    disabled={passwordLoading !== null}
-                    className="rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                    disabled={loading !== null}
+                    className="w-full rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
                   >
-                    {passwordLoading === 'reset'
-                      ? 'Sending...'
-                      : 'Forgot password'}
+                    {loading === 'reset' ? 'Sending...' : 'Forgot password'}
                   </button>
-                </div>
-              </form>
-              {passwordMessage && (
-                <p className="rounded-lg bg-gray-50 p-3 text-center text-sm leading-6 text-gray-700">
-                  {passwordMessage}
-                </p>
+                </form>
+              ) : (
+                <form onSubmit={handleCreateAccount} className="mt-5 space-y-4">
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-medium text-gray-800">
+                      Email
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      disabled={loading !== null}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-sm font-medium text-gray-800">
+                      Password
+                    </span>
+                    <input
+                      type="password"
+                      required
+                      placeholder="At least 6 characters"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      disabled={loading !== null}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                    />
+                  </label>
+
+                  <fieldset className="space-y-2">
+                    <legend className="text-sm font-medium text-gray-800">
+                      I am creating a:
+                    </legend>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm text-gray-700">
+                      <input
+                        type="radio"
+                        name="signup-role"
+                        value="parent"
+                        checked={signupRole === 'parent'}
+                        onChange={() => setSignupRole('parent')}
+                        disabled={loading !== null}
+                        className="mt-1"
+                      />
+                      <span>
+                        <span className="block font-medium text-gray-950">
+                          Parent / Family account
+                        </span>
+                        Manage children, bookings, and subscriptions.
+                      </span>
+                    </label>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm text-gray-700">
+                      <input
+                        type="radio"
+                        name="signup-role"
+                        value="scholar"
+                        checked={signupRole === 'scholar'}
+                        onChange={() => setSignupRole('scholar')}
+                        disabled={loading !== null}
+                        className="mt-1"
+                      />
+                      <span>
+                        <span className="block font-medium text-gray-950">
+                          Scholar / Ustass account
+                        </span>
+                        Scholar accounts are reviewed by the platform team before teaching access.
+                      </span>
+                    </label>
+                  </fieldset>
+
+                  <button
+                    type="submit"
+                    disabled={loading !== null}
+                    className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    {loading === 'sign-up' ? 'Creating...' : 'Create account'}
+                  </button>
+                </form>
               )}
             </div>
           </div>
