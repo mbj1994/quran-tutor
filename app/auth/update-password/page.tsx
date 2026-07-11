@@ -1,12 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 
-export default function UpdatePasswordPage() {
+function getHashParams() {
+  if (typeof window === 'undefined' || !window.location.hash) {
+    return new URLSearchParams();
+  }
+
+  return new URLSearchParams(window.location.hash.replace(/^#/, ''));
+}
+
+function UpdatePasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => supabaseBrowser(), []);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,7 +25,29 @@ export default function UpdatePasswordPage() {
   const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    async function checkSession() {
+    async function prepareRecoverySession() {
+      const hashParams = getHashParams();
+      const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
+      const code = searchParams.get('code') || hashParams.get('code');
+
+      if (errorCode) {
+        router.replace('/login?auth_message=expired-reset');
+        return;
+      }
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          router.replace('/login?auth_message=expired-reset');
+          return;
+        }
+
+        router.replace('/auth/update-password');
+        setCheckingSession(false);
+        return;
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -29,8 +60,8 @@ export default function UpdatePasswordPage() {
       setCheckingSession(false);
     }
 
-    void checkSession();
-  }, [router, supabase]);
+    void prepareRecoverySession();
+  }, [router, searchParams, supabase]);
 
   async function handleUpdatePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -51,40 +82,42 @@ export default function UpdatePasswordPage() {
 
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
+      const errorText = error.message.toLowerCase();
+      if (errorText.includes('same password')) {
+        setMessage('Choose a new password that is different from your old password.');
+        return;
+      }
+
       setMessage('We could not update your password. Please request a new reset link.');
       return;
     }
 
+    await supabase.auth.signOut();
+    setLoading(false);
     setSuccess(true);
     setPassword('');
     setConfirmPassword('');
-    setMessage('Password updated. You can now sign in.');
+    setMessage('Password updated. Please sign in with your new password.');
   }
 
   return (
     <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-emerald-50 px-4 py-10">
       <section className="w-full max-w-sm rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm sm:p-8">
-        <h1 className="text-center text-2xl font-semibold text-gray-950">
-          Set a new password
-        </h1>
+        <h1 className="text-center text-2xl font-semibold text-gray-950">Set a new password</h1>
         <p className="mt-2 text-center text-sm leading-6 text-gray-600">
           Choose a new password with at least 6 characters.
         </p>
 
         {checkingSession ? (
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Checking your reset link...
-          </p>
+          <p className="mt-6 text-center text-sm text-gray-600">Checking your reset link...</p>
         ) : (
           <>
             <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-800">
-                  New password
-                </span>
+                <span className="mb-1 block text-sm font-medium text-gray-800">New password</span>
                 <input
                   type="password"
                   required
@@ -96,9 +129,7 @@ export default function UpdatePasswordPage() {
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-800">
-                  Confirm password
-                </span>
+                <span className="mb-1 block text-sm font-medium text-gray-800">Confirm password</span>
                 <input
                   type="password"
                   required
@@ -121,9 +152,7 @@ export default function UpdatePasswordPage() {
             {message && (
               <p
                 className={`mt-4 rounded-lg p-3 text-center text-sm leading-6 ${
-                  success
-                    ? 'bg-emerald-50 text-emerald-800'
-                    : 'bg-red-50 text-red-700'
+                  success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'
                 }`}
               >
                 {message}
@@ -133,7 +162,7 @@ export default function UpdatePasswordPage() {
             {success && (
               <div className="mt-4 text-center">
                 <Link
-                  href="/login"
+                  href="/login?auth_message=password-updated"
                   className="inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
                 >
                   Back to login
@@ -144,5 +173,13 @@ export default function UpdatePasswordPage() {
         )}
       </section>
     </main>
+  );
+}
+
+export default function UpdatePasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <UpdatePasswordForm />
+    </Suspense>
   );
 }
