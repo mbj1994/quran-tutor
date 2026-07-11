@@ -6,12 +6,22 @@ type ProfileRole = {
   role: { code: string | null } | { code: string | null }[] | null;
 };
 
+const ALLOWED_NEXT_PATHS = new Set([
+  '/dashboard',
+  '/classes',
+  '/my-classes',
+  '/subscription',
+  '/scholar/overview',
+  '/scholar/classes',
+  '/auth/update-password',
+]);
+
 function getSafeNext(value: string | null) {
   if (!value || !value.startsWith('/') || value.startsWith('//')) {
     return null;
   }
 
-  return value;
+  return ALLOWED_NEXT_PATHS.has(value) ? value : null;
 }
 
 function getRoleCode(profile: ProfileRole | null) {
@@ -19,20 +29,34 @@ function getRoleCode(profile: ProfileRole | null) {
   return role?.code ?? null;
 }
 
+function getAuthErrorMessage(errorCode: string | null) {
+  if (errorCode === 'otp_expired') {
+    return 'expired-reset';
+  }
+
+  return 'auth-error';
+}
+
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const url = new URL(request.url);
+  const { searchParams, origin } = url;
   const code = searchParams.get('code');
+  const errorCode = searchParams.get('error_code');
   const next = getSafeNext(searchParams.get('next') || searchParams.get('redirect_to'));
 
+  if (errorCode) {
+    return NextResponse.redirect(`${origin}/login?auth_message=${getAuthErrorMessage(errorCode)}`);
+  }
+
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?auth_message=expired-reset`);
+    return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
   const supabase = createRouteHandlerClient({ cookies });
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?auth_message=expired-reset`);
+    return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
   if (next === '/auth/update-password') {
@@ -43,17 +67,17 @@ export async function GET(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let redirectTo = next ?? '/dashboard';
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role:roles(code)')
-      .eq('id', user.id)
-      .maybeSingle<ProfileRole>();
-
-    redirectTo = getRoleCode(profile) === 'scholar' ? '/scholar/overview' : '/dashboard';
+  if (!user) {
+    return NextResponse.redirect(`${origin}/dashboard`);
   }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  const redirectTo = getRoleCode(profile) === 'scholar' ? '/scholar/overview' : next ?? '/dashboard';
 
   return NextResponse.redirect(`${origin}${redirectTo}`);
 }
