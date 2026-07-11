@@ -22,23 +22,34 @@ function getRoleCode(profile: ProfileRole | null) {
   return role?.code ?? null;
 }
 
+function getAuthMessage(code: string | null) {
+  switch (code) {
+    case 'expired-reset':
+      return 'This password reset link expired or was already used. Please request a new reset email and open the newest link.';
+    case 'password-updated':
+      return 'Password updated. Please sign in with your new password.';
+    case 'account-confirmed':
+      return 'Account confirmed. Please sign in to continue.';
+    case 'auth-error':
+      return 'That sign-in link could not be used. Please sign in with your email and password.';
+    default:
+      return null;
+  }
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = useSession();
   const supabase = useMemo(() => supabaseBrowser(), []);
   const authMessage = searchParams.get('auth_message');
-  const expiredReset = authMessage === 'expired-reset';
+  const initialMessage = getAuthMessage(authMessage);
 
   const [mode, setMode] = useState<AccountMode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [signupRole, setSignupRole] = useState<SignupRole>('parent');
-  const [message, setMessage] = useState<string | null>(
-    expiredReset
-      ? 'This password reset link expired. Please request a new reset link.'
-      : null
-  );
+  const [message, setMessage] = useState<string | null>(initialMessage);
   const [loading, setLoading] = useState<LoadingAction>(null);
 
   const getPostLoginPath = useCallback(async () => {
@@ -65,10 +76,17 @@ function LoginForm() {
   }, [getPostLoginPath, router]);
 
   useEffect(() => {
-    if (session && !expiredReset) {
+    const nextMessage = getAuthMessage(authMessage);
+    if (nextMessage) {
+      setMessage(nextMessage);
+    }
+  }, [authMessage]);
+
+  useEffect(() => {
+    if (session && authMessage !== 'password-updated') {
       void redirectAfterLogin();
     }
-  }, [session, expiredReset, redirectAfterLogin]);
+  }, [session, authMessage, redirectAfterLogin]);
 
   async function setCurrentUserRole(roleCode: SignupRole) {
     const {
@@ -104,7 +122,7 @@ function LoginForm() {
     setMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
 
@@ -113,7 +131,7 @@ function LoginForm() {
     if (error) {
       if (error.message.toLowerCase().includes('invalid login credentials')) {
         setMessage(
-          'Invalid email or password. If you forgot your password, request a reset link.'
+          'Invalid email or password. Use Forgot password if you need to create a new password.'
         );
         return;
       }
@@ -138,9 +156,10 @@ function LoginForm() {
     setMessage(null);
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           role: signupRole,
         },
@@ -152,7 +171,7 @@ function LoginForm() {
       const errorText = error.message.toLowerCase();
       if (errorText.includes('already registered') || errorText.includes('already exists')) {
         setMessage(
-          'This email already exists. Use sign in if you know the password, or forgot password to create a new password.'
+          'This email already exists. Sign in if you know the password, or use Forgot password to reset it.'
         );
         return;
       }
@@ -169,32 +188,36 @@ function LoginForm() {
     }
 
     setLoading(null);
-    setMessage('Account created. Please check your email to confirm your account, then sign in.');
     setMode('sign-in');
     setPassword('');
+    setMessage(
+      signupRole === 'scholar'
+        ? 'Scholar account created. Please confirm your email. Scholar access is reviewed by the platform team before teaching.'
+        : 'Account created. Please check your email to confirm your account, then sign in.'
+    );
   }
 
   async function handleResetPassword() {
     if (loading) return;
 
-    if (!email) {
-      setMessage('Enter your email first.');
+    if (!email.trim()) {
+      setMessage('Enter your email first, then click Forgot password.');
       return;
     }
 
     setLoading('reset');
     setMessage(null);
 
-    // Supabase Auth redirect URLs must include /auth/callback and /auth/update-password
-    // for local and production domains.
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password&type=recovery`,
+    // Keep recovery redirect simple. Supabase will append its auth code to this URL.
+    // This URL must be allow-listed in Supabase Auth redirect URLs.
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth/update-password`,
     });
 
     setLoading(null);
 
     if (error) {
-      setMessage('We could not send a reset email. Please try again.');
+      setMessage('We could not send a reset email. Please try again in a few minutes.');
       return;
     }
 
@@ -207,9 +230,7 @@ function LoginForm() {
         <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
           <div className="bg-gray-50 p-6 sm:p-8">
             <p className="text-sm font-medium text-emerald-700">Quran Tutor</p>
-            <h1 className="mt-3 text-3xl font-semibold text-gray-950">
-              Welcome back
-            </h1>
+            <h1 className="mt-3 text-3xl font-semibold text-gray-950">Welcome back</h1>
             <p className="mt-3 max-w-md text-sm leading-6 text-gray-600">
               Sign in to continue to your Qur&apos;an learning dashboard.
             </p>
@@ -237,7 +258,7 @@ function LoginForm() {
                   type="button"
                   onClick={() => {
                     setMode('sign-in');
-                    setMessage(null);
+                    setMessage(getAuthMessage(authMessage));
                   }}
                   className={`rounded-md px-3 py-2 text-sm font-medium ${
                     mode === 'sign-in'
@@ -272,9 +293,7 @@ function LoginForm() {
               {mode === 'sign-in' ? (
                 <form onSubmit={handlePasswordSignIn} className="mt-5 space-y-4">
                   <label className="block">
-                    <span className="mb-1 block text-sm font-medium text-gray-800">
-                      Email
-                    </span>
+                    <span className="mb-1 block text-sm font-medium text-gray-800">Email</span>
                     <input
                       type="email"
                       required
@@ -286,9 +305,7 @@ function LoginForm() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-sm font-medium text-gray-800">
-                      Password
-                    </span>
+                    <span className="mb-1 block text-sm font-medium text-gray-800">Password</span>
                     <input
                       type="password"
                       required
@@ -316,13 +333,15 @@ function LoginForm() {
                   >
                     {loading === 'reset' ? 'Sending...' : 'Forgot password'}
                   </button>
+
+                  <p className="text-center text-xs leading-5 text-gray-500">
+                    Scholar accounts are approved by the platform team before teaching access.
+                  </p>
                 </form>
               ) : (
                 <form onSubmit={handleCreateAccount} className="mt-5 space-y-4">
                   <label className="block">
-                    <span className="mb-1 block text-sm font-medium text-gray-800">
-                      Email
-                    </span>
+                    <span className="mb-1 block text-sm font-medium text-gray-800">Email</span>
                     <input
                       type="email"
                       required
@@ -334,9 +353,7 @@ function LoginForm() {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1 block text-sm font-medium text-gray-800">
-                      Password
-                    </span>
+                    <span className="mb-1 block text-sm font-medium text-gray-800">Password</span>
                     <input
                       type="password"
                       required
@@ -349,9 +366,7 @@ function LoginForm() {
                   </label>
 
                   <fieldset className="space-y-2">
-                    <legend className="text-sm font-medium text-gray-800">
-                      I am creating a:
-                    </legend>
+                    <legend className="text-sm font-medium text-gray-800">I am creating a:</legend>
                     <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm text-gray-700">
                       <input
                         type="radio"
