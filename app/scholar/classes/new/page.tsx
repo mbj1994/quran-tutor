@@ -156,115 +156,164 @@ export default function NewClassPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md bg-gray-50 p-4">
-      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
-        Create a Class
-      </h1>
+    <main className="mx-auto max-w-2xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-950">
+          Create a live Qur&apos;an class
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-gray-600">
+          Set the subject, level, language, schedule, and live class link.
+        </p>
+      </div>
 
       <form
         onSubmit={handleSubmit}
         className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
       >
-        <input
-          required
-          className="w-full rounded border p-2"
-          placeholder="Title e.g., Surah Al-Fatihah"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Class title
+          </span>
+          <input
+            required
+            className="w-full rounded-lg border border-gray-300 p-2"
+            placeholder="Surah Al-Fatihah"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </label>
 
-        <select
-          className="w-full rounded border p-2"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        >
-          <option value="">Subject</option>
-          {subjects.map((subjectOption) => (
-            <option key={subjectOption} value={subjectOption}>
-              {subjectOption}
-            </option>
-          ))}
-        </select>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Subject
+            </span>
+            <select
+              className="w-full rounded-lg border border-gray-300 p-2"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            >
+              <option value="">Select subject</option>
+              {subjects.map((subjectOption) => (
+                <option key={subjectOption} value={subjectOption}>
+                  {subjectOption}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <select
-          className="w-full rounded border p-2"
-          value={level}
-          onChange={(e) => setLevel(e.target.value)}
-        >
-          <option value="">Level</option>
-          {levels.map((levelOption) => (
-            <option key={levelOption} value={levelOption}>
-              {levelOption}
-            </option>
-          ))}
-        </select>
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Level
+            </span>
+            <select
+              className="w-full rounded-lg border border-gray-300 p-2"
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+            >
+              <option value="">Select level</option>
+              {levels.map((levelOption) => (
+                <option key={levelOption} value={levelOption}>
+                  {levelOption}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <select
-          className="w-full rounded border p-2"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          <option value="">Language</option>
-          {languages.map((languageOption) => (
-            <option key={languageOption} value={languageOption}>
-              {languageOption}
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          className="min-h-28 w-full rounded border p-2"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Language
+            </span>
+            <select
+              className="w-full rounded-lg border border-gray-300 p-2"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              <option value="">Select language</option>
+              {languages.map((languageOption) => (
+                <option key={languageOption} value={languageOption}>
+                  {languageOption}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Start time
+          </span>
+          <input
+            required
+            type="datetime-local"
+            className="w-full rounded-lg border border-gray-300 p-2"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+          />
+        </label>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Duration
+            </span>
+            <input
+              type="number"
+              min={15}
+              max={180}
+              step={15}
+              className="w-full rounded-lg border border-gray-300 p-2"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Capacity
+            </span>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              className="w-full rounded-lg border border-gray-300 p-2"
+              value={capacity}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+            />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Description
+          </span>
+          <textarea
+            className="min-h-28 w-full rounded-lg border border-gray-300 p-2"
+            placeholder="What learners will practise in this class"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-gray-800">
             Live class link / video meeting URL
           </span>
           <input
             type="url"
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
             placeholder="https://..."
             value={meetingUrl}
             onChange={(e) => setMeetingUrl(e.target.value)}
           />
           <span className="mt-1 block text-xs text-gray-500">
-            Use an approved Zoom, Google Meet, or Jitsi link for this live class.
+            Use Zoom, Google Meet, or Jitsi for now.
           </span>
         </label>
 
-        <input
-          required
-          type="datetime-local"
-          className="w-full rounded border p-2"
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
-        />
-
-        <input
-          type="number"
-          min={15}
-          max={180}
-          step={15}
-          className="w-full rounded border p-2"
-          value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
-        />
-
-        <input
-          type="number"
-          min={1}
-          max={100}
-          className="w-full rounded border p-2"
-          value={capacity}
-          onChange={(e) => setCapacity(Number(e.target.value))}
-        />
-
         <button
           disabled={loading}
-          className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-emerald-600 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save class'}
         </button>

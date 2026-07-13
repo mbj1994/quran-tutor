@@ -265,13 +265,18 @@ export default async function ScholarClassProgressPage({
   );
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
-            Progress: {classRow.title}
+            Update Learner Progress
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Record Qur&apos;an level, lessons completed, points, badges, and
+            progress notes.
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            {classRow.title} -{' '}
             {formatDateTime(classRow.start_time)} - {classRow.duration_min} min
           </p>
         </div>
@@ -286,11 +291,10 @@ export default async function ScholarClassProgressPage({
       {enrolments.length === 0 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No progress notes have been added yet.
+            No learners are available for progress updates yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
-            Once a parent books a child, you can record Qur&apos;an level,
-            revision notes, and learning rewards here.
+            New learners will appear here when this live class is booked.
           </p>
           <Link
             href="/scholar/classes"
@@ -311,18 +315,28 @@ export default async function ScholarClassProgressPage({
             return (
               <li
                 key={enrolment.id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
-                <div className="mb-3">
-                  <div className="font-medium">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-950">
                     {learner?.full_name ?? 'Unknown learner'}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {learner?.age !== null && learner?.age !== undefined
-                      ? `Age: ${learner.age}`
-                      : 'Age: -'}
-                    {' - '}
-                    Preferred language: {learner?.preferred_language ?? '-'}
+                    </h2>
+                    <div className="mt-1 space-y-1 text-sm text-gray-600">
+                      <p>
+                        Current Qur&apos;an level:{' '}
+                        {learner?.quran_level ?? 'Not set yet'}
+                      </p>
+                      <p>
+                        Lessons completed: {learner?.lessons_completed ?? 0}
+                      </p>
+                      <p>Points: {learner?.points ?? 0}</p>
+                      <p>
+                        Badge:{' '}
+                        {learner?.current_badge ??
+                          badgeForLessons(learner?.lessons_completed ?? 0)}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -336,36 +350,36 @@ export default async function ScholarClassProgressPage({
                     />
 
                     <label className="block">
-                      <span className="mb-1 block text-sm font-medium">
+                      <span className="mb-1 block text-sm font-medium text-gray-800">
                         Attendance
                       </span>
                       <select
                         name="attendance_status"
                         defaultValue={progress?.attendance_status ?? 'present'}
-                        className="w-full rounded border p-2"
+                        className="w-full rounded-lg border border-gray-300 p-2"
                       >
                         <option value="present">Present</option>
-                        <option value="absent">Absent</option>
                         <option value="late">Late</option>
+                        <option value="absent">Absent</option>
                       </select>
                     </label>
 
                     <div className="grid gap-3 md:grid-cols-2">
                       <label className="block">
-                        <span className="mb-1 block text-sm font-medium">
-                          Current Qur&apos;an level
+                        <span className="mb-1 block text-sm font-medium text-gray-800">
+                          Qur&apos;an level
                         </span>
                         <input
                           name="quran_level"
                           defaultValue={learner?.quran_level ?? ''}
-                          className="w-full rounded border p-2"
+                          className="w-full rounded-lg border border-gray-300 p-2"
                           placeholder="Quran reading beginner"
                         />
                       </label>
 
                       <label className="block">
-                        <span className="mb-1 block text-sm font-medium">
-                          Current badge
+                        <span className="mb-1 block text-sm font-medium text-gray-800">
+                          Badge
                         </span>
                         <select
                           name="current_badge"
@@ -373,7 +387,7 @@ export default async function ScholarClassProgressPage({
                             learner?.current_badge ??
                             badgeForLessons(learner?.lessons_completed ?? 0)
                           }
-                          className="w-full rounded border p-2"
+                          className="w-full rounded-lg border border-gray-300 p-2"
                         >
                           {badgeOptions.map((badge) => (
                             <option key={badge} value={badge}>
@@ -384,7 +398,7 @@ export default async function ScholarClassProgressPage({
                       </label>
 
                       <label className="block">
-                        <span className="mb-1 block text-sm font-medium">
+                        <span className="mb-1 block text-sm font-medium text-gray-800">
                           Lessons completed
                         </span>
                         <input
@@ -392,12 +406,12 @@ export default async function ScholarClassProgressPage({
                           type="number"
                           min={0}
                           defaultValue={learner?.lessons_completed ?? 0}
-                          className="w-full rounded border p-2"
+                          className="w-full rounded-lg border border-gray-300 p-2"
                         />
                       </label>
 
                       <label className="block">
-                        <span className="mb-1 block text-sm font-medium">
+                        <span className="mb-1 block text-sm font-medium text-gray-800">
                           Points
                         </span>
                         <input
@@ -405,26 +419,26 @@ export default async function ScholarClassProgressPage({
                           type="number"
                           min={0}
                           defaultValue={learner?.points ?? 0}
-                          className="w-full rounded border p-2"
+                          className="w-full rounded-lg border border-gray-300 p-2"
                         />
                       </label>
                     </div>
 
                     <label className="block">
-                      <span className="mb-1 block text-sm font-medium">
-                        Revision note for parent
+                      <span className="mb-1 block text-sm font-medium text-gray-800">
+                        Progress notes
                       </span>
                       <textarea
                         name="progress_note"
                         defaultValue={
                           progress?.parent_note ?? progress?.notes ?? ''
                         }
-                        className="min-h-24 w-full rounded border p-2"
+                        className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
                       />
                     </label>
 
-                    <button className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
-                      Save child progress
+                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                      Save learner progress
                     </button>
                   </form>
                 ) : (

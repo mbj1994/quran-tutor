@@ -271,13 +271,17 @@ export default async function ScholarClassRosterPage({
   );
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
-            {classRow.title}
+            Class Roster
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            View enrolled children, mark attendance, and add lesson notes.
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            {classRow.title} -{' '}
             {formatDateTime(classRow.start_time)} - {classRow.duration_min} min
           </p>
         </div>
@@ -289,9 +293,9 @@ export default async function ScholarClassRosterPage({
         </Link>
       </div>
 
-      <p className="mb-4 text-sm text-gray-600">
-        Total enrolled: {enrolments.length}
-      </p>
+      <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium text-gray-700 shadow-sm">
+        Learners enrolled: {enrolments.length}
+      </div>
 
       {enrolments.length === 0 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -299,8 +303,7 @@ export default async function ScholarClassRosterPage({
             No children are enrolled in this class yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
-            When parents book this live class for their children, the roster
-            will appear here.
+            New enrolments will appear here when this live class is booked.
           </p>
           <Link
             href="/scholar/classes"
@@ -321,7 +324,7 @@ export default async function ScholarClassRosterPage({
             return (
               <li
                 key={enrolment.id}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -333,14 +336,17 @@ export default async function ScholarClassRosterPage({
                       <p>
                         Preferred language: {learner?.preferred_language ?? '-'}
                       </p>
-                      <p>Qur&apos;an level: {learner?.quran_level ?? 'Not set yet'}</p>
-                      {learner?.learning_goals && (
-                        <p>Learning goals: {learner.learning_goals}</p>
-                      )}
+                      <p>
+                        Qur&apos;an level:{' '}
+                        {learner?.quran_level ?? 'Not set yet'}
+                      </p>
+                      <p>
+                        Learning goals: {learner?.learning_goals ?? 'Not set yet'}
+                      </p>
                     </div>
                   </div>
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                    {progress?.attendance_status ?? 'Not marked'}
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium capitalize text-emerald-700">
+                    Attendance: {progress?.attendance_status ?? 'Not marked'}
                   </span>
                 </div>
 
@@ -358,10 +364,18 @@ export default async function ScholarClassRosterPage({
                         Attendance
                       </legend>
                       <div className="flex flex-wrap gap-2">
-                        {attendanceOptions.map((status) => (
+                        {attendanceOptions.map((status) => {
+                          const label =
+                            status === 'present'
+                              ? 'Present'
+                              : status === 'late'
+                                ? 'Late'
+                                : 'Absent';
+
+                          return (
                           <label
                             key={status}
-                            className="flex items-center gap-2 rounded border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700"
                           >
                             <input
                               type="radio"
@@ -371,21 +385,22 @@ export default async function ScholarClassRosterPage({
                                 (progress?.attendance_status ?? 'present') === status
                               }
                             />
-                            <span className="capitalize">{status}</span>
+                            <span>{label}</span>
                           </label>
-                        ))}
+                          );
+                        })}
                       </div>
                     </fieldset>
 
                     <div className="grid gap-3 md:grid-cols-3">
                       <label className="block">
                         <span className="mb-1 block text-sm font-medium text-gray-800">
-                          What was covered
+                          What we covered
                         </span>
                         <textarea
                           name="covered"
                           defaultValue={progress?.covered ?? progress?.notes ?? ''}
-                          className="min-h-24 w-full rounded border p-2"
+                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
                         />
                       </label>
                       <label className="block">
@@ -395,22 +410,22 @@ export default async function ScholarClassRosterPage({
                         <textarea
                           name="revision"
                           defaultValue={progress?.revision ?? progress?.homework ?? ''}
-                          className="min-h-24 w-full rounded border p-2"
+                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
                         />
                       </label>
                       <label className="block">
                         <span className="mb-1 block text-sm font-medium text-gray-800">
-                          Parent note
+                          Note for parent
                         </span>
                         <textarea
                           name="parent_note"
                           defaultValue={progress?.parent_note ?? ''}
-                          className="min-h-24 w-full rounded border p-2"
+                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
                         />
                       </label>
                     </div>
 
-                    <button className="rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700">
+                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                       Save attendance and notes
                     </button>
                   </form>

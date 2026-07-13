@@ -213,11 +213,15 @@ export default async function EditClassPage({
   const paramsValue = await searchParams;
 
   return (
-    <main className="mx-auto max-w-md bg-gray-50 p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-2xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-950">Edit Class</h1>
-          <p className="text-sm text-gray-600">{classRow.title}</p>
+          <h1 className="text-2xl font-semibold text-gray-950">
+            Edit teaching class
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            Update the class details, schedule, capacity, and live class link.
+          </p>
         </div>
         <Link
           href="/scholar/classes"
@@ -234,33 +238,35 @@ export default async function EditClassPage({
         <input type="hidden" name="class_id" value={classRow.id} />
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Title</span>
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Class title
+          </span>
           <input
             required
             name="title"
             defaultValue={classRow.title}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
             placeholder="Surah Al-Fatihah"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">
-            Class date and time
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Start time
           </span>
           <input
             required
             name="start_time"
             type="datetime-local"
             defaultValue={formatDateTimeLocal(classRow.start_time)}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
           />
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium">
-              Duration minutes
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Duration
             </span>
             <input
               name="duration_min"
@@ -269,31 +275,35 @@ export default async function EditClassPage({
               max={180}
               step={15}
               defaultValue={classRow.duration_min}
-              className="w-full rounded border p-2"
+              className="w-full rounded-lg border border-gray-300 p-2"
             />
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium">Capacity</span>
+            <span className="mb-1 block text-sm font-medium text-gray-800">
+              Capacity
+            </span>
             <input
               name="capacity"
               type="number"
               min={1}
               max={100}
               defaultValue={classRow.capacity}
-              className="w-full rounded border p-2"
+              className="w-full rounded-lg border border-gray-300 p-2"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Subject</span>
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Subject
+          </span>
           <select
             name="subject"
             defaultValue={classRow.subject ?? ''}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
           >
-            <option value="">No subject</option>
+            <option value="">Select subject</option>
             {subjects.map((subject) => (
               <option key={subject} value={subject}>
                 {subject}
@@ -303,13 +313,15 @@ export default async function EditClassPage({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Level</span>
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Level
+          </span>
           <select
             name="level"
             defaultValue={classRow.level ?? ''}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
           >
-            <option value="">No level</option>
+            <option value="">Select level</option>
             {levels.map((level) => (
               <option key={level} value={level}>
                 {level}
@@ -319,13 +331,15 @@ export default async function EditClassPage({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Language</span>
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Language
+          </span>
           <select
             name="language"
             defaultValue={classRow.language ?? ''}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
           >
-            <option value="">No language</option>
+            <option value="">Select language</option>
             {languages.map((language) => (
               <option key={language} value={language}>
                 {language}
@@ -335,32 +349,34 @@ export default async function EditClassPage({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Description</span>
+          <span className="mb-1 block text-sm font-medium text-gray-800">
+            Description
+          </span>
           <textarea
             name="description"
             defaultValue={classRow.description ?? ''}
-            className="min-h-28 w-full rounded border p-2"
+            className="min-h-28 w-full rounded-lg border border-gray-300 p-2"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">
+          <span className="mb-1 block text-sm font-medium text-gray-800">
             Live class link / video meeting URL
           </span>
           <input
             name="meeting_url"
             type="url"
             defaultValue={classRow.meeting_url ?? ''}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2"
             placeholder="https://..."
           />
           <span className="mt-1 block text-xs text-gray-500">
-            Use an approved Zoom, Google Meet, or Jitsi link for this live class.
+            Use Zoom, Google Meet, or Jitsi for now.
           </span>
         </label>
 
-        <button className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700">
-          Save Class
+        <button className="w-full rounded-lg bg-emerald-600 py-2 font-medium text-white hover:bg-emerald-700">
+          Save class
         </button>
 
         {paramsValue?.error && (
