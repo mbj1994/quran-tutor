@@ -96,18 +96,18 @@ export default async function ClassesPage() {
   const { data: classes } = await sb
     .from('classes')
     .select(
-      'id,title,subject,level,language,start_time,duration_min,capacity, enrolments(count)'
+      'id,title,subject,level,language,start_time,duration_min,capacity,scholar_id,enrolments(count)'
     )
     .order('start_time', { ascending: true });
 
   return (
-    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
+    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
       <div className="mb-4">
         <h1 className="text-2xl font-semibold text-gray-950">
           Browse Live Qur&apos;an Classes
         </h1>
         <p className="mt-2 text-sm text-gray-600">
-          Browse upcoming classes taught by approved Scholars/Ustass.
+          Choose live classes for your children with approved scholars/ustass.
         </p>
       </div>
 
@@ -137,6 +137,7 @@ export default async function ClassesPage() {
                 {classRow.title}
               </div>
               <div className="mt-1 space-y-1 text-sm text-gray-600">
+                <p>Scholar/Ustass: Approved teacher</p>
                 {classRow.subject && <p>Subject: {classRow.subject}</p>}
                 {classRow.level && <p>Level: {classRow.level}</p>}
                 {classRow.language && <p>Language: {classRow.language}</p>}
@@ -150,6 +151,13 @@ export default async function ClassesPage() {
                 </span>
                 <span className="rounded-full bg-gray-100 px-3 py-1">
                   {spots > 0 ? `${spots} spaces available` : 'No spaces available'}
+                </span>
+                <span className="rounded-full bg-gray-100 px-3 py-1">
+                  {bookedByCurrentFamily
+                    ? meetingUrl
+                      ? 'Live link ready'
+                      : 'Live link after booking'
+                    : 'Live link available after booking'}
                 </span>
               </div>
 

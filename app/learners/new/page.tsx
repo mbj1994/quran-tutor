@@ -84,32 +84,42 @@ export default async function NewLearnerPage({
   const error = params?.error;
 
   return (
-    <main className="mx-auto max-w-md p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Add Learner</h1>
-        <Link href="/learners" className="text-sm text-emerald-700 underline">
-          Back to learners
+    <main className="mx-auto max-w-xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold text-gray-950">Add a child</h1>
+          <p className="text-sm leading-6 text-gray-600">
+            Create a learning profile so we can recommend the right Qur&apos;an classes.
+          </p>
+        </div>
+        <Link href="/learners" className="text-sm font-medium text-emerald-700 underline">
+          Back
         </Link>
       </div>
 
-      <form action={createLearner} className="space-y-4">
+      <form
+        action={createLearner}
+        className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+      >
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Full name</span>
+          <span className="mb-1 block text-sm font-medium text-gray-900">
+            Child name
+          </span>
           <input
             required
             name="full_name"
-            className="w-full rounded border p-2"
-            placeholder="Learner full name"
+            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            placeholder="Child name"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Age</span>
+          <span className="mb-1 block text-sm font-medium text-gray-900">Age</span>
           <input
             name="age"
             type="number"
             min={0}
-            className="w-full rounded border p-2"
+            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
             placeholder="Optional"
           />
         </label>
@@ -118,7 +128,10 @@ export default async function NewLearnerPage({
           <span className="mb-1 block text-sm font-medium">
             Preferred language
           </span>
-          <select name="preferred_language" className="w-full rounded border p-2">
+          <select
+            name="preferred_language"
+            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+          >
             <option value="">No preference</option>
             {languages.map((language) => (
               <option key={language} value={language}>
@@ -129,10 +142,13 @@ export default async function NewLearnerPage({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">
-            Qur&apos;an learning level
+          <span className="mb-1 block text-sm font-medium text-gray-900">
+            Qur&apos;an level
           </span>
-          <select name="quran_level" className="w-full rounded border p-2">
+          <select
+            name="quran_level"
+            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+          >
             <option value="">Not sure yet</option>
             {quranLevels.map((level) => (
               <option key={level} value={level}>
@@ -140,6 +156,9 @@ export default async function NewLearnerPage({
               </option>
             ))}
           </select>
+          <p className="mt-1 text-xs leading-5 text-gray-500">
+            Choose the level that best describes the child today. It can be updated later.
+          </p>
         </label>
 
         <label className="block">
@@ -148,8 +167,8 @@ export default async function NewLearnerPage({
           </span>
           <textarea
             name="learning_goals"
-            className="min-h-24 w-full rounded border p-2"
-            placeholder="Optional"
+            className="min-h-24 w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            placeholder="What should the child work towards?"
           />
         </label>
 
@@ -157,13 +176,13 @@ export default async function NewLearnerPage({
           <span className="mb-1 block text-sm font-medium">Notes</span>
           <textarea
             name="notes"
-            className="min-h-28 w-full rounded border p-2"
-            placeholder="Optional"
+            className="min-h-28 w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            placeholder="Anything the scholar should know?"
           />
         </label>
 
         <button className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700">
-          Save Learner
+          Save child
         </button>
 
         {error && <p className="text-sm text-red-600">{error}</p>}

@@ -77,34 +77,44 @@ export default function ClientBookButton({
     );
   }
 
+  if (!hasActiveSubscription) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-gray-700">
+          Subscribe to book live Qur&apos;an classes.
+        </span>
+        <Link
+          href="/subscription"
+          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          Go to Billing
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-2">
-      {hasActiveSubscription && (
-        <select
-          value={selectedLearnerId}
-          onChange={(event) => setSelectedLearnerId(event.target.value)}
+    <div className="flex flex-wrap items-center gap-2">
+      <select
+        value={selectedLearnerId}
+        onChange={(event) => setSelectedLearnerId(event.target.value)}
         disabled={disabled || status === 'saving'}
         className="rounded-lg border px-2 py-2 text-sm"
       >
-          <option value="">Choose child</option>
-          {learners.map((learner) => (
-            <option key={learner.id} value={learner.id}>
-              {learner.full_name}
-            </option>
-          ))}
-        </select>
-      )}
+        <option value="">Choose child</option>
+        {learners.map((learner) => (
+          <option key={learner.id} value={learner.id}>
+            {learner.full_name}
+          </option>
+        ))}
+      </select>
 
       <button
         onClick={book}
         disabled={disabled || status === 'saving'}
         className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
-        {status === 'saving'
-          ? 'Booking...'
-          : hasActiveSubscription
-            ? 'Book class'
-            : 'Subscribe to book'}
+        {status === 'saving' ? 'Booking...' : 'Book class'}
       </button>
     </div>
   );

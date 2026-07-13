@@ -8,6 +8,9 @@ export const dynamic = 'force-dynamic';
 type BookedClass = {
   id: string;
   title: string;
+  subject: string | null;
+  level: string | null;
+  language: string | null;
   start_time: string;
   duration_min: number;
   meeting_url: string | null;
@@ -104,6 +107,9 @@ export default async function MyClasses() {
         class:classes (
           id,
           title,
+          subject,
+          level,
+          language,
           start_time,
           duration_min,
           meeting_url
@@ -164,10 +170,15 @@ export default async function MyClasses() {
   );
 
   return (
-    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
-      <h1 className="mb-4 text-2xl font-semibold text-gray-950">
-        My Live Classes
-      </h1>
+    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-5 space-y-2">
+        <h1 className="text-2xl font-semibold text-gray-950">
+          My Live Classes
+        </h1>
+        <p className="max-w-2xl text-sm leading-6 text-gray-600">
+          See your children&apos;s booked classes, live links, attendance, and revision notes.
+        </p>
+      </div>
 
       {enrolments.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -210,6 +221,9 @@ export default async function MyClasses() {
               <div className="text-lg font-semibold text-gray-950">
                 {bookedClass ? bookedClass.title : 'Unknown class'}
               </div>
+              <div className="mt-1 text-sm text-gray-600">
+                Scholar/Ustass: Approved teacher
+              </div>
               <div className="text-sm text-gray-500">
                 {bookedClass
                   ? `${formatDateTime(bookedClass.start_time)} - ${bookedClass.duration_min} min`
@@ -218,13 +232,32 @@ export default async function MyClasses() {
               <div className="mt-2 text-sm text-gray-600">
                 Child: {learner?.full_name ?? 'Unknown child'}
               </div>
+              {bookedClass && (
+                <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
+                  {bookedClass.subject && (
+                    <span className="rounded-full bg-gray-100 px-3 py-1">
+                      Subject: {bookedClass.subject}
+                    </span>
+                  )}
+                  {bookedClass.level && (
+                    <span className="rounded-full bg-gray-100 px-3 py-1">
+                      Level: {bookedClass.level}
+                    </span>
+                  )}
+                  {bookedClass.language && (
+                    <span className="rounded-full bg-gray-100 px-3 py-1">
+                      Language: {bookedClass.language}
+                    </span>
+                  )}
+                </div>
+              )}
               {learner && (
                 <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
                   <span className="rounded-full bg-gray-100 px-3 py-1">
                     My Qur&apos;an Level: {learner.quran_level ?? 'Not set yet'}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
-                    Lessons: {learner.lessons_completed ?? 0}
+                    Lessons Completed: {learner.lessons_completed ?? 0}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
                     My Points: {learner.points ?? 0}
@@ -259,7 +292,7 @@ export default async function MyClasses() {
                 <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                   <div>Attendance: {progress.attendance_status}</div>
                   {(progress.covered ?? progress.notes) && (
-                    <div>Covered: {progress.covered ?? progress.notes}</div>
+                    <div>What was covered: {progress.covered ?? progress.notes}</div>
                   )}
                   {(progress.revision ?? progress.homework) && (
                     <div>What to Revise: {progress.revision ?? progress.homework}</div>

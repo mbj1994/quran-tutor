@@ -14,6 +14,8 @@ type Subscription = {
 type Learner = {
   id: string;
   full_name: string;
+  age: number | null;
+  preferred_language: string | null;
   quran_level: string | null;
   points: number | null;
   lessons_completed: number | null;
@@ -98,7 +100,7 @@ export default async function DashboardPage() {
       sb
         .from('learners')
         .select(
-          'id, full_name, quran_level, points, lessons_completed, current_badge'
+          'id, full_name, age, preferred_language, quran_level, points, lessons_completed, current_badge'
         )
         .eq('parent_id', user.id)
         .order('full_name', { ascending: true }),
@@ -197,8 +199,70 @@ export default async function DashboardPage() {
   });
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4">
-      <h1 className="text-2xl font-semibold text-gray-950">Family Dashboard</h1>
+    <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4 sm:p-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold text-gray-950">Family Dashboard</h1>
+        <p className="max-w-2xl text-sm leading-6 text-gray-600">
+          Manage your children&apos;s Qur&apos;an learning, live classes, and progress.
+        </p>
+      </div>
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link
+          href="/learners"
+          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+        >
+          <p className="text-sm text-gray-500">Children</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950">{learners.length}</p>
+        </Link>
+        <Link
+          href="/my-classes"
+          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+        >
+          <p className="text-sm text-gray-500">Upcoming live classes</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950">{enrolments.length}</p>
+        </Link>
+        <Link
+          href="/subscription"
+          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+        >
+          <p className="text-sm text-gray-500">Billing status</p>
+          <p className="mt-2 text-lg font-semibold text-gray-950">
+            {hasActiveSubscription ? 'Active' : 'Not active'}
+          </p>
+        </Link>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <p className="text-sm text-gray-500">Learning progress</p>
+          <p className="mt-2 text-2xl font-semibold text-gray-950">{progressRows.length}</p>
+        </div>
+      </section>
+
+      <section className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <Link
+          href="/learners/new"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          Add a child
+        </Link>
+        <Link
+          href="/classes"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+        >
+          Browse classes
+        </Link>
+        <Link
+          href="/my-classes"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+        >
+          View my live classes
+        </Link>
+        <Link
+          href="/subscription"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+        >
+          Manage billing
+        </Link>
+      </section>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-950">Billing</h2>
@@ -230,11 +294,8 @@ export default async function DashboardPage() {
             >
               View Children
             </Link>
-            <Link
-              href="/learners/new"
-              className="rounded bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700"
-            >
-              Add Child
+            <Link href="/learners/new" className="rounded bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700">
+              Add a child
             </Link>
           </div>
         </div>
@@ -255,6 +316,16 @@ export default async function DashboardPage() {
                   <div className="font-semibold text-gray-950">
                     {learner.full_name}
                   </div>
+                  <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-600">
+                    {learner.age !== null && (
+                      <span className="rounded-full bg-white px-2 py-1">
+                        Age {learner.age}
+                      </span>
+                    )}
+                    <span className="rounded-full bg-white px-2 py-1">
+                      {learner.preferred_language ?? 'Language not set'}
+                    </span>
+                  </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <p className="text-xs uppercase text-gray-500">
@@ -265,21 +336,27 @@ export default async function DashboardPage() {
                       </p>
                     </div>
                     <div>
+                      <p className="text-xs uppercase text-gray-500">
+                        Lessons Completed
+                      </p>
+                      <p className="font-medium text-gray-900">
+                        {lessonsCompleted}
+                      </p>
+                    </div>
+                    <div>
                       <p className="text-xs uppercase text-gray-500">My Points</p>
                       <p className="font-medium text-gray-900">
                         {learner.points ?? 0}
                       </p>
                     </div>
                   </div>
-                  <p className="mt-3 text-sm text-gray-700">
-                    Lessons completed: {lessonsCompleted}
-                  </p>
                   <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
                     My Badge: {badgeForLessons(lessonsCompleted, learner.current_badge)}
                   </p>
                   {latestNote && (
                     <p className="mt-3 text-sm text-gray-700">
-                      Latest note: {latestNote}
+                      <span className="font-medium text-gray-900">What to Revise:</span>{' '}
+                      {latestNote}
                     </p>
                   )}
                 </li>
@@ -308,7 +385,7 @@ export default async function DashboardPage() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">
-            Upcoming Booked Classes
+            Upcoming live classes
           </h2>
           <Link
             href="/my-classes"

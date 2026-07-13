@@ -44,9 +44,22 @@ export default async function SubscriptionPage() {
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
-      <h1 className="text-2xl font-semibold text-gray-950">
-        Billing
-      </h1>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold text-gray-950">Billing</h1>
+        <p className="text-sm leading-6 text-gray-600">
+          Subscribe so your children can book and attend live Qur&apos;an classes.
+        </p>
+      </div>
+
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="font-semibold text-gray-950">Family learning plan</h2>
+        <ul className="mt-3 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
+          <li>Live classes with approved scholars/ustass</li>
+          <li>Child progress tracking</li>
+          <li>Attendance and revision notes</li>
+          <li>Learning rewards</li>
+        </ul>
+      </section>
 
       {isActive ? (
         <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

@@ -13,6 +13,9 @@ type Learner = {
   quran_level: string | null;
   learning_goals: string | null;
   notes: string | null;
+  points: number | null;
+  lessons_completed: number | null;
+  current_badge: string | null;
 };
 
 export default async function LearnersPage() {
@@ -27,7 +30,7 @@ export default async function LearnersPage() {
   const { data, error } = await sb
     .from('learners')
     .select(
-      'id, full_name, age, preferred_language, quran_level, learning_goals, notes'
+      'id, full_name, age, preferred_language, quran_level, learning_goals, notes, points, lessons_completed, current_badge'
     )
     .eq('parent_id', user.id)
     .order('created_at', { ascending: false });
@@ -39,9 +42,14 @@ export default async function LearnersPage() {
   const learners = (data ?? []) as Learner[];
 
   return (
-    <main className="mx-auto max-w-3xl bg-gray-50 p-4">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold text-gray-950">Children</h1>
+    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold text-gray-950">Children</h1>
+          <p className="max-w-2xl text-sm leading-6 text-gray-600">
+            Add and manage the children learning Qur&apos;an with your family account.
+          </p>
+        </div>
         <Link
           href="/learners/new"
           className="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
@@ -90,6 +98,21 @@ export default async function LearnersPage() {
                 <p>Learning goals: {learner.learning_goals}</p>
               )}
               {learner.notes && <p>Notes: {learner.notes}</p>}
+            </div>
+
+            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+              <p className="font-medium text-gray-950">Progress summary</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white px-3 py-1">
+                  Lessons: {learner.lessons_completed ?? 0}
+                </span>
+                <span className="rounded-full bg-white px-3 py-1">
+                  Points: {learner.points ?? 0}
+                </span>
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                  {learner.current_badge ?? 'New Learner'}
+                </span>
+              </div>
             </div>
           </li>
         ))}
