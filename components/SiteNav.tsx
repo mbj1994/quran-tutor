@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { unstable_noStore as noStore } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import LogoutButton from './LogoutButton';
 
@@ -37,6 +38,8 @@ function getRoleCode(profile: ProfileRole | null) {
 }
 
 export default async function SiteNav() {
+  noStore();
+
   const sb = createServerComponentClient({ cookies });
   const {
     data: { user },
