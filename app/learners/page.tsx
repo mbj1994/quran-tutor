@@ -13,6 +13,7 @@ type Learner = {
   quran_level: string | null;
   learning_goals: string | null;
   notes: string | null;
+  student_access_code: string | null;
   points: number | null;
   lessons_completed: number | null;
   current_badge: string | null;
@@ -30,7 +31,7 @@ export default async function LearnersPage() {
   const { data, error } = await sb
     .from('learners')
     .select(
-      'id, full_name, age, preferred_language, quran_level, learning_goals, notes, points, lessons_completed, current_badge'
+      'id, full_name, age, preferred_language, quran_level, learning_goals, notes, student_access_code, points, lessons_completed, current_badge'
     )
     .eq('parent_id', user.id)
     .order('created_at', { ascending: false });
@@ -113,6 +114,23 @@ export default async function LearnersPage() {
                   {learner.current_badge ?? 'New Learner'}
                 </span>
               </div>
+            </div>
+
+            <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-950">
+              <p className="font-medium">Student access code</p>
+              <p className="mt-2 font-mono text-xl font-semibold tracking-wide">
+                {learner.student_access_code ?? 'Code pending'}
+              </p>
+              <p className="mt-2 leading-6 text-emerald-900">
+                Use this code on the student page so your child can view only
+                their own live classes and progress.
+              </p>
+              <Link
+                href="/student"
+                className="mt-3 inline-block rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              >
+                Open Student Page
+              </Link>
             </div>
           </li>
         ))}

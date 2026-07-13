@@ -17,6 +17,7 @@ type Learner = {
   age: number | null;
   preferred_language: string | null;
   quran_level: string | null;
+  student_access_code: string | null;
   points: number | null;
   lessons_completed: number | null;
   current_badge: string | null;
@@ -100,7 +101,7 @@ export default async function DashboardPage() {
       sb
         .from('learners')
         .select(
-          'id, full_name, age, preferred_language, quran_level, points, lessons_completed, current_badge'
+          'id, full_name, age, preferred_language, quran_level, student_access_code, points, lessons_completed, current_badge'
         )
         .eq('parent_id', user.id)
         .order('full_name', { ascending: true }),
@@ -353,6 +354,16 @@ export default async function DashboardPage() {
                   <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
                     My Badge: {badgeForLessons(lessonsCompleted, learner.current_badge)}
                   </p>
+                  {learner.student_access_code && (
+                    <p className="mt-2 text-sm text-gray-700">
+                      <span className="font-medium text-gray-900">
+                        Student access code:
+                      </span>{' '}
+                      <span className="font-mono font-semibold">
+                        {learner.student_access_code}
+                      </span>
+                    </p>
+                  )}
                   {latestNote && (
                     <p className="mt-3 text-sm text-gray-700">
                       <span className="font-medium text-gray-900">What to Revise:</span>{' '}

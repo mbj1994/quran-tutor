@@ -16,6 +16,7 @@ type ProfileRole = {
 const publicLinks: NavLink[] = [
   { href: '/', label: 'Home' },
   { href: '/classes', label: 'Browse Classes' },
+  { href: '/student', label: 'Student Access' },
   { href: '/login', label: 'Login' },
 ];
 
