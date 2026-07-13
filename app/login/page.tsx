@@ -73,6 +73,7 @@ function LoginForm() {
   const redirectAfterLogin = useCallback(async () => {
     const path = await getPostLoginPath();
     router.replace(path);
+    router.refresh();
   }, [getPostLoginPath, router]);
 
   useEffect(() => {
