@@ -286,12 +286,11 @@ export default async function ScholarClassProgressPage({
       {enrolments.length === 0 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No progress notes yet
+            No progress notes have been added yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
-            No learners are enrolled in this live class yet. Once a parent
-            books a learner, you can record Qur&apos;an level, revision notes,
-            and learning rewards here.
+            Once a parent books a child, you can record Qur&apos;an level,
+            revision notes, and learning rewards here.
           </p>
           <Link
             href="/scholar/classes"

@@ -296,7 +296,7 @@ export default async function ScholarClassRosterPage({
       {enrolments.length === 0 ? (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No enrolled learners yet
+            No children are enrolled in this class yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             When parents book this live class for their children, the roster

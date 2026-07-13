@@ -52,7 +52,7 @@ export default function PaymentsPage() {
       <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h1 className="text-2xl font-semibold text-gray-950">
-            Checkout
+            Payment Checkout
           </h1>
           <p className="mt-3 text-sm leading-6 text-gray-600">
             Please log in to start or manage a family subscription for live
@@ -72,7 +72,7 @@ export default function PaymentsPage() {
   return (
     <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
       <h1 className="text-2xl font-semibold text-gray-950">
-        Checkout
+        Payment Checkout
       </h1>
 
       <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

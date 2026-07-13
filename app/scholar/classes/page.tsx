@@ -61,24 +61,24 @@ export default async function ScholarClasses() {
           href="/scholar/classes/new"
           className="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
         >
-          New class
+          Create a class
         </Link>
       </div>
 
       {classes?.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No teaching classes yet
+            You have not created any teaching classes yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Create your first live class so parents can book a place for their
-            learners.
+            children.
           </p>
           <Link
             href="/scholar/classes/new"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Create class
+            Create a class
           </Link>
         </section>
       )}

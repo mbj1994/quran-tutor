@@ -20,7 +20,7 @@ const publicLinks: NavLink[] = [
 ];
 
 const parentLinks: NavLink[] = [
-  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/dashboard', label: 'Family Dashboard' },
   { href: '/learners', label: 'Children' },
   { href: '/classes', label: 'Browse Classes' },
   { href: '/my-classes', label: 'My Live Classes' },

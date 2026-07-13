@@ -288,7 +288,9 @@ export default async function DashboardPage() {
           </ul>
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
-            <h3 className="font-medium text-gray-950">No children yet</h3>
+            <h3 className="font-medium text-gray-950">
+              You have not added any children yet.
+            </h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Add a child profile with their Qur&apos;an level so you can book
               the right live class and track learning rewards.
@@ -297,7 +299,7 @@ export default async function DashboardPage() {
               href="/learners/new"
               className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Add child
+              Add a child
             </Link>
           </div>
         )}
@@ -355,7 +357,9 @@ export default async function DashboardPage() {
           </ul>
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
-            <h3 className="font-medium text-gray-950">No booked classes yet</h3>
+            <h3 className="font-medium text-gray-950">
+              You have not booked any live classes yet.
+            </h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Browse available live Qur&apos;an classes and choose the best
               Scholar/Ustass and level for your child.
@@ -364,7 +368,7 @@ export default async function DashboardPage() {
               href="/classes"
               className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Browse Classes
+              Browse classes
             </Link>
           </div>
         )}
@@ -416,7 +420,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
             <h3 className="font-medium text-gray-950">
-              No progress notes yet
+              No progress notes have been added yet.
             </h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Revision notes, attendance, and child progress will appear after

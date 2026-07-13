@@ -52,7 +52,9 @@ export default async function LearnersPage() {
 
       {learners.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-gray-950">No children yet</h2>
+          <h2 className="font-semibold text-gray-950">
+            You have not added any children yet.
+          </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Add your child&apos;s profile so you can choose their
             Qur&apos;an level, book live classes, and follow child progress.
@@ -61,7 +63,7 @@ export default async function LearnersPage() {
             href="/learners/new"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Add first child
+            Add a child
           </Link>
         </section>
       )}

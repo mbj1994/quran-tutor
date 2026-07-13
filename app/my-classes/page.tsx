@@ -172,17 +172,17 @@ export default async function MyClasses() {
       {enrolments.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            No booked classes yet
+            You have not booked any live classes yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
-            Once you book a live Qur&apos;an class for a learner, the schedule
+            Once you book a live Qur&apos;an class for a child, the schedule
             and class link will appear here.
           </p>
           <Link
             href="/classes"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Browse Classes
+            Browse classes
           </Link>
         </section>
       )}

@@ -11,10 +11,9 @@ export default function Home() {
           Quran Tutor
         </h1>
         <p className="max-w-3xl text-lg leading-8 text-gray-700">
-          Book live Qur&apos;an classes for your child with approved
-          Scholars/Ustass. Parents can manage learner profiles, follow child
-          progress, and support steady subscription-based learning in one calm
-          dashboard.
+          Parents can create child profiles, book live Qur&apos;an classes with
+          approved Scholars/Ustass, and follow progress and learning rewards in
+          one simple family dashboard.
         </p>
       </section>
 
@@ -26,27 +25,26 @@ export default function Home() {
           Get started
         </Link>
         <Link
+          href="/classes"
+          className="rounded-lg border border-emerald-600 bg-white px-5 py-3 font-medium text-emerald-700 hover:bg-emerald-50"
+        >
+          Browse classes
+        </Link>
+        <Link
           href="/login"
           className="rounded-lg border border-gray-300 bg-white px-5 py-3 font-medium text-gray-800 hover:bg-gray-100"
         >
           Login
-        </Link>
-        <Link
-          href="/classes"
-          className="rounded-lg border border-emerald-600 bg-white px-5 py-3 font-medium text-emerald-700 hover:bg-emerald-50"
-        >
-          Browse Classes
         </Link>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
           ['Approved Scholars/Ustass', 'Classes are taught by approved teachers managed by the platform team.'],
-          ['Family dashboard', 'Add children, book live classes, and keep the family schedule easy to follow.'],
-          ['Child progress', "See Qur'an level, revision notes, attendance, and what to practise next."],
+          ['Parent-managed profiles', 'Add each child with their age, language, level, and learning goals.'],
+          ['Live class booking', 'Browse available Qur\'an classes and book the right place for your child.'],
+          ['Child progress', 'See attendance, revision notes, Qur\'an level, and what to practise next.'],
           ['Learning rewards', 'Children build points and badges as they complete lessons.'],
-          ['Live class links', 'Join through simple video meeting links for each booked class.'],
-          ['Subscription-supported', 'Family subscriptions help sustain consistent learning and scholar support.'],
         ].map(([title, body]) => (
           <article
             key={title}
