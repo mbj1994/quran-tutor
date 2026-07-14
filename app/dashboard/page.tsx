@@ -76,7 +76,7 @@ function badgeForLessons(lessonsCompleted: number, savedBadge?: string | null) {
   if (savedBadge) return savedBadge;
   if (lessonsCompleted >= 10) return 'Rising Reciter';
   if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return "Qur'an Starter";
+  if (lessonsCompleted >= 1) return 'Qur’an Starter';
   return 'New Learner';
 }
 
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-gray-950">Family Dashboard</h1>
         <p className="max-w-2xl text-sm leading-6 text-gray-600">
-          Manage your children&apos;s Qur&apos;an learning, live classes, and progress.
+          Manage your children&apos;s Qur&apos;an learning, Live Classes, and progress.
         </p>
       </div>
 
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
           href="/my-classes"
           className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
         >
-          <p className="text-sm text-gray-500">Upcoming live classes</p>
+          <p className="text-sm text-gray-500">Upcoming Live Classes</p>
           <p className="mt-2 text-2xl font-semibold text-gray-950">{enrolments.length}</p>
         </Link>
         <Link
@@ -249,13 +249,13 @@ export default async function DashboardPage() {
           href="/classes"
           className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
-          Browse classes
+          Browse Classes
         </Link>
         <Link
           href="/my-classes"
           className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
-          View my live classes
+          View My Live Classes
         </Link>
         <Link
           href="/subscription"
@@ -396,7 +396,7 @@ export default async function DashboardPage() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">
-            Upcoming live classes
+            Upcoming Live Classes
           </h2>
           <Link
             href="/my-classes"
@@ -446,17 +446,17 @@ export default async function DashboardPage() {
         ) : (
           <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
             <h3 className="font-medium text-gray-950">
-              You have not booked any live classes yet.
+              You have not booked any Live Classes yet.
             </h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Browse available live Qur&apos;an classes and choose the best
-              Scholar/Ustass and level for your child.
+              Scholar / Ustass teacher and level for your child.
             </p>
             <Link
               href="/classes"
               className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Browse classes
+              Browse Classes
             </Link>
           </div>
         )}
@@ -512,7 +512,7 @@ export default async function DashboardPage() {
             </h3>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Revision notes, attendance, and child progress will appear after
-              a Scholar/Ustass records a lesson update.
+              a Scholar / Ustass records a lesson update.
             </p>
           </div>
         )}

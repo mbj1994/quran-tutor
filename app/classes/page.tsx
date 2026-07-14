@@ -107,7 +107,7 @@ export default async function ClassesPage() {
           Browse Live Qur&apos;an Classes
         </h1>
         <p className="mt-2 text-sm text-gray-600">
-          Choose live classes for your children with approved scholars/ustass.
+          Choose Live Classes for your children with approved Scholar / Ustass teachers.
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default async function ClassesPage() {
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">No classes available yet</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
-            New live classes will appear here once the teaching team schedules
+            New Live Classes will appear here once the teaching team schedules
             them.
           </p>
         </section>
@@ -137,7 +137,7 @@ export default async function ClassesPage() {
                 {classRow.title}
               </div>
               <div className="mt-1 space-y-1 text-sm text-gray-600">
-                <p>Scholar/Ustass: Approved teacher</p>
+                <p>Scholar / Ustass: Approved teacher</p>
                 {classRow.subject && <p>Subject: {classRow.subject}</p>}
                 {classRow.level && <p>Level: {classRow.level}</p>}
                 {classRow.language && <p>Language: {classRow.language}</p>}
@@ -161,11 +161,11 @@ export default async function ClassesPage() {
                 </span>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <span className="text-sm text-gray-600">
                   {bookedByCurrentFamily ? 'Already booked' : 'Choose a child to book'}
                 </span>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                   {bookedByCurrentFamily && meetingUrl && (
                     <a
                       href={meetingUrl}

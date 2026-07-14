@@ -9,8 +9,8 @@ const languages = ['English', 'Wolof', 'Mandinka', 'Fula', 'Arabic'] as const;
 const quranLevels = [
   'Beginner Arabic letters',
   'Qaida / Noorani Qaida',
-  'Quran reading beginner',
-  'Quran reading intermediate',
+  'Qur’an reading beginner',
+  'Qur’an reading intermediate',
   'Tajweed beginner',
   'Memorization beginner',
   'Memorization ongoing',
@@ -85,7 +85,7 @@ export default async function NewLearnerPage({
 
   return (
     <main className="mx-auto max-w-xl bg-gray-50 p-4 sm:p-6">
-      <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-gray-950">Add a child</h1>
           <p className="text-sm leading-6 text-gray-600">

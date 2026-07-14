@@ -66,17 +66,20 @@ export default async function SiteNav() {
 
   return (
     <header className="border-b bg-white">
-      <nav className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
-        <Link href="/" className="text-lg font-semibold text-emerald-800">
+      <nav className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          href="/"
+          className="w-fit text-lg font-semibold leading-tight text-emerald-800"
+        >
           Quran Tutor
         </Link>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm sm:justify-end">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-gray-700 hover:text-emerald-700 hover:underline"
+              className="rounded-md px-1 py-1 leading-5 text-gray-700 hover:text-emerald-700 hover:underline"
             >
               {link.label}
             </Link>

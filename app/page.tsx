@@ -12,7 +12,7 @@ export default function Home() {
         </h1>
         <p className="max-w-3xl text-lg leading-8 text-gray-700">
           Parents can create child profiles, book live Qur&apos;an classes with
-          approved Scholars/Ustass, and follow progress and learning rewards in
+          approved Scholar / Ustass teachers, and follow progress and learning rewards in
           one simple family dashboard.
         </p>
       </section>
@@ -28,7 +28,7 @@ export default function Home() {
           href="/classes"
           className="rounded-lg border border-emerald-600 bg-white px-5 py-3 font-medium text-emerald-700 hover:bg-emerald-50"
         >
-          Browse classes
+          Browse Classes
         </Link>
         <Link
           href="/login"
@@ -40,10 +40,10 @@ export default function Home() {
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
-          ['Approved Scholars/Ustass', 'Classes are taught by approved teachers managed by the platform team.'],
+          ['Approved Scholar / Ustass teachers', 'Classes are taught by approved teachers managed by the platform team.'],
           ['Parent-managed profiles', 'Add each child with their age, language, level, and learning goals.'],
-          ['Live class booking', 'Browse available Qur\'an classes and book the right place for your child.'],
-          ['Child progress', 'See attendance, revision notes, Qur\'an level, and what to practise next.'],
+          ['Live Classes', 'Browse available Qur’an classes and book the right place for your child.'],
+          ['Child progress', 'See attendance, revision notes, Qur’an level, and what to practise next.'],
           ['Learning rewards', 'Children build points and badges as they complete lessons.'],
         ].map(([title, body]) => (
           <article

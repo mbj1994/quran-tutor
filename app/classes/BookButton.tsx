@@ -70,7 +70,7 @@ export default function ClientBookButton({
     return (
       <Link
         href="/learners/new"
-        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+        className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
       >
         Add child first
       </Link>
@@ -79,13 +79,13 @@ export default function ClientBookButton({
 
   if (!hasActiveSubscription) {
     return (
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
         <span className="text-sm font-medium text-gray-700">
           Subscribe to book live Qur&apos;an classes.
         </span>
         <Link
           href="/subscription"
-          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
         >
           Go to Billing
         </Link>
@@ -94,12 +94,12 @@ export default function ClientBookButton({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
       <select
         value={selectedLearnerId}
         onChange={(event) => setSelectedLearnerId(event.target.value)}
         disabled={disabled || status === 'saving'}
-        className="rounded-lg border px-2 py-2 text-sm"
+        className="w-full rounded-lg border px-2 py-2 text-sm sm:w-auto"
       >
         <option value="">Choose child</option>
         {learners.map((learner) => (
@@ -112,7 +112,7 @@ export default function ClientBookButton({
       <button
         onClick={book}
         disabled={disabled || status === 'saving'}
-        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 sm:w-auto"
       >
         {status === 'saving' ? 'Booking...' : 'Book class'}
       </button>

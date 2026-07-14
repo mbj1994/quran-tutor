@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import SiteNav from '@/components/SiteNav';
 import { Providers } from './providers';
@@ -16,7 +16,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Quran Tutor',
-  description: 'Online Quran learning for diaspora children',
+  description: 'Live Qur’an learning for Gambian diaspora children',
+  applicationName: 'Quran Tutor',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Quran Tutor',
+    statusBarStyle: 'default',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#059669',
 };
 
 export default function RootLayout({

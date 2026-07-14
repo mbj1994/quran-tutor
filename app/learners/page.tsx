@@ -66,7 +66,7 @@ export default async function LearnersPage() {
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Add your child&apos;s profile so you can choose their
-            Qur&apos;an level, book live classes, and follow child progress.
+            Qur&apos;an level, book Live Classes, and follow child progress.
           </p>
           <Link
             href="/learners/new"
@@ -123,7 +123,7 @@ export default async function LearnersPage() {
               </p>
               <p className="mt-2 leading-6 text-emerald-900">
                 Use this code on the student page so your child can view only
-                their own live classes and progress.
+                their own Live Classes and progress.
               </p>
               <Link
                 href="/student"

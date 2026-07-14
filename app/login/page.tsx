@@ -246,7 +246,7 @@ function LoginForm() {
               <article className="rounded-lg border border-gray-200 bg-white p-4">
                 <h2 className="font-semibold text-gray-950">Scholar / Ustass</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Teach live classes, manage attendance, and update learner progress.
+                  Teach Live Classes, manage attendance, and update child progress.
                 </p>
               </article>
             </div>

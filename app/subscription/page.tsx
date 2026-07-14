@@ -43,7 +43,7 @@ export default async function SubscriptionPage() {
   const isActive = data?.status === 'active' || data?.status === 'trialing';
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
+    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-4 sm:p-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-gray-950">Billing</h1>
         <p className="text-sm leading-6 text-gray-600">
@@ -54,7 +54,7 @@ export default async function SubscriptionPage() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="font-semibold text-gray-950">Family learning plan</h2>
         <ul className="mt-3 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
-          <li>Live classes with approved scholars/ustass</li>
+          <li>Live Classes with approved Scholar / Ustass teachers</li>
           <li>Child progress tracking</li>
           <li>Attendance and revision notes</li>
           <li>Learning rewards</li>
@@ -80,7 +80,7 @@ export default async function SubscriptionPage() {
             </h2>
             <p className="mt-2 text-sm leading-6 text-gray-600">
               Start a family subscription to book live Qur&apos;an classes for
-              your learners.
+              your children.
             </p>
           </div>
           <Link

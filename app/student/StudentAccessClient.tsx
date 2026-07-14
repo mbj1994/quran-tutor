@@ -63,7 +63,7 @@ function badgeForLessons(lessonsCompleted: number, savedBadge?: string | null) {
   if (savedBadge) return savedBadge;
   if (lessonsCompleted >= 10) return 'Rising Reciter';
   if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return "Qur'an Starter";
+  if (lessonsCompleted >= 1) return 'Qur’an Starter';
   return 'New Learner';
 }
 
@@ -157,7 +157,7 @@ export default function StudentAccessClient() {
             </label>
             <button
               disabled={isLoading}
-              className="rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 sm:mt-6"
+              className="w-full rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 sm:mt-6 sm:w-auto"
             >
               {isLoading ? 'Checking...' : 'Continue'}
             </button>
@@ -217,7 +217,7 @@ export default function StudentAccessClient() {
 
               {student.classes.length === 0 ? (
                 <p className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
-                  No live classes are booked yet.
+                  No Live Classes are booked yet.
                 </p>
               ) : (
                 <ul className="mt-4 space-y-4">
@@ -235,7 +235,7 @@ export default function StudentAccessClient() {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <h3 className="font-semibold text-gray-950">
-                              {bookedClass?.title ?? "Qur'an class"}
+                              {bookedClass?.title ?? 'Qur’an class'}
                             </h3>
                             {bookedClass && (
                               <p className="mt-1 text-sm text-gray-600">
@@ -272,7 +272,7 @@ export default function StudentAccessClient() {
                               href={bookedClass.meeting_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg bg-emerald-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-emerald-700"
+                              className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                             >
                               Join Live Class
                             </a>

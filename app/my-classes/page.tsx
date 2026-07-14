@@ -84,7 +84,7 @@ export default async function MyClasses() {
           <h2 className="font-semibold text-gray-950">Add a child first</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Create a child profile with their Qur&apos;an level before booking
-            live classes.
+            Live Classes.
           </p>
           <Link
             href="/learners/new"
@@ -183,7 +183,7 @@ export default async function MyClasses() {
       {enrolments.length === 0 && (
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="font-semibold text-gray-950">
-            You have not booked any live classes yet.
+            You have not booked any Live Classes yet.
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Once you book a live Qur&apos;an class for a child, the schedule
@@ -193,7 +193,7 @@ export default async function MyClasses() {
             href="/classes"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
-            Browse classes
+            Browse Classes
           </Link>
         </section>
       )}
@@ -222,7 +222,7 @@ export default async function MyClasses() {
                 {bookedClass ? bookedClass.title : 'Unknown class'}
               </div>
               <div className="mt-1 text-sm text-gray-600">
-                Scholar/Ustass: Approved teacher
+                Scholar / Ustass: Approved teacher
               </div>
               <div className="text-sm text-gray-500">
                 {bookedClass
@@ -278,7 +278,7 @@ export default async function MyClasses() {
                     href={bookedClass.meeting_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                    className="mt-3 inline-block w-full rounded bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                   >
                     Join Live Class
                   </a>
