@@ -7,6 +7,8 @@ import {
   getMilestoneProgress,
   getNextMilestone,
 } from '@/lib/gamification';
+import { appLanguages } from '@/lib/languages';
+import CopyCodeButton from '@/app/learners/CopyCodeButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +16,10 @@ type Subscription = {
   status: string | null;
   current_period_end: string | null;
   created_at: string | null;
+};
+
+type Profile = {
+  app_language: string | null;
 };
 
 type Learner = {
@@ -77,6 +83,31 @@ function formatDateTime(value: string) {
   });
 }
 
+async function updateAppLanguage(formData: FormData) {
+  'use server';
+
+  const sb = createServerComponentClient({ cookies });
+
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
+  if (!user) redirect('/login');
+
+  const appLanguage = String(formData.get('app_language') ?? '').trim();
+
+  if (!appLanguages.includes(appLanguage as (typeof appLanguages)[number])) {
+    redirect('/dashboard');
+  }
+
+  await sb
+    .from('profiles')
+    .update({ app_language: appLanguage })
+    .eq('id', user.id);
+
+  redirect('/dashboard');
+}
+
 export default async function DashboardPage() {
   const sb = createServerComponentClient({ cookies });
 
@@ -86,7 +117,11 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login');
 
-  const [{ data: subscription, error: subscriptionError }, { data: learnerRows, error: learnerError }] =
+  const [
+    { data: subscription, error: subscriptionError },
+    { data: learnerRows, error: learnerError },
+    { data: profile, error: profileError },
+  ] =
     await Promise.all([
       sb
         .from('subscriptions')
@@ -102,6 +137,11 @@ export default async function DashboardPage() {
         )
         .eq('parent_id', user.id)
         .order('full_name', { ascending: true }),
+      sb
+        .from('profiles')
+        .select('app_language')
+        .eq('id', user.id)
+        .maybeSingle<Profile>(),
     ]);
 
   if (subscriptionError) {
@@ -110,6 +150,10 @@ export default async function DashboardPage() {
 
   if (learnerError) {
     return <p className="p-4 text-red-600">{learnerError.message}</p>;
+  }
+
+  if (profileError) {
+    return <p className="p-4 text-red-600">{profileError.message}</p>;
   }
 
   const learners = (learnerRows ?? []) as Learner[];
@@ -283,6 +327,28 @@ export default async function DashboardPage() {
       </section>
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-950">
+          Preferred app language
+        </h2>
+        <form action={updateAppLanguage} className="mt-3 flex flex-col gap-3 sm:max-w-md sm:flex-row">
+          <select
+            name="app_language"
+            defaultValue={profile?.app_language ?? 'English'}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
+          >
+            {appLanguages.map((language) => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
+          </select>
+          <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+            Save preference
+          </button>
+        </form>
+      </section>
+
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">Children</h2>
           <div className="flex gap-2">
@@ -388,14 +454,15 @@ export default async function DashboardPage() {
                     </div>
                   </div>
                   {learner.student_access_code && (
-                    <p className="mt-2 text-sm text-gray-700">
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-700">
                       <span className="font-medium text-gray-900">
                         Student access code:
-                      </span>{' '}
+                      </span>
                       <span className="font-mono font-semibold">
                         {learner.student_access_code}
                       </span>
-                    </p>
+                      <CopyCodeButton code={learner.student_access_code} />
+                    </div>
                   )}
                   {latestNote && (
                     <p className="mt-3 text-sm text-gray-700">

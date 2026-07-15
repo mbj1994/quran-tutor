@@ -5,7 +5,9 @@ export const dynamic = 'force-dynamic';
 
 type LearnerRow = {
   id: string;
+  parent_id: string;
   full_name: string;
+  preferred_language: string | null;
   quran_level: string | null;
   learning_goals: string | null;
   points: number | null;
@@ -47,6 +49,19 @@ type LessonProgressRow = {
   updated_at: string | null;
   created_at: string | null;
   class: ProgressClass | ProgressClass[] | null;
+};
+
+type BrowseClassRow = {
+  id: string;
+  title: string;
+  subject: string | null;
+  level: string | null;
+  language: string | null;
+  start_time: string;
+  duration_min: number | null;
+  capacity: number;
+  scholar: { full_name: string | null } | { full_name: string | null }[] | null;
+  enrolments: { count: number }[];
 };
 
 function firstOrNull<T>(value: T | T[] | null) {
@@ -106,7 +121,7 @@ export async function POST(request: Request) {
   const { data: learner, error: learnerError } = await sb
     .from('learners')
     .select(
-      'id, full_name, quran_level, learning_goals, points, lessons_completed, current_badge'
+      'id, parent_id, full_name, preferred_language, quran_level, learning_goals, points, lessons_completed, current_badge'
     )
     .eq('student_access_code', code)
     .maybeSingle<LearnerRow>();
@@ -125,7 +140,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const [{ data: enrolmentRows, error: enrolmentError }, { data: progressRows, error: progressError }] =
+  const [
+    { data: enrolmentRows, error: enrolmentError },
+    { data: progressRows, error: progressError },
+    { data: browseRows, error: browseError },
+  ] =
     await Promise.all([
       sb
         .from('enrolments')
@@ -172,9 +191,30 @@ export async function POST(request: Request) {
         )
         .eq('learner_profile_id', learner.id)
         .order('updated_at', { ascending: false }),
+      sb
+        .from('classes')
+        .select(
+          `
+            id,
+            title,
+            subject,
+            level,
+            language,
+            start_time,
+            duration_min,
+            capacity,
+            scholar:profiles!classes_scholar_id_fkey (
+              full_name
+            ),
+            enrolments(count)
+          `
+        )
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true })
+        .limit(12),
     ]);
 
-  if (enrolmentError || progressError) {
+  if (enrolmentError || progressError || browseError) {
     return NextResponse.json(
       { error: 'We could not load the student learning page right now.' },
       { status: 500 }
@@ -201,9 +241,57 @@ export async function POST(request: Request) {
     class: firstOrNull(row.class),
   }));
 
+  const bookedClassIds = new Set(
+    classes.map((row) => row.class?.id).filter(Boolean) as string[]
+  );
+
+  const browseClasses = ((browseRows ?? []) as BrowseClassRow[])
+    .map((classRow) => {
+      const booked = classRow.enrolments[0]?.count ?? 0;
+
+      return {
+        id: classRow.id,
+        title: classRow.title,
+        scholar_name: firstOrNull(classRow.scholar)?.full_name ?? null,
+        subject: classRow.subject,
+        level: classRow.level,
+        language: classRow.language,
+        start_time: classRow.start_time,
+        duration_min: classRow.duration_min,
+        available_spaces: Math.max(classRow.capacity - booked, 0),
+        is_booked: bookedClassIds.has(classRow.id),
+        language_match:
+          Boolean(learner.preferred_language) &&
+          classRow.language === learner.preferred_language,
+        level_match:
+          Boolean(learner.quran_level) && classRow.level === learner.quran_level,
+      };
+    })
+    .sort((a, b) => {
+      const aScore = Number(a.language_match) * 2 + Number(a.level_match);
+      const bScore = Number(b.language_match) * 2 + Number(b.level_match);
+
+      if (aScore !== bScore) return bScore - aScore;
+      return (
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      );
+    });
+
+  const safeLearner = {
+    id: learner.id,
+    full_name: learner.full_name,
+    preferred_language: learner.preferred_language,
+    quran_level: learner.quran_level,
+    learning_goals: learner.learning_goals,
+    points: learner.points,
+    lessons_completed: learner.lessons_completed,
+    current_badge: learner.current_badge,
+  };
+
   return NextResponse.json({
-    learner,
+    learner: safeLearner,
     classes,
     progress,
+    browseClasses,
   });
 }

@@ -10,6 +10,7 @@ import {
 type Learner = {
   id: string;
   full_name: string;
+  preferred_language: string | null;
   quran_level: string | null;
   learning_goals: string | null;
   points: number | null;
@@ -34,6 +35,21 @@ type StudentClass = {
   class: BookedClass | null;
 };
 
+type BrowseClass = {
+  id: string;
+  title: string;
+  scholar_name: string | null;
+  subject: string | null;
+  level: string | null;
+  language: string | null;
+  start_time: string;
+  duration_min: number | null;
+  available_spaces: number;
+  is_booked: boolean;
+  language_match: boolean;
+  level_match: boolean;
+};
+
 type LessonProgress = {
   id: string;
   class_id: string;
@@ -55,6 +71,7 @@ type StudentPayload = {
   learner: Learner;
   classes: StudentClass[];
   progress: LessonProgress[];
+  browseClasses: BrowseClass[];
 };
 
 function formatDateTime(value: string) {
@@ -69,6 +86,7 @@ export default function StudentAccessClient() {
   const [student, setStudent] = useState<StudentPayload | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [bookingClassId, setBookingClassId] = useState<string | null>(null);
 
   const progressByClass = useMemo(() => {
     const map = new Map<string, LessonProgress>();
@@ -82,12 +100,8 @@ export default function StudentAccessClient() {
     return map;
   }, [student]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function loadStudent(normalizedCode: string) {
     setError('');
-    setIsLoading(true);
-
-    const normalizedCode = code.trim().toUpperCase().replace(/\s+/g, '');
 
     try {
       const response = await fetch('/api/student/access', {
@@ -110,11 +124,58 @@ export default function StudentAccessClient() {
 
       setCode(normalizedCode);
       setStudent(payload);
+      return true;
     } catch {
       setStudent(null);
       setError('We could not open that student page. Please try again.');
+      return false;
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsLoading(true);
+
+    const normalizedCode = code.trim().toUpperCase().replace(/\s+/g, '');
+
+    try {
+      await loadStudent(normalizedCode);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function bookClass(classId: string) {
+    const normalizedCode = code.trim().toUpperCase().replace(/\s+/g, '');
+    setBookingClassId(classId);
+    setError('');
+
+    try {
+      const response = await fetch('/api/student/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student_access_code: normalizedCode,
+          class_id: classId,
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        setError(payload.error ?? 'We could not book that Live Class.');
+        return;
+      }
+
+      await loadStudent(normalizedCode);
+    } catch {
+      setError('We could not book that Live Class. Please try again.');
+    } finally {
+      setBookingClassId(null);
     }
   }
 
@@ -132,11 +193,11 @@ export default function StudentAccessClient() {
         <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-7">
           <div className="max-w-2xl space-y-2">
             <h1 className="text-3xl font-semibold text-gray-950">
-              Student Access
+              My Student Page
             </h1>
             <p className="text-base leading-7 text-gray-600">
-              Enter your student code to see your live Qur&apos;an classes and
-              progress.
+              Enter your student code to see your Qur&apos;an Journey, Live Classes,
+              revision, and rewards.
             </p>
           </div>
 
@@ -179,11 +240,15 @@ export default function StudentAccessClient() {
                   <h2 className="mt-1 text-2xl font-semibold text-gray-950">
                     {learner.full_name}
                   </h2>
-                  {learner.learning_goals && (
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">
-                      Goal: {learner.learning_goals}
-                    </p>
-                  )}
+                  <div className="mt-3 flex flex-wrap gap-2 text-sm text-gray-700">
+                    <span className="rounded-full bg-emerald-50 px-3 py-1">
+                      Qur&apos;an level: {learner.quran_level ?? 'Not set yet'}
+                    </span>
+                    <span className="rounded-full bg-emerald-50 px-3 py-1">
+                      Preferred language:{' '}
+                      {learner.preferred_language ?? 'Not set yet'}
+                    </span>
+                  </div>
                 </div>
                 <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
                   {badge}
@@ -194,10 +259,10 @@ export default function StudentAccessClient() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-950">
-                      Your Qur&apos;an Journey
+                      My Qur&apos;an Journey
                     </h3>
                     <p className="mt-1 text-sm leading-6 text-emerald-900">
-                      Small steps every week build strong Qur&apos;an reading.
+                      Small steps every week build steady Qur&apos;an learning.
                     </p>
                   </div>
                   <p className="rounded-full bg-white px-3 py-1 text-sm font-medium text-emerald-800">
@@ -258,6 +323,11 @@ export default function StudentAccessClient() {
                   <p className="mt-2 text-sm leading-6 text-gray-700">
                     {nextMilestone}
                   </p>
+                  {learner.learning_goals && (
+                    <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-gray-700">
+                      Learning milestone: {learner.learning_goals}
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -351,13 +421,109 @@ export default function StudentAccessClient() {
                               </p>
                             )}
                             {progress.parent_note && (
-                              <p>Note for parent: {progress.parent_note}</p>
+                              <p>Scholar / Ustass note: {progress.parent_note}</p>
                             )}
                           </div>
                         )}
                       </li>
                     );
                   })}
+                </ul>
+              )}
+            </section>
+
+            <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-950">
+                    Browse Classes for Me
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-gray-600">
+                    Classes that match your language or level are shown first.
+                  </p>
+                </div>
+              </div>
+
+              {student.browseClasses.length === 0 ? (
+                <p className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                  No upcoming Live Classes are available yet.
+                </p>
+              ) : (
+                <ul className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {student.browseClasses.map((classRow) => (
+                    <li
+                      key={classRow.id}
+                      className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-950">
+                            {classRow.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-600">
+                            Scholar / Ustass:{' '}
+                            {classRow.scholar_name ?? 'Approved teacher'}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-600">
+                            {formatDateTime(classRow.start_time)}
+                            {classRow.duration_min
+                              ? ` - ${classRow.duration_min} min`
+                              : ''}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                          {classRow.available_spaces > 0
+                            ? `${classRow.available_spaces} spaces`
+                            : 'Full'}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-700">
+                        {classRow.subject && (
+                          <span className="rounded-full bg-white px-3 py-1">
+                            {classRow.subject}
+                          </span>
+                        )}
+                        {classRow.level && (
+                          <span className="rounded-full bg-white px-3 py-1">
+                            {classRow.level}
+                          </span>
+                        )}
+                        {classRow.language && (
+                          <span className="rounded-full bg-white px-3 py-1">
+                            {classRow.language}
+                          </span>
+                        )}
+                        {classRow.language_match && (
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800">
+                            Language match
+                          </span>
+                        )}
+                        {classRow.level_match && (
+                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800">
+                            Level match
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => bookClass(classRow.id)}
+                        disabled={
+                          classRow.is_booked ||
+                          classRow.available_spaces === 0 ||
+                          bookingClassId === classRow.id
+                        }
+                        className="mt-4 w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+                      >
+                        {classRow.is_booked
+                          ? 'Already booked'
+                          : bookingClassId === classRow.id
+                            ? 'Booking...'
+                            : 'Book this class'}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </section>
@@ -393,13 +559,39 @@ export default function StudentAccessClient() {
                       )}
                       {progress.parent_note && (
                         <p className="mt-1">
-                          Note for parent: {progress.parent_note}
+                          Scholar / Ustass note: {progress.parent_note}
                         </p>
                       )}
                     </li>
                   ))}
                 </ul>
               )}
+            </section>
+
+            <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="text-xl font-semibold text-gray-950">My Rewards</h2>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg bg-emerald-50 p-4">
+                  <p className="text-sm font-medium text-emerald-900">Badge</p>
+                  <p className="mt-1 text-lg font-semibold text-gray-950">
+                    {badge}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-emerald-50 p-4">
+                  <p className="text-sm font-medium text-emerald-900">Points</p>
+                  <p className="mt-1 text-lg font-semibold text-gray-950">
+                    {learner.points ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-emerald-50 p-4">
+                  <p className="text-sm font-medium text-emerald-900">
+                    Lessons completed
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-gray-950">
+                    {lessonsCompleted}
+                  </p>
+                </div>
+              </div>
             </section>
           </>
         )}

@@ -2,14 +2,40 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
+import { appLanguages } from '@/lib/languages';
 
 type ProfileRole = {
   role: { code: string | null } | { code: string | null }[] | null;
+  app_language: string | null;
 };
 
 function getRoleCode(profile: ProfileRole | null) {
   const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
   return role?.code ?? null;
+}
+
+async function updateScholarAppLanguage(formData: FormData) {
+  'use server';
+
+  const sb = createServerComponentClient({ cookies });
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+
+  if (!user) redirect('/login');
+
+  const appLanguage = String(formData.get('app_language') ?? '').trim();
+
+  if (!appLanguages.includes(appLanguage as (typeof appLanguages)[number])) {
+    redirect('/scholar/overview');
+  }
+
+  await sb
+    .from('profiles')
+    .update({ app_language: appLanguage })
+    .eq('id', user.id);
+
+  redirect('/scholar/overview');
 }
 
 export default async function ScholarOverview() {
@@ -22,7 +48,7 @@ export default async function ScholarOverview() {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('role:roles(code)')
+    .select('app_language, role:roles(code)')
     .eq('id', user.id)
     .maybeSingle<ProfileRole>();
 
@@ -103,6 +129,31 @@ export default async function ScholarOverview() {
           </li>
         ))}
       </ul>
+
+      <section className="mt-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-950">
+          Preferred app language
+        </h2>
+        <form
+          action={updateScholarAppLanguage}
+          className="mt-3 flex flex-col gap-3 sm:max-w-md sm:flex-row"
+        >
+          <select
+            name="app_language"
+            defaultValue={profile?.app_language ?? 'English'}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
+          >
+            {appLanguages.map((language) => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
+          </select>
+          <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+            Save preference
+          </button>
+        </form>
+      </section>
     </main>
   );
 }

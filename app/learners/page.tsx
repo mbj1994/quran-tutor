@@ -7,6 +7,7 @@ import {
   getMilestoneProgress,
   getNextMilestone,
 } from '@/lib/gamification';
+import CopyCodeButton from './CopyCodeButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -144,9 +145,12 @@ export default async function LearnersPage() {
 
             <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-950">
               <p className="font-medium">Student access code</p>
-              <p className="mt-2 font-mono text-xl font-semibold tracking-wide">
-                {learner.student_access_code ?? 'Code pending'}
-              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <p className="font-mono text-xl font-semibold tracking-wide">
+                  {learner.student_access_code ?? 'Code pending'}
+                </p>
+                <CopyCodeButton code={learner.student_access_code} />
+              </div>
               <p className="mt-2 leading-6 text-emerald-900">
                 Use this code on the student page so your child can view only
                 their own Live Classes and progress.

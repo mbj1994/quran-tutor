@@ -2,10 +2,10 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { appLanguages } from '@/lib/languages';
 
 export const dynamic = 'force-dynamic';
 
-const languages = ['English', 'Wolof', 'Mandinka', 'Fula', 'Arabic'] as const;
 const quranLevels = [
   'Beginner Arabic letters',
   'Qaida / Noorani Qaida',
@@ -126,14 +126,14 @@ export default async function NewLearnerPage({
 
         <label className="block">
           <span className="mb-1 block text-sm font-medium">
-            Preferred language
+            Preferred learning language
           </span>
           <select
             name="preferred_language"
             className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
           >
             <option value="">No preference</option>
-            {languages.map((language) => (
+            {appLanguages.map((language) => (
               <option key={language} value={language}>
                 {language}
               </option>
