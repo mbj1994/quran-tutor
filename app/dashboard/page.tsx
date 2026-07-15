@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import {
+  displayBadge,
+  getMilestoneProgress,
+  getNextMilestone,
+} from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,14 +75,6 @@ function formatDateTime(value: string) {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
-}
-
-function badgeForLessons(lessonsCompleted: number, savedBadge?: string | null) {
-  if (savedBadge) return savedBadge;
-  if (lessonsCompleted >= 10) return 'Rising Reciter';
-  if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return 'Qur’an Starter';
-  return 'New Learner';
 }
 
 export default async function DashboardPage() {
@@ -305,9 +302,16 @@ export default async function DashboardPage() {
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {learners.map((learner) => {
               const lessonsCompleted = learner.lessons_completed ?? 0;
+              const badge = displayBadge(learner.current_badge, lessonsCompleted);
+              const nextMilestone = getNextMilestone(lessonsCompleted);
+              const milestoneProgress = getMilestoneProgress(lessonsCompleted);
               const latestProgress = latestProgressByLearner.get(learner.id);
               const latestNote =
-                latestProgress?.parent_note ?? latestProgress?.notes ?? null;
+                latestProgress?.revision ??
+                latestProgress?.homework ??
+                latestProgress?.parent_note ??
+                latestProgress?.notes ??
+                null;
 
               return (
                 <li
@@ -327,6 +331,52 @@ export default async function DashboardPage() {
                       {learner.preferred_language ?? 'Language not set'}
                     </span>
                   </div>
+                  <div className="mt-3 rounded-lg border border-emerald-100 bg-white p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-gray-950">
+                        Learning progress
+                      </p>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        {badge}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Lessons
+                        </p>
+                        <p className="font-medium text-gray-900">
+                          {lessonsCompleted}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-gray-500">
+                          Points
+                        </p>
+                        <p className="font-medium text-gray-900">
+                          {learner.points ?? 0}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <div className="flex justify-between gap-3 text-xs text-gray-600">
+                        <span>Next milestone</span>
+                        <span>
+                          {lessonsCompleted}/{milestoneProgress.target}
+                        </span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className="h-full rounded-full bg-emerald-500"
+                          style={{ width: `${milestoneProgress.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-gray-700">
+                        {nextMilestone}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <p className="text-xs uppercase text-gray-500">
@@ -336,24 +386,7 @@ export default async function DashboardPage() {
                         {learner.quran_level ?? 'Not set yet'}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500">
-                        Lessons Completed
-                      </p>
-                      <p className="font-medium text-gray-900">
-                        {lessonsCompleted}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-500">My Points</p>
-                      <p className="font-medium text-gray-900">
-                        {learner.points ?? 0}
-                      </p>
-                    </div>
                   </div>
-                  <p className="mt-2 inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                    My Badge: {badgeForLessons(lessonsCompleted, learner.current_badge)}
-                  </p>
                   {learner.student_access_code && (
                     <p className="mt-2 text-sm text-gray-700">
                       <span className="font-medium text-gray-900">
@@ -366,7 +399,7 @@ export default async function DashboardPage() {
                   )}
                   {latestNote && (
                     <p className="mt-3 text-sm text-gray-700">
-                      <span className="font-medium text-gray-900">What to Revise:</span>{' '}
+                      <span className="font-medium text-gray-900">Revision focus:</span>{' '}
                       {latestNote}
                     </p>
                   )}

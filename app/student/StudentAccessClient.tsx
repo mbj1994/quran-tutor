@@ -1,6 +1,11 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
+import {
+  displayBadge,
+  getMilestoneProgress,
+  getNextMilestone,
+} from '@/lib/gamification';
 
 type Learner = {
   id: string;
@@ -59,14 +64,6 @@ function formatDateTime(value: string) {
   });
 }
 
-function badgeForLessons(lessonsCompleted: number, savedBadge?: string | null) {
-  if (savedBadge) return savedBadge;
-  if (lessonsCompleted >= 10) return 'Rising Reciter';
-  if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return 'Qur’an Starter';
-  return 'New Learner';
-}
-
 export default function StudentAccessClient() {
   const [code, setCode] = useState('');
   const [student, setStudent] = useState<StudentPayload | null>(null);
@@ -123,6 +120,11 @@ export default function StudentAccessClient() {
 
   const learner = student?.learner;
   const lessonsCompleted = learner?.lessons_completed ?? 0;
+  const badge = learner
+    ? displayBadge(learner.current_badge, lessonsCompleted)
+    : 'New Learner';
+  const nextMilestone = getNextMilestone(lessonsCompleted);
+  const milestoneProgress = getMilestoneProgress(lessonsCompleted);
 
   return (
     <main className="min-h-[calc(100vh-73px)] bg-emerald-50 px-4 py-8 sm:px-6">
@@ -168,7 +170,7 @@ export default function StudentAccessClient() {
 
         {learner && (
           <>
-            <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-sm font-medium text-emerald-700">
@@ -183,28 +185,78 @@ export default function StudentAccessClient() {
                     </p>
                   )}
                 </div>
-                <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                  My Badge: {badgeForLessons(lessonsCompleted, learner.current_badge)}
+                <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
+                  {badge}
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">My Qur&apos;an Level</p>
-                  <p className="mt-2 font-semibold text-gray-950">
-                    {learner.quran_level ?? 'Not set yet'}
+              <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-950">
+                      Your Qur&apos;an Journey
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-emerald-900">
+                      Small steps every week build strong Qur&apos;an reading.
+                    </p>
+                  </div>
+                  <p className="rounded-full bg-white px-3 py-1 text-sm font-medium text-emerald-800">
+                    {milestoneProgress.remaining === 0
+                      ? 'Milestone reached'
+                      : `${milestoneProgress.remaining} lesson${
+                          milestoneProgress.remaining === 1 ? '' : 's'
+                        } to go`}
                   </p>
                 </div>
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Lessons Completed</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-950">
-                    {lessonsCompleted}
-                  </p>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xs font-medium uppercase text-gray-500">
+                      My Qur&apos;an Level
+                    </p>
+                    <p className="mt-1 font-semibold text-gray-950">
+                      {learner.quran_level ?? 'Not set yet'}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xs font-medium uppercase text-gray-500">
+                      My Badge
+                    </p>
+                    <p className="mt-1 font-semibold text-gray-950">{badge}</p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xs font-medium uppercase text-gray-500">
+                      My Points
+                    </p>
+                    <p className="mt-1 text-xl font-semibold text-gray-950">
+                      {learner.points ?? 0}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white p-3">
+                    <p className="text-xs font-medium uppercase text-gray-500">
+                      Lessons Completed
+                    </p>
+                    <p className="mt-1 text-xl font-semibold text-gray-950">
+                      {lessonsCompleted}
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">My Points</p>
-                  <p className="mt-2 text-2xl font-semibold text-gray-950">
-                    {learner.points ?? 0}
+
+                <div className="mt-4">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <p className="font-medium text-gray-950">Next Milestone</p>
+                    <p className="text-gray-600">
+                      {lessonsCompleted}/{milestoneProgress.target} lessons
+                    </p>
+                  </div>
+                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-white">
+                    <div
+                      className="h-full rounded-full bg-emerald-500"
+                      style={{ width: `${milestoneProgress.percent}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-gray-700">
+                    {nextMilestone}
                   </p>
                 </div>
               </div>

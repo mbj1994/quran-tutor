@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { deriveBadgeFromLessons } from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,13 +62,6 @@ function formatDateTime(value: string) {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
-}
-
-function badgeForLessons(lessonsCompleted: number) {
-  if (lessonsCompleted >= 10) return 'Rising Reciter';
-  if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return "Qur'an Starter";
-  return 'New Learner';
 }
 
 async function saveRosterProgress(formData: FormData) {
@@ -167,7 +161,7 @@ async function saveRosterProgress(formData: FormData) {
       .update({
         lessons_completed: lessonsCompleted,
         points,
-        current_badge: badgeForLessons(lessonsCompleted),
+        current_badge: deriveBadgeFromLessons(lessonsCompleted),
       })
       .eq('id', learnerProfileId);
 

@@ -2,6 +2,11 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import {
+  displayBadge,
+  getMilestoneProgress,
+  getNextMilestone,
+} from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,7 +83,13 @@ export default async function LearnersPage() {
       )}
 
       <ul className="grid gap-4 sm:grid-cols-2">
-        {learners.map((learner) => (
+        {learners.map((learner) => {
+          const lessonsCompleted = learner.lessons_completed ?? 0;
+          const badge = displayBadge(learner.current_badge, lessonsCompleted);
+          const nextMilestone = getNextMilestone(lessonsCompleted);
+          const milestoneProgress = getMilestoneProgress(lessonsCompleted);
+
+          return (
           <li
             key={learner.id}
             className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
@@ -105,14 +116,29 @@ export default async function LearnersPage() {
               <p className="font-medium text-gray-950">Progress summary</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className="rounded-full bg-white px-3 py-1">
-                  Lessons: {learner.lessons_completed ?? 0}
+                  Lessons: {lessonsCompleted}
                 </span>
                 <span className="rounded-full bg-white px-3 py-1">
                   Points: {learner.points ?? 0}
                 </span>
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                  {learner.current_badge ?? 'New Learner'}
+                  {badge}
                 </span>
+              </div>
+              <div className="mt-3">
+                <div className="flex justify-between gap-3 text-xs text-gray-600">
+                  <span>Next milestone</span>
+                  <span>
+                    {lessonsCompleted}/{milestoneProgress.target}
+                  </span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white">
+                  <div
+                    className="h-full rounded-full bg-emerald-500"
+                    style={{ width: `${milestoneProgress.percent}%` }}
+                  />
+                </div>
+                <p className="mt-2 leading-6 text-gray-700">{nextMilestone}</p>
               </div>
             </div>
 
@@ -133,7 +159,8 @@ export default async function LearnersPage() {
               </Link>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </main>
   );

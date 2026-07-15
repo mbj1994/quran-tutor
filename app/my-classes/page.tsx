@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { displayBadge } from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
 
@@ -212,6 +213,14 @@ export default async function MyClasses() {
                   `${bookedClass.id}:${enrolment.learner_profile_id}`
                 )
               : undefined;
+          const lessonsCompleted = learner?.lessons_completed ?? 0;
+          const badge = learner
+            ? displayBadge(learner.current_badge, lessonsCompleted)
+            : 'New Learner';
+          const revisionFocus =
+            progress?.revision ?? progress?.homework ?? 'Revision notes will appear after a lesson update.';
+          const latestNote =
+            progress?.parent_note ?? progress?.covered ?? progress?.notes ?? null;
 
           return (
             <li
@@ -252,19 +261,40 @@ export default async function MyClasses() {
                 </div>
               )}
               {learner && (
-                <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
+                <div className="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-sm font-semibold text-gray-950">
+                    Learning progress
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
                   <span className="rounded-full bg-gray-100 px-3 py-1">
                     My Qur&apos;an Level: {learner.quran_level ?? 'Not set yet'}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
-                    Lessons Completed: {learner.lessons_completed ?? 0}
+                    Lessons Completed: {lessonsCompleted}
                   </span>
                   <span className="rounded-full bg-gray-100 px-3 py-1">
                     My Points: {learner.points ?? 0}
                   </span>
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                    My Badge: {learner.current_badge ?? 'New Learner'}
+                  <span className="rounded-full bg-white px-3 py-1 font-medium text-emerald-700">
+                    Badge: {badge}
                   </span>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-sm text-gray-700 sm:grid-cols-2">
+                    <p>
+                      <span className="font-medium text-gray-900">
+                        What to revise:
+                      </span>{' '}
+                      {revisionFocus}
+                    </p>
+                    {latestNote && (
+                      <p>
+                        <span className="font-medium text-gray-900">
+                          Latest note:
+                        </span>{' '}
+                        {latestNote}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
               {enrolment.status && (
@@ -291,15 +321,6 @@ export default async function MyClasses() {
               {progress && (
                 <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                   <div>Attendance: {progress.attendance_status}</div>
-                  {(progress.covered ?? progress.notes) && (
-                    <div>What was covered: {progress.covered ?? progress.notes}</div>
-                  )}
-                  {(progress.revision ?? progress.homework) && (
-                    <div>What to Revise: {progress.revision ?? progress.homework}</div>
-                  )}
-                  {progress.parent_note && (
-                    <div>Parent note: {progress.parent_note}</div>
-                  )}
                 </div>
               )}
             </li>

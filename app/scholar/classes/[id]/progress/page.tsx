@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { badgeOptions, deriveBadgeFromLessons } from '@/lib/gamification';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,13 +51,6 @@ type LessonProgress = {
 };
 
 const attendanceOptions = ['present', 'absent', 'late'] as const;
-const badgeOptions = [
-  'New Learner',
-  "Qur'an Starter",
-  'Consistent Learner',
-  'Rising Reciter',
-] as const;
-
 function firstOrNull<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
@@ -66,13 +60,6 @@ function formatDateTime(value: string) {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
-}
-
-function badgeForLessons(lessonsCompleted: number) {
-  if (lessonsCompleted >= 10) return 'Rising Reciter';
-  if (lessonsCompleted >= 5) return 'Consistent Learner';
-  if (lessonsCompleted >= 1) return "Qur'an Starter";
-  return 'New Learner';
 }
 
 async function saveProgress(formData: FormData) {
@@ -133,7 +120,7 @@ async function saveProgress(formData: FormData) {
 
   const currentBadge =
     submittedBadge ||
-    badgeForLessons(Number.isFinite(lessonsCompleted) ? lessonsCompleted : 0);
+    deriveBadgeFromLessons(Number.isFinite(lessonsCompleted) ? lessonsCompleted : 0);
 
   const { error: learnerError } = await sb
     .from('learners')
@@ -275,6 +262,9 @@ export default async function ScholarClassProgressPage({
             Record Qur&apos;an level, lessons completed, points, badges, and
             progress notes.
           </p>
+          <p className="mt-1 text-sm leading-6 text-emerald-700">
+            Use points and badges to encourage consistency, not competition.
+          </p>
           <p className="mt-1 text-sm text-gray-500">
             {classRow.title} -{' '}
             {formatDateTime(classRow.start_time)} - {classRow.duration_min} min
@@ -308,6 +298,9 @@ export default async function ScholarClassProgressPage({
           {enrolments.map((enrolment) => {
             const learner = firstOrNull(enrolment.learner);
             const learnerProfileId = enrolment.learner_profile_id ?? learner?.id;
+            const lessonsCompleted = learner?.lessons_completed ?? 0;
+            const suggestedBadge = deriveBadgeFromLessons(lessonsCompleted);
+            const displayedBadge = learner?.current_badge ?? suggestedBadge;
             const progress = learnerProfileId
               ? progressByLearner.get(learnerProfileId)
               : undefined;
@@ -332,10 +325,13 @@ export default async function ScholarClassProgressPage({
                       </p>
                       <p>Points: {learner?.points ?? 0}</p>
                       <p>
-                        Badge:{' '}
-                        {learner?.current_badge ??
-                          badgeForLessons(learner?.lessons_completed ?? 0)}
+                        Badge: {displayedBadge}
                       </p>
+                      {!learner?.current_badge && (
+                        <p className="text-emerald-700">
+                          Suggested badge from lessons completed: {suggestedBadge}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -383,10 +379,7 @@ export default async function ScholarClassProgressPage({
                         </span>
                         <select
                           name="current_badge"
-                          defaultValue={
-                            learner?.current_badge ??
-                            badgeForLessons(learner?.lessons_completed ?? 0)
-                          }
+                          defaultValue={displayedBadge}
                           className="w-full rounded-lg border border-gray-300 p-2"
                         >
                           {badgeOptions.map((badge) => (
@@ -395,6 +388,11 @@ export default async function ScholarClassProgressPage({
                             </option>
                           ))}
                         </select>
+                        {!learner?.current_badge && (
+                          <span className="mt-1 block text-xs text-emerald-700">
+                            Suggested from lessons completed: {suggestedBadge}
+                          </span>
+                        )}
                       </label>
 
                       <label className="block">
