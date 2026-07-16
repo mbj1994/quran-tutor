@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
+import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
+import { isApprovedScholar } from '@/lib/scholarApproval';
 
 const subjects = [
   'Arabic letters',
@@ -26,14 +29,9 @@ const levels = [
 
 const languages = ['English', 'Mandinka', 'Wolof', 'Fula', 'Arabic'] as const;
 
-type ProfileRole = {
-  role: { code: string | null } | { code: string | null }[] | null;
+type ProfileRole = BaseProfileRole & {
+  scholar_status: string | null;
 };
-
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
-}
 
 function looksLikeUrl(value: string) {
   if (!value) return true;
@@ -61,9 +59,9 @@ export default function NewClassPage() {
   const [capacity, setCapacity] = useState(20);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const [roleStatus, setRoleStatus] = useState<'checking' | 'authorized'>(
-    'checking'
-  );
+  const [roleStatus, setRoleStatus] = useState<
+    'checking' | 'authorized' | 'pending' | 'suspended'
+  >('checking');
 
   useEffect(() => {
     let active = true;
@@ -82,7 +80,7 @@ export default function NewClassPage() {
 
       const { data: profile } = await sb
         .from('profiles')
-        .select('role:roles(code)')
+        .select('scholar_status, role:roles(code)')
         .eq('id', user.id)
         .maybeSingle<ProfileRole>();
 
@@ -90,6 +88,11 @@ export default function NewClassPage() {
 
       if (getRoleCode(profile) !== 'scholar') {
         router.replace('/dashboard');
+        return;
+      }
+
+      if (!isApprovedScholar(profile)) {
+        setRoleStatus(profile?.scholar_status === 'suspended' ? 'suspended' : 'pending');
         return;
       }
 
@@ -126,6 +129,18 @@ export default function NewClassPage() {
       return;
     }
 
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('scholar_status, role:roles(code)')
+      .eq('id', user.id)
+      .maybeSingle<ProfileRole>();
+
+    if (!isApprovedScholar(profile)) {
+      setRoleStatus(profile?.scholar_status === 'suspended' ? 'suspended' : 'pending');
+      setLoading(false);
+      return;
+    }
+
     const { error } = await sb.from('classes').insert({
       scholar_id: user.id,
       title,
@@ -153,6 +168,10 @@ export default function NewClassPage() {
         </section>
       </main>
     );
+  }
+
+  if (roleStatus === 'pending' || roleStatus === 'suspended') {
+    return <ScholarStatusCard status={roleStatus} />;
   }
 
   return (

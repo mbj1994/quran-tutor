@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const allowedRoles = ['parent', 'scholar', 'learner'] as const;
+const allowedRoles = ['parent', 'scholar', 'learner', 'admin'] as const;
 
 type RoleCode = (typeof allowedRoles)[number];
 
 type SetRoleRequest = {
   email?: string;
   role?: string;
+  scholar_status?: string;
 };
 
 function json(status: number, body: { ok: boolean; error?: string }) {
@@ -49,7 +50,10 @@ export async function POST(request: Request) {
   }
 
   if (!isRoleCode(roleCode)) {
-    return json(400, { ok: false, error: 'Role must be parent, scholar, or learner.' });
+    return json(400, {
+      ok: false,
+      error: 'Role must be parent, scholar, learner, or admin.',
+    });
   }
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -109,7 +113,14 @@ export async function POST(request: Request) {
 
   const { error: profileError } = await supabase
     .from('profiles')
-    .upsert({ id: userId, role_id: role.id }, { onConflict: 'id' });
+    .upsert(
+      {
+        id: userId,
+        role_id: role.id,
+        scholar_status: roleCode === 'scholar' ? 'approved' : null,
+      },
+      { onConflict: 'id' }
+    );
 
   if (profileError) {
     return json(500, { ok: false, error: profileError.message });

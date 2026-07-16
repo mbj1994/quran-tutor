@@ -3,14 +3,11 @@ import { cookies } from 'next/headers';
 import { unstable_noStore as noStore } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import LogoutButton from './LogoutButton';
+import { getRoleCode, type ProfileRole } from '@/lib/roles';
 
 type NavLink = {
   href: string;
   label: string;
-};
-
-type ProfileRole = {
-  role: { code: string | null } | { code: string | null }[] | null;
 };
 
 const publicLinks: NavLink[] = [
@@ -33,10 +30,10 @@ const scholarLinks: NavLink[] = [
   { href: '/scholar/classes', label: 'Teaching Classes' },
 ];
 
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
-}
+const adminLinks: NavLink[] = [
+  { href: '/admin', label: 'Admin' },
+  { href: '/admin/scholars', label: 'Scholar Approvals' },
+];
 
 export default async function SiteNav() {
   noStore();
@@ -59,7 +56,13 @@ export default async function SiteNav() {
       .eq('id', user.id)
       .maybeSingle<ProfileRole>();
 
-    if (getRoleCode(profile) === 'scholar') {
+    const roleCode = getRoleCode(profile);
+
+    if (roleCode === 'admin') {
+      links = adminLinks;
+    }
+
+    if (roleCode === 'scholar') {
       links = scholarLinks;
     }
   }

@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-
-type ProfileRole = {
-  role: { code: string | null } | { code: string | null }[] | null;
-};
+import { getRoleCode, type ProfileRole } from '@/lib/roles';
 
 const ALLOWED_NEXT_PATHS = new Set([
   '/dashboard',
@@ -22,11 +19,6 @@ function getSafeNext(value: string | null) {
   }
 
   return ALLOWED_NEXT_PATHS.has(value) ? value : null;
-}
-
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
 }
 
 function getAuthErrorMessage(errorCode: string | null) {
@@ -77,7 +69,13 @@ export async function GET(request: Request) {
     .eq('id', user.id)
     .maybeSingle<ProfileRole>();
 
-  const redirectTo = getRoleCode(profile) === 'scholar' ? '/scholar/overview' : next ?? '/dashboard';
+  const roleCode = getRoleCode(profile);
+  const redirectTo =
+    roleCode === 'scholar'
+      ? '/scholar/overview'
+      : roleCode === 'admin'
+        ? '/admin'
+        : next ?? '/dashboard';
 
   return NextResponse.redirect(`${origin}${redirectTo}`);
 }

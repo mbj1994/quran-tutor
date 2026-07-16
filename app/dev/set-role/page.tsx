@@ -72,6 +72,7 @@ export default function DevSetRolePage() {
             <option value="parent">parent</option>
             <option value="scholar">scholar</option>
             <option value="learner">learner</option>
+            <option value="admin">admin</option>
           </select>
           <button
             type="submit"

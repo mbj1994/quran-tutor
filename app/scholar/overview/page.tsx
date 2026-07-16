@@ -3,16 +3,15 @@ import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 import { appLanguages } from '@/lib/languages';
+import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { getRoleCode } from '@/lib/roles';
+import { isApprovedScholar } from '@/lib/scholarApproval';
 
 type ProfileRole = {
   role: { code: string | null } | { code: string | null }[] | null;
   app_language: string | null;
+  scholar_status: string | null;
 };
-
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
-}
 
 async function updateScholarAppLanguage(formData: FormData) {
   'use server';
@@ -23,6 +22,14 @@ async function updateScholarAppLanguage(formData: FormData) {
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('scholar_status, role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  if (!isApprovedScholar(profile)) redirect('/scholar/overview');
 
   const appLanguage = String(formData.get('app_language') ?? '').trim();
 
@@ -48,11 +55,14 @@ export default async function ScholarOverview() {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('app_language, role:roles(code)')
+    .select('app_language, scholar_status, role:roles(code)')
     .eq('id', user.id)
     .maybeSingle<ProfileRole>();
 
   if (getRoleCode(profile) !== 'scholar') redirect('/dashboard');
+  if (!isApprovedScholar(profile)) {
+    return <ScholarStatusCard status={profile?.scholar_status} />;
+  }
 
   const { data: classes } = await sb
     .from('classes')

@@ -3,6 +3,9 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
+import { isApprovedScholar } from '@/lib/scholarApproval';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +54,10 @@ type ClassRow = {
   meeting_url: string | null;
 };
 
+type ProfileRole = BaseProfileRole & {
+  scholar_status: string | null;
+};
+
 function looksLikeUrl(value: string) {
   if (!value) return true;
 
@@ -81,6 +88,14 @@ async function updateClass(formData: FormData) {
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('scholar_status, role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  if (!isApprovedScholar(profile)) redirect('/scholar/classes');
 
   const classId = String(formData.get('class_id') ?? '');
   const title = String(formData.get('title') ?? '').trim();
@@ -178,6 +193,17 @@ export default async function EditClassPage({
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('scholar_status, role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  if (getRoleCode(profile) !== 'scholar') redirect('/dashboard');
+  if (!isApprovedScholar(profile)) {
+    return <ScholarStatusCard status={profile?.scholar_status} />;
+  }
 
   const { data: classRow, error: classError } = await sb
     .from('classes')

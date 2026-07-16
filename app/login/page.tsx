@@ -4,23 +4,15 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabaseBrowser } from '@/lib/supabaseClient';
+import { getRoleCode, type ProfileRole } from '@/lib/roles';
 
 type AccountMode = 'sign-in' | 'create';
 type SignupRole = 'parent' | 'scholar';
 type LoadingAction = 'sign-in' | 'sign-up' | 'reset' | null;
 
-type ProfileRole = {
-  role: { code: string | null } | { code: string | null }[] | null;
-};
-
 type RoleId = {
   id: string;
 };
-
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
-}
 
 function getAuthMessage(code: string | null) {
   switch (code) {
@@ -110,7 +102,14 @@ function LoginForm() {
 
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, role_id: role.id }, { onConflict: 'id' });
+      .upsert(
+        {
+          id: user.id,
+          role_id: role.id,
+          scholar_status: roleCode === 'scholar' ? 'pending' : null,
+        },
+        { onConflict: 'id' }
+      );
 
     return !error;
   }
@@ -184,6 +183,14 @@ function LoginForm() {
     if (data.session) {
       await setCurrentUserRole(signupRole);
       setLoading(null);
+      if (signupRole === 'scholar') {
+        setMode('sign-in');
+        setPassword('');
+        setMessage(
+          'Scholar account created. Your account will be reviewed by the platform team before you can teach.'
+        );
+        return;
+      }
       await redirectAfterLogin();
       return;
     }
@@ -193,7 +200,7 @@ function LoginForm() {
     setPassword('');
     setMessage(
       signupRole === 'scholar'
-        ? 'Scholar account created. Please confirm your email. Scholar access is reviewed by the platform team before teaching.'
+        ? 'Scholar account created. Your account will be reviewed by the platform team before you can teach.'
         : 'Account created. Please check your email to confirm your account, then sign in.'
     );
   }

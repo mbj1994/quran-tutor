@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
+import { isApprovedScholar } from '@/lib/scholarApproval';
 
 export const dynamic = 'force-dynamic';
 
-type ProfileRole = {
-  role: { code: string | null } | { code: string | null }[] | null;
+type ProfileRole = BaseProfileRole & {
+  scholar_status: string | null;
 };
 
 type ClassRow = {
@@ -22,11 +25,6 @@ type ClassRow = {
   meeting_url: string | null;
   enrolments: { count: number }[];
 };
-
-function getRoleCode(profile: ProfileRole | null) {
-  const role = Array.isArray(profile?.role) ? profile.role[0] : profile?.role;
-  return role?.code ?? null;
-}
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString('en-US', {
@@ -46,11 +44,14 @@ export default async function ScholarClasses() {
 
   const { data: profile } = await sb
     .from('profiles')
-    .select('role:roles(code)')
+    .select('scholar_status, role:roles(code)')
     .eq('id', user.id)
     .maybeSingle<ProfileRole>();
 
   if (getRoleCode(profile) !== 'scholar') redirect('/dashboard');
+  if (!isApprovedScholar(profile)) {
+    return <ScholarStatusCard status={profile?.scholar_status} />;
+  }
 
   const { data: classes, error } = await sb
     .from('classes')

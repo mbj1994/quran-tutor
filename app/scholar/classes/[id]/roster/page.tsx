@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { deriveBadgeFromLessons } from '@/lib/gamification';
+import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
+import { isApprovedScholar } from '@/lib/scholarApproval';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +54,10 @@ type LessonProgress = {
   homework: string | null;
 };
 
+type ProfileRole = BaseProfileRole & {
+  scholar_status: string | null;
+};
+
 const attendanceOptions = ['present', 'absent', 'late'] as const;
 
 function firstOrNull<T>(value: T | T[] | null) {
@@ -74,6 +81,14 @@ async function saveRosterProgress(formData: FormData) {
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('scholar_status, role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  if (!isApprovedScholar(profile)) redirect('/scholar/classes');
 
   const classId = String(formData.get('class_id') ?? '');
   const learnerProfileId = String(formData.get('learner_profile_id') ?? '');
@@ -192,6 +207,17 @@ export default async function ScholarClassRosterPage({
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { data: profile } = await sb
+    .from('profiles')
+    .select('scholar_status, role:roles(code)')
+    .eq('id', user.id)
+    .maybeSingle<ProfileRole>();
+
+  if (getRoleCode(profile) !== 'scholar') redirect('/dashboard');
+  if (!isApprovedScholar(profile)) {
+    return <ScholarStatusCard status={profile?.scholar_status} />;
+  }
 
   const { data: classRow, error: classError } = await sb
     .from('classes')
