@@ -279,34 +279,34 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <section className="grid gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:flex sm:flex-wrap">
         <Link
           href="/learners/new"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
         >
           Add a child
         </Link>
         <Link
           href="/classes"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           Browse Classes
         </Link>
         <Link
           href="/my-classes"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           View My Live Classes
         </Link>
         <Link
           href="/subscription"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           Manage billing
         </Link>
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-semibold text-gray-950">Billing</h2>
         <p className="mt-2 text-gray-700">
           Subscription: {hasActiveSubscription ? 'Active' : 'Not active'}
@@ -326,7 +326,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-semibold text-gray-950">
           Preferred app language
         </h2>
@@ -348,7 +348,7 @@ export default async function DashboardPage() {
         </form>
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">Children</h2>
           <div className="flex gap-2">

@@ -78,7 +78,7 @@ export default async function ScholarClasses() {
         </div>
         <Link
           href="/scholar/classes/new"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
         >
           Create a class
         </Link>
@@ -106,7 +106,7 @@ export default async function ScholarClasses() {
         {teachingClasses.map((classRow) => (
           <li
             key={classRow.id}
-            className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+            className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -159,22 +159,22 @@ export default async function ScholarClasses() {
               </span>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               <Link
                 href={`/scholar/classes/${classRow.id}/edit`}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Edit
               </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/roster`}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Roster
               </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/progress`}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="col-span-2 flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:col-span-1"
               >
                 Progress
               </Link>

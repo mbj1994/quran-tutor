@@ -233,10 +233,10 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-emerald-50 px-4 py-10">
+    <main className="flex min-h-[calc(100vh-73px)] items-center justify-center overflow-hidden bg-emerald-50 px-4 py-6 sm:px-6 sm:py-10">
       <section className="w-full max-w-4xl overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
         <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="bg-gray-50 p-6 sm:p-8">
+          <div className="bg-gray-50 p-5 sm:p-8">
             <p className="text-sm font-medium text-emerald-700">Quran Tutor</p>
             <h1 className="mt-3 text-3xl font-semibold text-gray-950">Welcome back</h1>
             <p className="mt-3 max-w-md text-sm leading-6 text-gray-600">
@@ -259,7 +259,7 @@ function LoginForm() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-8">
+          <div className="p-5 sm:p-8">
             <div className="mx-auto max-w-sm">
               <div className="grid grid-cols-2 rounded-lg bg-gray-100 p-1">
                 <button
@@ -268,7 +268,7 @@ function LoginForm() {
                     setMode('sign-in');
                     setMessage(getAuthMessage(authMessage));
                   }}
-                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                  className={`min-h-11 rounded-md px-3 py-2 text-sm font-medium ${
                     mode === 'sign-in'
                       ? 'bg-white text-gray-950 shadow-sm'
                       : 'text-gray-600 hover:text-gray-950'
@@ -282,7 +282,7 @@ function LoginForm() {
                     setMode('create');
                     setMessage(null);
                   }}
-                  className={`rounded-md px-3 py-2 text-sm font-medium ${
+                  className={`min-h-11 rounded-md px-3 py-2 text-sm font-medium ${
                     mode === 'create'
                       ? 'bg-white text-gray-950 shadow-sm'
                       : 'text-gray-600 hover:text-gray-950'
@@ -309,7 +309,7 @@ function LoginForm() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       disabled={loading !== null}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
                   <label className="block">
@@ -321,14 +321,14 @@ function LoginForm() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={loading !== null}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
 
                   <button
                     type="submit"
                     disabled={loading !== null}
-                    className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {loading === 'sign-in' ? 'Signing in...' : 'Sign in'}
                   </button>
@@ -337,7 +337,7 @@ function LoginForm() {
                     type="button"
                     onClick={handleResetPassword}
                     disabled={loading !== null}
-                    className="w-full rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
                   >
                     {loading === 'reset' ? 'Sending...' : 'Forgot password'}
                   </button>
@@ -357,7 +357,7 @@ function LoginForm() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       disabled={loading !== null}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
                   <label className="block">
@@ -369,7 +369,7 @@ function LoginForm() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={loading !== null}
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
 
@@ -414,7 +414,7 @@ function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading !== null}
-                    className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {loading === 'sign-up' ? 'Creating...' : 'Create account'}
                   </button>

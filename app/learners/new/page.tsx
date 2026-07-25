@@ -99,7 +99,7 @@ export default async function NewLearnerPage({
 
       <form
         action={createLearner}
-        className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+        className="space-y-5 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6"
       >
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-gray-900">
@@ -108,7 +108,7 @@ export default async function NewLearnerPage({
           <input
             required
             name="full_name"
-            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
             placeholder="Child name"
           />
         </label>
@@ -119,7 +119,7 @@ export default async function NewLearnerPage({
             name="age"
             type="number"
             min={0}
-            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
             placeholder="Optional"
           />
         </label>
@@ -130,7 +130,7 @@ export default async function NewLearnerPage({
           </span>
           <select
             name="preferred_language"
-            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
           >
             <option value="">No preference</option>
             {appLanguages.map((language) => (
@@ -147,7 +147,7 @@ export default async function NewLearnerPage({
           </span>
           <select
             name="quran_level"
-            className="w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
           >
             <option value="">Not sure yet</option>
             {quranLevels.map((level) => (
@@ -167,7 +167,7 @@ export default async function NewLearnerPage({
           </span>
           <textarea
             name="learning_goals"
-            className="min-h-24 w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-28 w-full rounded-lg border border-gray-300 p-3 text-gray-950"
             placeholder="What should the child work towards?"
           />
         </label>
@@ -176,12 +176,12 @@ export default async function NewLearnerPage({
           <span className="mb-1 block text-sm font-medium">Notes</span>
           <textarea
             name="notes"
-            className="min-h-28 w-full rounded-lg border border-gray-300 p-2 text-gray-950"
+            className="min-h-32 w-full rounded-lg border border-gray-300 p-3 text-gray-950"
             placeholder="Anything the scholar should know?"
           />
         </label>
 
-        <button className="w-full rounded bg-emerald-600 py-2 text-white hover:bg-emerald-700">
+        <button className="min-h-12 w-full rounded-lg bg-emerald-600 py-2 text-white hover:bg-emerald-700">
           Save child
         </button>
 

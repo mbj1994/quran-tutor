@@ -110,16 +110,16 @@ export default async function ScholarOverview() {
             progress.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid gap-2 sm:flex sm:flex-wrap">
           <Link
             href="/scholar/classes"
-            className="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            className="flex min-h-11 items-center justify-center rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
           >
             View teaching classes
           </Link>
           <Link
             href="/scholar/classes/new"
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Create a class
           </Link>
@@ -151,7 +151,7 @@ export default async function ScholarOverview() {
           <select
             name="app_language"
             defaultValue={profile?.app_language ?? 'English'}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
+            className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
           >
             {appLanguages.map((language) => (
               <option key={language} value={language}>
@@ -159,7 +159,7 @@ export default async function ScholarOverview() {
               </option>
             ))}
           </select>
-          <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+          <button className="min-h-11 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
             Save preference
           </button>
         </form>

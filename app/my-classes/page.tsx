@@ -77,7 +77,7 @@ export default async function MyClasses() {
 
   if (ownedLearnerIds.length === 0) {
     return (
-      <main className="mx-auto max-w-3xl bg-gray-50 p-4">
+      <main className="mx-auto max-w-3xl bg-gray-50 p-4 sm:p-6">
         <h1 className="mb-4 text-2xl font-semibold text-gray-950">
           My Live Classes
         </h1>
@@ -225,7 +225,7 @@ export default async function MyClasses() {
           return (
             <li
               key={enrolment.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
             >
               <div className="text-lg font-semibold text-gray-950">
                 {bookedClass ? bookedClass.title : 'Unknown class'}
