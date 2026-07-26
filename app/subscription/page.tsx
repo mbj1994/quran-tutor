@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { getStripe } from '@/lib/stripe';
+import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +11,14 @@ type Subscription = {
   status: string | null;
   current_period_end: string | null;
   created_at: string | null;
+};
+
+type ConfirmationState = 'success' | 'pending' | 'error' | null;
+
+type SubscriptionPageProps = {
+  searchParams: Promise<{
+    session_id?: string;
+  }>;
 };
 
 function formatDate(value: string) {
@@ -19,7 +29,9 @@ function formatDate(value: string) {
   });
 }
 
-export default async function SubscriptionPage() {
+export default async function SubscriptionPage({
+  searchParams,
+}: SubscriptionPageProps) {
   const sb = createServerComponentClient({ cookies });
 
   const {
@@ -27,6 +39,50 @@ export default async function SubscriptionPage() {
   } = await sb.auth.getUser();
 
   if (!user) redirect('/login');
+
+  const { session_id: sessionId } = await searchParams;
+  let confirmationState: ConfirmationState = null;
+
+  if (sessionId) {
+    if (!sessionId.startsWith('cs_')) {
+      confirmationState = 'error';
+    } else {
+      try {
+        const session = await getStripe().checkout.sessions.retrieve(sessionId);
+
+        console.info('Stripe Checkout Session confirmation:', {
+          sessionId: session.id,
+          status: session.status,
+          paymentStatus: session.payment_status,
+        });
+
+        const belongsToCurrentUser =
+          session.metadata?.type === 'subscription' &&
+          session.metadata?.user_id === user.id;
+
+        if (!belongsToCurrentUser || session.status !== 'complete') {
+          confirmationState = 'error';
+        } else if (
+          session.payment_status === 'paid' ||
+          session.payment_status === 'no_payment_required'
+        ) {
+          await storeStripeCheckoutSession(session.id);
+          confirmationState = 'success';
+        } else if (session.payment_status === 'unpaid') {
+          confirmationState = 'pending';
+        } else {
+          confirmationState = 'error';
+        }
+      } catch (error) {
+        console.error('Stripe Checkout Session confirmation failed:', error);
+        confirmationState = 'error';
+      }
+    }
+  }
+
+  // TODO: Full delayed-payment support should update subscriptions from Stripe
+  // webhooks: checkout.session.completed, checkout.session.async_payment_succeeded,
+  // checkout.session.async_payment_failed, and invoice.payment_succeeded.
 
   const { data, error } = await sb
     .from('subscriptions')
@@ -50,6 +106,24 @@ export default async function SubscriptionPage() {
           Subscribe so your children can book and attend live Qur&apos;an classes.
         </p>
       </div>
+
+      {confirmationState === 'success' && (
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          Your payment was confirmed and your subscription is being updated.
+        </p>
+      )}
+      {confirmationState === 'pending' && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Your bank payment is processing. Your subscription will activate once
+          Stripe confirms the payment.
+        </p>
+      )}
+      {confirmationState === 'error' && (
+        <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          We could not confirm this checkout. Please try again or contact
+          support.
+        </p>
+      )}
 
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="font-semibold text-gray-950">Family learning plan</h2>

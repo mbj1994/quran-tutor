@@ -64,15 +64,54 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_BASE_URL ||
       new URL(req.url).origin;
 
+    let customer: string | undefined;
+
+    if (type === 'subscription' && user) {
+      const { data: existingSubscription, error: customerLookupError } =
+        await sb
+          .from('subscriptions')
+          .select('stripe_customer_id')
+          .eq('user_id', user.id)
+          .not('stripe_customer_id', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle<{ stripe_customer_id: string | null }>();
+
+      if (customerLookupError) {
+        console.error(
+          'Unable to look up the authenticated user Stripe customer:',
+          customerLookupError
+        );
+        return NextResponse.json(
+          { error: 'Unable to start checkout. Please try again.' },
+          { status: 500 }
+        );
+      }
+
+      customer = existingSubscription?.stripe_customer_id ?? undefined;
+
+      if (!customer) {
+        const stripeCustomer = await getStripe().customers.create({
+          email: user.email ?? undefined,
+          metadata: { user_id: user.id },
+        });
+        customer = stripeCustomer.id;
+      }
+    }
+
     const session = await getStripe().checkout.sessions.create({
       mode: type === 'donation' ? 'payment' : 'subscription',
       line_items: [{ price, quantity: 1 }],
-      customer_email: user?.email ?? undefined,
+      customer,
+      customer_email: customer ? undefined : (user?.email ?? undefined),
       metadata: {
         user_id: user?.id ?? '',
         type,
       },
-      success_url: `${origin}/payments/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url:
+        type === 'donation'
+          ? `${origin}/donation?session_id={CHECKOUT_SESSION_ID}`
+          : `${origin}/subscription?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/payments/cancel`,
     });
 

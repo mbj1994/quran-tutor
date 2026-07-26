@@ -22,6 +22,7 @@ type ClassRow = {
   title: string;
   start_time: string;
   duration_min: number;
+  meeting_url: string | null;
 };
 
 type LearnerRow = {
@@ -38,9 +39,9 @@ type LearnerRow = {
 
 type EnrolmentRow = {
   id: string;
+  learner_profile_id: string | null;
   status: string | null;
   created_at: string | null;
-  learner: LearnerRow | LearnerRow[] | null;
 };
 
 type LessonProgress = {
@@ -59,10 +60,6 @@ type ProfileRole = BaseProfileRole & {
 };
 
 const attendanceOptions = ['present', 'absent', 'late'] as const;
-
-function firstOrNull<T>(value: T | T[] | null) {
-  return Array.isArray(value) ? value[0] ?? null : value;
-}
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString('en-US', {
@@ -221,7 +218,7 @@ export default async function ScholarClassRosterPage({
 
   const { data: classRow, error: classError } = await sb
     .from('classes')
-    .select('id, scholar_id, title, start_time, duration_min')
+    .select('id, scholar_id, title, start_time, duration_min, meeting_url')
     .eq('id', id)
     .maybeSingle<ClassRow>();
 
@@ -257,17 +254,7 @@ export default async function ScholarClassRosterPage({
           id,
           status,
           created_at,
-          learner:learners!enrolments_learner_profile_id_fkey (
-            id,
-            full_name,
-            age,
-            preferred_language,
-            quran_level,
-            learning_goals,
-            lessons_completed,
-            points,
-            current_badge
-          )
+          learner_profile_id
         `
       )
       .eq('class_id', classRow.id)
@@ -285,6 +272,26 @@ export default async function ScholarClassRosterPage({
   }
 
   const enrolments = (data ?? []) as EnrolmentRow[];
+  const learnerProfileIds = enrolments
+    .map((enrolment) => enrolment.learner_profile_id)
+    .filter((learnerId): learnerId is string => Boolean(learnerId));
+  const { data: learnerData, error: learnerError } =
+    learnerProfileIds.length > 0
+      ? await sb
+          .from('learners')
+          .select(
+            'id, full_name, age, preferred_language, quran_level, learning_goals, lessons_completed, points, current_badge'
+          )
+          .in('id', learnerProfileIds)
+      : { data: [], error: null };
+
+  if (learnerError) {
+    return <p className="p-4 text-red-600">{learnerError.message}</p>;
+  }
+
+  const learnersById = new Map(
+    ((learnerData ?? []) as LearnerRow[]).map((learner) => [learner.id, learner])
+  );
   const progressRows = (progressData ?? []) as LessonProgress[];
   const progressByLearner = new Map(
     progressRows.map((progress) => [progress.learner_profile_id, progress])
@@ -311,6 +318,16 @@ export default async function ScholarClassRosterPage({
         >
           Back to classes
         </Link>
+        {classRow.meeting_url && (
+          <a
+            href={classRow.meeting_url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Join Live Class
+          </a>
+        )}
       </div>
 
       <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium text-gray-700 shadow-sm">
@@ -335,8 +352,10 @@ export default async function ScholarClassRosterPage({
       ) : (
         <ul className="space-y-4">
           {enrolments.map((enrolment) => {
-            const learner = firstOrNull(enrolment.learner);
-            const learnerProfileId = learner?.id;
+            const learnerProfileId = enrolment.learner_profile_id;
+            const learner = learnerProfileId
+              ? learnersById.get(learnerProfileId)
+              : undefined;
             const progress = learnerProfileId
               ? progressByLearner.get(learnerProfileId)
               : undefined;
@@ -349,7 +368,10 @@ export default async function ScholarClassRosterPage({
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold text-gray-950">
-                      {learner?.full_name ?? 'Unknown learner'}
+                      {learner?.full_name ??
+                        (learnerProfileId
+                          ? 'Learner details unavailable'
+                          : 'Unknown learner')}
                     </h2>
                     <div className="mt-1 space-y-1 text-sm text-gray-600">
                       <p>Age: {learner?.age ?? '-'}</p>
@@ -370,7 +392,7 @@ export default async function ScholarClassRosterPage({
                   </span>
                 </div>
 
-                {learnerProfileId ? (
+                {learnerProfileId && learner ? (
                   <form action={saveRosterProgress} className="mt-4 space-y-3">
                     <input type="hidden" name="class_id" value={classRow.id} />
                     <input
@@ -449,6 +471,10 @@ export default async function ScholarClassRosterPage({
                       Save attendance and notes
                     </button>
                   </form>
+                ) : learnerProfileId ? (
+                  <p className="mt-3 text-sm text-amber-700">
+                    Learner details unavailable
+                  </p>
                 ) : (
                   <p className="mt-3 text-sm text-red-600">
                     This booking is missing a learner profile.
