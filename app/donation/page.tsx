@@ -29,8 +29,8 @@ export default async function DonationPage({
 
         console.info('Stripe donation Checkout Session confirmation:', {
           sessionId: session.id,
-          status: session.status,
-          paymentStatus: session.payment_status,
+          'session.status': session.status,
+          'session.payment_status': session.payment_status,
         });
 
         const sb = createServerComponentClient({ cookies });
@@ -55,8 +55,10 @@ export default async function DonationPage({
         } else {
           confirmationState = 'error';
         }
-      } catch (error) {
-        console.error('Stripe donation Checkout Session confirmation failed:', error);
+      } catch {
+        console.error(
+          'Stripe donation Checkout Session confirmation failed for the supplied session_id.'
+        );
         confirmationState = 'error';
       }
     }
