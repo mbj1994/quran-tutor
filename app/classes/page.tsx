@@ -101,7 +101,7 @@ export default async function ClassesPage() {
     .order('start_time', { ascending: true });
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-4">
         <h1 className="text-2xl font-semibold text-gray-950">
           Browse Live Qur&apos;an Classes
@@ -112,7 +112,7 @@ export default async function ClassesPage() {
       </div>
 
       {classes?.length === 0 && (
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">No classes available yet</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             New Live Classes will appear here once the teaching team schedules
@@ -131,7 +131,7 @@ export default async function ClassesPage() {
           return (
             <li
               key={classRow.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5"
             >
               <div className="text-lg font-semibold text-gray-950">
                 {classRow.title}

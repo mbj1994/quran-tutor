@@ -1,59 +1,66 @@
 import Link from 'next/link';
 
+const highlights = [
+  ['☾', 'Live Qur’an Classes', 'Small, welcoming lessons that fit family life.'],
+  ['✦', 'Trusted Scholar / Ustass', 'Approved teachers who guide children with care.'],
+  ['↗', 'Learning Progress', 'See lessons, revision notes, points, and milestones.'],
+  ['⌁', 'Student Access', 'A simple code gives each child their own learning view.'],
+  ['♡', 'Support a Child', 'Donations can help more families access Qur’an learning.'],
+];
+
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-96px)] max-w-5xl flex-col justify-center gap-7 overflow-hidden bg-gray-50 px-4 py-8 sm:gap-8 sm:px-6 sm:py-12">
-      <section className="space-y-5">
-        <p className="text-sm font-medium uppercase tracking-wide text-emerald-700">
-          Live Qur&apos;an learning for Gambian diaspora families
-        </p>
-        <h1 className="max-w-3xl text-3xl font-bold text-gray-950 sm:text-5xl">
-          Quran Tutor
-        </h1>
-        <p className="max-w-3xl text-lg leading-8 text-gray-700">
-          Parents can create child profiles, book live Qur&apos;an classes with
-          approved Scholar / Ustass teachers, and follow progress and learning rewards in
-          one simple family dashboard.
-        </p>
+    <main className="mx-auto max-w-6xl overflow-hidden px-4 py-8 sm:px-6 sm:py-14">
+      <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200/70 bg-emerald-950 px-6 py-10 text-white shadow-xl shadow-emerald-950/10 sm:px-10 sm:py-16 lg:px-16">
+        <div className="absolute -right-16 -top-16 size-64 rounded-full border-[36px] border-white/5" />
+        <div className="absolute -bottom-20 right-1/4 size-48 rounded-full bg-amber-300/10 blur-2xl" />
+        <div className="relative max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-200">
+            Live Qur’an learning for every family
+          </p>
+          <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
+            Help your child grow with the Qur’an.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-emerald-50/85 sm:text-lg">
+            Trusted live teaching and clear progress, all in one warm Family Dashboard.
+          </p>
+          <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+            <Link href="/login" className="flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-emerald-950 shadow-sm hover:bg-amber-200">
+              Get Started
+            </Link>
+            <Link href="/classes" className="flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/15">
+              Browse Classes
+            </Link>
+            <Link href="/student" className="flex min-h-12 items-center justify-center rounded-xl px-5 py-3 font-medium text-emerald-100 hover:bg-white/10 hover:text-white">
+              Student Access
+            </Link>
+          </div>
+        </div>
       </section>
 
-      <div className="grid gap-3 sm:flex sm:flex-wrap">
-        <Link
-          href="/login"
-          className="flex min-h-12 items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white shadow-sm hover:bg-emerald-700"
-        >
-          Get started
-        </Link>
-        <Link
-          href="/classes"
-          className="flex min-h-12 items-center justify-center rounded-lg border border-emerald-600 bg-white px-5 py-3 font-medium text-emerald-700 hover:bg-emerald-50"
-        >
-          Browse Classes
-        </Link>
-        <Link
-          href="/login"
-          className="flex min-h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3 font-medium text-gray-800 hover:bg-gray-100"
-        >
-          Login
-        </Link>
-      </div>
-
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          ['Approved Scholar / Ustass teachers', 'Classes are taught by approved teachers managed by the platform team.'],
-          ['Parent-managed profiles', 'Add each child with their age, language, level, and learning goals.'],
-          ['Live Classes', 'Browse available Qur’an classes and book the right place for your child.'],
-          ['Child progress', 'See attendance, revision notes, Qur’an level, and what to practise next.'],
-          ['Learning rewards', 'Children build points and badges as they complete lessons.'],
-        ].map(([title, body]) => (
+      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {highlights.map(([icon, title, body]) => (
           <article
             key={title}
-            className="min-w-0 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+            className="min-w-0 rounded-2xl border border-emerald-100 bg-white/90 p-5 shadow-sm shadow-emerald-950/5 hover:border-emerald-200 hover:shadow-md"
           >
-            <h2 className="font-semibold text-gray-950">{title}</h2>
+            <span className="grid size-10 place-items-center rounded-xl bg-emerald-50 text-lg font-semibold text-emerald-700">
+              {icon}
+            </span>
+            <h2 className="mt-4 font-semibold text-gray-950">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-gray-600">{body}</p>
           </article>
         ))}
+      </section>
+
+      <section className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200/70 bg-amber-50/80 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-semibold text-emerald-950">Learning rooted in faith and family</h2>
+          <p className="mt-1 text-sm text-gray-600">Made for Gambian diaspora children, wherever home may be.</p>
+        </div>
+        <Link href="/donation" className="shrink-0 font-semibold text-emerald-800 hover:text-emerald-950">
+          Make a Donation →
+        </Link>
       </section>
     </main>
   );

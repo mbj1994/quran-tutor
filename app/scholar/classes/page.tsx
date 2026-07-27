@@ -66,7 +66,7 @@ export default async function ScholarClasses() {
   const teachingClasses = (classes ?? []) as ClassRow[];
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
@@ -78,14 +78,14 @@ export default async function ScholarClasses() {
         </div>
         <Link
           href="/scholar/classes/new"
-          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
+          className="flex min-h-11 w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
         >
           Create a class
         </Link>
       </div>
 
       {teachingClasses.length === 0 && (
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">
             You have not created any teaching classes yet.
           </h2>
@@ -95,7 +95,7 @@ export default async function ScholarClasses() {
           </p>
           <Link
             href="/scholar/classes/new"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Create a class
           </Link>
@@ -106,7 +106,7 @@ export default async function ScholarClasses() {
         {teachingClasses.map((classRow) => (
           <li
             key={classRow.id}
-            className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5"
+            className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -165,26 +165,26 @@ export default async function ScholarClasses() {
                   href={classRow.meeting_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="col-span-2 flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:col-span-1"
+                  className="col-span-2 flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:col-span-1"
                 >
                   Join Live Class
                 </a>
               )}
               <Link
                 href={`/scholar/classes/${classRow.id}/edit`}
-                className="flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Edit
               </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/roster`}
-                className="flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Roster
               </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/progress`}
-                className="col-span-2 flex min-h-11 items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:col-span-1"
+                className="col-span-2 flex min-h-11 items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:col-span-1"
               >
                 Progress
               </Link>

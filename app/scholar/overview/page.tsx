@@ -101,7 +101,7 @@ export default async function ScholarOverview() {
   ];
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">Scholar Home</h1>
@@ -113,13 +113,13 @@ export default async function ScholarOverview() {
         <div className="grid gap-2 sm:flex sm:flex-wrap">
           <Link
             href="/scholar/classes"
-            className="flex min-h-11 items-center justify-center rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            className="flex min-h-11 items-center justify-center rounded-2xl border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
           >
             View teaching classes
           </Link>
           <Link
             href="/scholar/classes/new"
-            className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Create a class
           </Link>
@@ -130,7 +130,7 @@ export default async function ScholarOverview() {
         {cards.map((card) => (
           <li
             key={card.label}
-            className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5"
           >
             <p className="text-3xl font-semibold text-gray-950">{card.value}</p>
             <p className="mt-2 text-sm font-medium text-gray-600">
@@ -140,7 +140,7 @@ export default async function ScholarOverview() {
         ))}
       </ul>
 
-      <section className="mt-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
         <h2 className="text-lg font-semibold text-gray-950">
           Preferred app language
         </h2>
@@ -151,7 +151,7 @@ export default async function ScholarOverview() {
           <select
             name="app_language"
             defaultValue={profile?.app_language ?? 'English'}
-            className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
+            className="min-h-11 rounded-2xl border border-gray-300 px-3 py-2 text-sm text-gray-950"
           >
             {appLanguages.map((language) => (
               <option key={language} value={language}>
@@ -159,7 +159,7 @@ export default async function ScholarOverview() {
               </option>
             ))}
           </select>
-          <button className="min-h-11 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+          <button className="min-h-11 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
             Save preference
           </button>
         </form>

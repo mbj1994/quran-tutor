@@ -234,7 +234,7 @@ function LoginForm() {
 
   return (
     <main className="flex min-h-[calc(100vh-73px)] items-center justify-center overflow-hidden bg-emerald-50 px-4 py-6 sm:px-6 sm:py-10">
-      <section className="w-full max-w-4xl overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
+      <section className="w-full max-w-4xl overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm shadow-emerald-950/5">
         <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
           <div className="bg-gray-50 p-5 sm:p-8">
             <p className="text-sm font-medium text-emerald-700">Quran Tutor</p>
@@ -244,13 +244,13 @@ function LoginForm() {
             </p>
 
             <div className="mt-6 grid gap-3">
-              <article className="rounded-lg border border-gray-200 bg-white p-4">
+              <article className="rounded-2xl border border-gray-200 bg-white p-4">
                 <h2 className="font-semibold text-gray-950">Parent / Student</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
                   Book classes, join live lessons, and follow child progress.
                 </p>
               </article>
-              <article className="rounded-lg border border-gray-200 bg-white p-4">
+              <article className="rounded-2xl border border-gray-200 bg-white p-4">
                 <h2 className="font-semibold text-gray-950">Scholar / Ustass</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">
                   Teach Live Classes, manage attendance, and update child progress.
@@ -261,7 +261,7 @@ function LoginForm() {
 
           <div className="p-5 sm:p-8">
             <div className="mx-auto max-w-sm">
-              <div className="grid grid-cols-2 rounded-lg bg-gray-100 p-1">
+              <div className="grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -270,7 +270,7 @@ function LoginForm() {
                   }}
                   className={`min-h-11 rounded-md px-3 py-2 text-sm font-medium ${
                     mode === 'sign-in'
-                      ? 'bg-white text-gray-950 shadow-sm'
+                      ? 'bg-white text-gray-950 shadow-sm shadow-emerald-950/5'
                       : 'text-gray-600 hover:text-gray-950'
                   }`}
                 >
@@ -284,7 +284,7 @@ function LoginForm() {
                   }}
                   className={`min-h-11 rounded-md px-3 py-2 text-sm font-medium ${
                     mode === 'create'
-                      ? 'bg-white text-gray-950 shadow-sm'
+                      ? 'bg-white text-gray-950 shadow-sm shadow-emerald-950/5'
                       : 'text-gray-600 hover:text-gray-950'
                   }`}
                 >
@@ -293,7 +293,7 @@ function LoginForm() {
               </div>
 
               {message && (
-                <p className="mt-5 rounded-lg bg-gray-50 p-3 text-sm leading-6 text-gray-700">
+                <p className="mt-5 rounded-2xl bg-gray-50 p-3 text-sm leading-6 text-gray-700">
                   {message}
                 </p>
               )}
@@ -309,7 +309,7 @@ function LoginForm() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       disabled={loading !== null}
-                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
                   <label className="block">
@@ -321,14 +321,14 @@ function LoginForm() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={loading !== null}
-                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
 
                   <button
                     type="submit"
                     disabled={loading !== null}
-                    className="min-h-12 w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-2xl bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {loading === 'sign-in' ? 'Signing in...' : 'Sign in'}
                   </button>
@@ -337,7 +337,7 @@ function LoginForm() {
                     type="button"
                     onClick={handleResetPassword}
                     disabled={loading !== null}
-                    className="min-h-12 w-full rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-2xl border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
                   >
                     {loading === 'reset' ? 'Sending...' : 'Forgot password'}
                   </button>
@@ -357,7 +357,7 @@ function LoginForm() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       disabled={loading !== null}
-                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
                   <label className="block">
@@ -369,13 +369,13 @@ function LoginForm() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       disabled={loading !== null}
-                      className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                      className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                     />
                   </label>
 
                   <fieldset className="space-y-2">
                     <legend className="text-sm font-medium text-gray-800">I am creating a:</legend>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm text-gray-700">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-3 text-sm text-gray-700">
                       <input
                         type="radio"
                         name="signup-role"
@@ -392,7 +392,7 @@ function LoginForm() {
                         Manage children, bookings, and subscriptions.
                       </span>
                     </label>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 text-sm text-gray-700">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-gray-200 p-3 text-sm text-gray-700">
                       <input
                         type="radio"
                         name="signup-role"
@@ -414,7 +414,7 @@ function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading !== null}
-                    className="min-h-12 w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    className="min-h-12 w-full rounded-2xl bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {loading === 'sign-up' ? 'Creating...' : 'Create account'}
                   </button>

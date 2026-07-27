@@ -228,8 +228,8 @@ export default async function ScholarClassRosterPage({
 
   if (!classRow || classRow.scholar_id !== user.id) {
     return (
-      <main className="mx-auto max-w-md bg-gray-50 p-4">
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <main className="mx-auto max-w-md bg-transparent p-4">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h1 className="font-semibold text-gray-950">Scholar access needed</h1>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             This roster is only available to the Scholar/Ustass assigned to the
@@ -237,7 +237,7 @@ export default async function ScholarClassRosterPage({
           </p>
           <Link
             href="/dashboard"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Go to dashboard
           </Link>
@@ -298,7 +298,7 @@ export default async function ScholarClassRosterPage({
   );
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
@@ -323,19 +323,19 @@ export default async function ScholarClassRosterPage({
             href={classRow.meeting_url}
             target="_blank"
             rel="noreferrer"
-            className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Join Live Class
           </a>
         )}
       </div>
 
-      <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium text-gray-700 shadow-sm">
+      <div className="mb-4 rounded-2xl border border-gray-200 bg-white p-4 text-sm font-medium text-gray-700 shadow-sm shadow-emerald-950/5">
         Learners enrolled: {enrolments.length}
       </div>
 
       {enrolments.length === 0 ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">
             No children are enrolled in this class yet.
           </h2>
@@ -344,7 +344,7 @@ export default async function ScholarClassRosterPage({
           </p>
           <Link
             href="/scholar/classes"
-            className="mt-4 inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            className="mt-4 inline-block rounded-2xl border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
           >
             Back to scholar classes
           </Link>
@@ -363,7 +363,7 @@ export default async function ScholarClassRosterPage({
             return (
               <li
                 key={enrolment.id}
-                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -417,7 +417,7 @@ export default async function ScholarClassRosterPage({
                           return (
                           <label
                             key={status}
-                            className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            className="flex items-center gap-2 rounded-2xl border border-gray-300 px-3 py-2 text-sm text-gray-700"
                           >
                             <input
                               type="radio"
@@ -442,7 +442,7 @@ export default async function ScholarClassRosterPage({
                         <textarea
                           name="covered"
                           defaultValue={progress?.covered ?? progress?.notes ?? ''}
-                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
+                          className="min-h-24 w-full rounded-2xl border border-gray-300 p-2"
                         />
                       </label>
                       <label className="block">
@@ -452,7 +452,7 @@ export default async function ScholarClassRosterPage({
                         <textarea
                           name="revision"
                           defaultValue={progress?.revision ?? progress?.homework ?? ''}
-                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
+                          className="min-h-24 w-full rounded-2xl border border-gray-300 p-2"
                         />
                       </label>
                       <label className="block">
@@ -462,12 +462,12 @@ export default async function ScholarClassRosterPage({
                         <textarea
                           name="parent_note"
                           defaultValue={progress?.parent_note ?? ''}
-                          className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
+                          className="min-h-24 w-full rounded-2xl border border-gray-300 p-2"
                         />
                       </label>
                     </div>
 
-                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                    <button className="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                       Save attendance and notes
                     </button>
                   </form>

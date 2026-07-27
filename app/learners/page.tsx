@@ -49,7 +49,7 @@ export default async function LearnersPage() {
   const learners = (data ?? []) as Learner[];
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-gray-950">Children</h1>
@@ -59,14 +59,14 @@ export default async function LearnersPage() {
         </div>
         <Link
           href="/learners/new"
-          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 sm:w-auto"
+          className="flex min-h-11 w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 sm:w-auto"
         >
           Add child
         </Link>
       </div>
 
       {learners.length === 0 && (
-        <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
           <h2 className="font-semibold text-gray-950">
             You have not added any children yet.
           </h2>
@@ -76,7 +76,7 @@ export default async function LearnersPage() {
           </p>
           <Link
             href="/learners/new"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Add a child
           </Link>
@@ -93,7 +93,7 @@ export default async function LearnersPage() {
           return (
           <li
             key={learner.id}
-            className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5"
           >
             <div className="text-lg font-semibold text-gray-950">
               {learner.full_name}
@@ -113,7 +113,7 @@ export default async function LearnersPage() {
               {learner.notes && <p>Notes: {learner.notes}</p>}
             </div>
 
-            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+            <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
               <p className="font-medium text-gray-950">Progress summary</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className="rounded-full bg-white px-3 py-1">
@@ -143,7 +143,7 @@ export default async function LearnersPage() {
               </div>
             </div>
 
-            <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-950">
+            <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-3 text-sm text-emerald-950">
               <p className="font-medium">Student access code</p>
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <p className="font-mono text-xl font-semibold tracking-wide">
@@ -157,7 +157,7 @@ export default async function LearnersPage() {
               </p>
               <Link
                 href="/student"
-                className="mt-3 inline-block rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                className="mt-3 inline-block rounded-2xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
               >
                 Open Student Page
               </Link>

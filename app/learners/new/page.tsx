@@ -84,7 +84,7 @@ export default async function NewLearnerPage({
   const error = params?.error;
 
   return (
-    <main className="mx-auto max-w-xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-xl bg-transparent p-4 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-gray-950">Add a child</h1>
@@ -99,7 +99,7 @@ export default async function NewLearnerPage({
 
       <form
         action={createLearner}
-        className="space-y-5 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6"
+        className="space-y-5 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-6"
       >
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-gray-900">
@@ -108,7 +108,7 @@ export default async function NewLearnerPage({
           <input
             required
             name="full_name"
-            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
+            className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950"
             placeholder="Child name"
           />
         </label>
@@ -119,7 +119,7 @@ export default async function NewLearnerPage({
             name="age"
             type="number"
             min={0}
-            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
+            className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950"
             placeholder="Optional"
           />
         </label>
@@ -130,7 +130,7 @@ export default async function NewLearnerPage({
           </span>
           <select
             name="preferred_language"
-            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
+            className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950"
           >
             <option value="">No preference</option>
             {appLanguages.map((language) => (
@@ -147,7 +147,7 @@ export default async function NewLearnerPage({
           </span>
           <select
             name="quran_level"
-            className="min-h-12 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950"
+            className="min-h-12 w-full rounded-2xl border border-gray-300 px-3 py-2 text-gray-950"
           >
             <option value="">Not sure yet</option>
             {quranLevels.map((level) => (
@@ -167,7 +167,7 @@ export default async function NewLearnerPage({
           </span>
           <textarea
             name="learning_goals"
-            className="min-h-28 w-full rounded-lg border border-gray-300 p-3 text-gray-950"
+            className="min-h-28 w-full rounded-2xl border border-gray-300 p-3 text-gray-950"
             placeholder="What should the child work towards?"
           />
         </label>
@@ -176,12 +176,12 @@ export default async function NewLearnerPage({
           <span className="mb-1 block text-sm font-medium">Notes</span>
           <textarea
             name="notes"
-            className="min-h-32 w-full rounded-lg border border-gray-300 p-3 text-gray-950"
+            className="min-h-32 w-full rounded-2xl border border-gray-300 p-3 text-gray-950"
             placeholder="Anything the scholar should know?"
           />
         </label>
 
-        <button className="min-h-12 w-full rounded-lg bg-emerald-600 py-2 text-white hover:bg-emerald-700">
+        <button className="min-h-12 w-full rounded-2xl bg-emerald-600 py-2 text-white hover:bg-emerald-700">
           Save child
         </button>
 

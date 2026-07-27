@@ -241,7 +241,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-5xl space-y-6 bg-transparent p-4 sm:p-6">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold text-gray-950">Family Dashboard</h1>
         <p className="max-w-2xl text-sm leading-6 text-gray-600">
@@ -252,61 +252,61 @@ export default async function DashboardPage() {
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/learners"
-          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+          className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 hover:border-emerald-200"
         >
           <p className="text-sm text-gray-500">Children</p>
           <p className="mt-2 text-2xl font-semibold text-gray-950">{learners.length}</p>
         </Link>
         <Link
           href="/my-classes"
-          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+          className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 hover:border-emerald-200"
         >
           <p className="text-sm text-gray-500">Upcoming Live Classes</p>
           <p className="mt-2 text-2xl font-semibold text-gray-950">{enrolments.length}</p>
         </Link>
         <Link
           href="/subscription"
-          className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:border-emerald-200"
+          className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 hover:border-emerald-200"
         >
           <p className="text-sm text-gray-500">Billing status</p>
           <p className="mt-2 text-lg font-semibold text-gray-950">
             {hasActiveSubscription ? 'Active' : 'Not active'}
           </p>
         </Link>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5">
           <p className="text-sm text-gray-500">Learning progress</p>
           <p className="mt-2 text-2xl font-semibold text-gray-950">{progressRows.length}</p>
         </div>
       </section>
 
-      <section className="grid gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:flex sm:flex-wrap">
+      <section className="grid gap-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:flex sm:flex-wrap">
         <Link
           href="/learners/new"
-          className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
         >
           Add a child
         </Link>
         <Link
           href="/classes"
-          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           Browse Classes
         </Link>
         <Link
           href="/my-classes"
-          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           View My Live Classes
         </Link>
         <Link
           href="/subscription"
-          className="flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
+          className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
         >
           Manage billing
         </Link>
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
         <h2 className="text-lg font-semibold text-gray-950">Billing</h2>
         <p className="mt-2 text-gray-700">
           Subscription: {hasActiveSubscription ? 'Active' : 'Not active'}
@@ -326,7 +326,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
         <h2 className="text-lg font-semibold text-gray-950">
           Preferred app language
         </h2>
@@ -334,7 +334,7 @@ export default async function DashboardPage() {
           <select
             name="app_language"
             defaultValue={profile?.app_language ?? 'English'}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-950"
+            className="rounded-2xl border border-gray-300 px-3 py-2 text-sm text-gray-950"
           >
             {appLanguages.map((language) => (
               <option key={language} value={language}>
@@ -342,13 +342,13 @@ export default async function DashboardPage() {
               </option>
             ))}
           </select>
-          <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+          <button className="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
             Save preference
           </button>
         </form>
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">Children</h2>
           <div className="flex gap-2">
@@ -382,7 +382,7 @@ export default async function DashboardPage() {
               return (
                 <li
                   key={learner.id}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                  className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                 >
                   <div className="font-semibold text-gray-950">
                     {learner.full_name}
@@ -397,7 +397,7 @@ export default async function DashboardPage() {
                       {learner.preferred_language ?? 'Language not set'}
                     </span>
                   </div>
-                  <div className="mt-3 rounded-lg border border-emerald-100 bg-white p-3">
+                  <div className="mt-3 rounded-2xl border border-emerald-100 bg-white p-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-gray-950">
                         Learning progress
@@ -475,7 +475,7 @@ export default async function DashboardPage() {
             })}
           </ul>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
             <h3 className="font-medium text-gray-950">
               You have not added any children yet.
             </h3>
@@ -485,7 +485,7 @@ export default async function DashboardPage() {
             </p>
             <Link
               href="/learners/new"
-              className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              className="mt-3 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
               Add a child
             </Link>
@@ -493,7 +493,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">
             Upcoming Live Classes
@@ -515,7 +515,7 @@ export default async function DashboardPage() {
               return (
                 <li
                   key={enrolment.id}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                  className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                 >
                   <div className="font-semibold text-gray-950">
                     {bookedClass?.title ?? 'Unknown class'}
@@ -544,7 +544,7 @@ export default async function DashboardPage() {
             })}
           </ul>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
             <h3 className="font-medium text-gray-950">
               You have not booked any Live Classes yet.
             </h3>
@@ -554,7 +554,7 @@ export default async function DashboardPage() {
             </p>
             <Link
               href="/classes"
-              className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+              className="mt-3 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
             >
               Browse Classes
             </Link>
@@ -562,7 +562,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
         <h2 className="text-lg font-semibold text-gray-950">
           Latest Progress and Homework
         </h2>
@@ -575,7 +575,7 @@ export default async function DashboardPage() {
               return (
                 <li
                   key={progress.id}
-                  className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                  className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                 >
                   <div className="font-semibold text-gray-950">
                     {learnerNames.get(progress.learner_profile_id) ?? 'Unknown learner'}
@@ -606,7 +606,7 @@ export default async function DashboardPage() {
             })}
           </ul>
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <div className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
             <h3 className="font-medium text-gray-950">
               No progress notes have been added yet.
             </h3>

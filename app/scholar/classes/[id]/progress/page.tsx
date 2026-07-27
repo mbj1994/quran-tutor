@@ -215,8 +215,8 @@ export default async function ScholarClassProgressPage({
 
   if (!classRow || classRow.scholar_id !== user.id) {
     return (
-      <main className="mx-auto max-w-md bg-gray-50 p-4">
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <main className="mx-auto max-w-md bg-transparent p-4">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h1 className="font-semibold text-gray-950">Scholar access needed</h1>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Progress notes are only available to the Scholar/Ustass assigned to
@@ -224,7 +224,7 @@ export default async function ScholarClassProgressPage({
           </p>
           <Link
             href="/dashboard"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Go to dashboard
           </Link>
@@ -284,7 +284,7 @@ export default async function ScholarClassProgressPage({
   );
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-950">
@@ -313,7 +313,7 @@ export default async function ScholarClassProgressPage({
             href={classRow.meeting_url}
             target="_blank"
             rel="noreferrer"
-            className="flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Join Live Class
           </a>
@@ -321,7 +321,7 @@ export default async function ScholarClassProgressPage({
       </div>
 
       {enrolments.length === 0 ? (
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">
             No learners are available for progress updates yet.
           </h2>
@@ -330,7 +330,7 @@ export default async function ScholarClassProgressPage({
           </p>
           <Link
             href="/scholar/classes"
-            className="mt-4 inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            className="mt-4 inline-block rounded-2xl border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
           >
             Back to scholar classes
           </Link>
@@ -352,7 +352,7 @@ export default async function ScholarClassProgressPage({
             return (
               <li
                 key={enrolment.id}
-                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5"
               >
                 <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -399,7 +399,7 @@ export default async function ScholarClassProgressPage({
                       <select
                         name="attendance_status"
                         defaultValue={progress?.attendance_status ?? 'present'}
-                        className="w-full rounded-lg border border-gray-300 p-2"
+                        className="w-full rounded-2xl border border-gray-300 p-2"
                       >
                         <option value="present">Present</option>
                         <option value="late">Late</option>
@@ -415,8 +415,8 @@ export default async function ScholarClassProgressPage({
                         <input
                           name="quran_level"
                           defaultValue={learner?.quran_level ?? ''}
-                          className="w-full rounded-lg border border-gray-300 p-2"
-                          placeholder="Quran reading beginner"
+                          className="w-full rounded-2xl border border-gray-300 p-2"
+                          placeholder="Qur’an reading beginner"
                         />
                       </label>
 
@@ -427,7 +427,7 @@ export default async function ScholarClassProgressPage({
                         <select
                           name="current_badge"
                           defaultValue={displayedBadge}
-                          className="w-full rounded-lg border border-gray-300 p-2"
+                          className="w-full rounded-2xl border border-gray-300 p-2"
                         >
                           {badgeOptions.map((badge) => (
                             <option key={badge} value={badge}>
@@ -451,7 +451,7 @@ export default async function ScholarClassProgressPage({
                           type="number"
                           min={0}
                           defaultValue={learner?.lessons_completed ?? 0}
-                          className="w-full rounded-lg border border-gray-300 p-2"
+                          className="w-full rounded-2xl border border-gray-300 p-2"
                         />
                       </label>
 
@@ -464,7 +464,7 @@ export default async function ScholarClassProgressPage({
                           type="number"
                           min={0}
                           defaultValue={learner?.points ?? 0}
-                          className="w-full rounded-lg border border-gray-300 p-2"
+                          className="w-full rounded-2xl border border-gray-300 p-2"
                         />
                       </label>
                     </div>
@@ -478,11 +478,11 @@ export default async function ScholarClassProgressPage({
                         defaultValue={
                           progress?.parent_note ?? progress?.notes ?? ''
                         }
-                        className="min-h-24 w-full rounded-lg border border-gray-300 p-2"
+                        className="min-h-24 w-full rounded-2xl border border-gray-300 p-2"
                       />
                     </label>
 
-                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+                    <button className="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                       Save learner progress
                     </button>
                   </form>

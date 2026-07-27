@@ -77,11 +77,11 @@ export default async function MyClasses() {
 
   if (ownedLearnerIds.length === 0) {
     return (
-      <main className="mx-auto max-w-3xl bg-gray-50 p-4 sm:p-6">
+      <main className="mx-auto max-w-3xl bg-transparent p-4 sm:p-6">
         <h1 className="mb-4 text-2xl font-semibold text-gray-950">
           My Live Classes
         </h1>
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">Add a child first</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             Create a child profile with their Qur&apos;an level before booking
@@ -89,7 +89,7 @@ export default async function MyClasses() {
           </p>
           <Link
             href="/learners/new"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Add child
           </Link>
@@ -171,7 +171,7 @@ export default async function MyClasses() {
   );
 
   return (
-    <main className="mx-auto max-w-4xl bg-gray-50 p-4 sm:p-6">
+    <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">
       <div className="mb-5 space-y-2">
         <h1 className="text-2xl font-semibold text-gray-950">
           My Live Classes
@@ -182,7 +182,7 @@ export default async function MyClasses() {
       </div>
 
       {enrolments.length === 0 && (
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">
             You have not booked any Live Classes yet.
           </h2>
@@ -192,7 +192,7 @@ export default async function MyClasses() {
           </p>
           <Link
             href="/classes"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="mt-4 inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Browse Classes
           </Link>
@@ -225,7 +225,7 @@ export default async function MyClasses() {
           return (
             <li
               key={enrolment.id}
-              className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+              className="min-w-0 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5"
             >
               <div className="text-lg font-semibold text-gray-950">
                 {bookedClass ? bookedClass.title : 'Unknown class'}
@@ -261,7 +261,7 @@ export default async function MyClasses() {
                 </div>
               )}
               {learner && (
-                <div className="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3">
+                <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                   <p className="text-sm font-semibold text-gray-950">
                     Learning progress
                   </p>
@@ -319,7 +319,7 @@ export default async function MyClasses() {
                 )
               )}
               {progress && (
-                <div className="mt-3 space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                <div className="mt-3 space-y-1 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
                   <div>Attendance: {progress.attendance_status}</div>
                 </div>
               )}

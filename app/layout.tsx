@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Quran Tutor',
+  title: 'Qur’an Tutor',
   description: 'Live Qur’an learning for Gambian diaspora children',
-  applicationName: 'Quran Tutor',
+  applicationName: 'Qur’an Tutor',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
-    title: 'Quran Tutor',
+    title: 'Qur’an Tutor',
     statusBarStyle: 'default',
   },
 };

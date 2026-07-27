@@ -188,16 +188,17 @@ export default function StudentAccessClient() {
   const milestoneProgress = getMilestoneProgress(lessonsCompleted);
 
   return (
-    <main className="min-h-[calc(100vh-73px)] bg-emerald-50 px-4 py-8 sm:px-6">
+    <main className="min-h-[calc(100vh-73px)] bg-transparent px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-5xl space-y-6">
-        <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-7">
+        <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200 bg-emerald-950 p-5 text-white shadow-lg shadow-emerald-950/10 sm:p-8">
+          <div className="absolute -right-12 -top-16 size-48 rounded-full border-[28px] border-white/5" />
           <div className="max-w-2xl space-y-2">
-            <h1 className="text-3xl font-semibold text-gray-950">
-              My Student Page
+            <p className="text-sm font-semibold text-emerald-200">Student Access</p>
+            <h1 className="text-3xl font-bold">
+              Welcome, young learner!
             </h1>
-            <p className="text-base leading-7 text-gray-600">
-              Enter your student code to see your Qur&apos;an Journey, Live Classes,
-              revision, and rewards.
+            <p className="text-base leading-7 text-emerald-100">
+              Enter your code to continue your Qur’an journey.
             </p>
           </div>
 
@@ -206,13 +207,13 @@ export default function StudentAccessClient() {
             className="mt-6 flex flex-col gap-3 sm:max-w-xl sm:flex-row"
           >
             <label className="flex-1">
-              <span className="mb-1 block text-sm font-medium text-gray-900">
+              <span className="mb-1 block text-sm font-medium text-emerald-50">
                 Student access code
               </span>
               <input
                 value={code}
                 onChange={(event) => setCode(event.target.value.toUpperCase())}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 font-mono text-lg font-semibold tracking-wide text-gray-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-2xl border border-gray-300 px-4 py-3 font-mono text-lg font-semibold tracking-wide text-gray-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                 maxLength={11}
                 placeholder="Q7K9M2RA"
                 autoComplete="off"
@@ -220,18 +221,18 @@ export default function StudentAccessClient() {
             </label>
             <button
               disabled={isLoading}
-              className="w-full rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 sm:mt-6 sm:w-auto"
+              className="w-full rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300 sm:mt-6 sm:w-auto"
             >
               {isLoading ? 'Checking...' : 'Continue'}
             </button>
           </form>
 
-          {error && <p className="mt-4 text-sm font-medium text-red-600">{error}</p>}
+          {error && <p className="mt-4 rounded-xl bg-white/10 p-3 text-sm font-medium text-red-100">{error}</p>}
         </section>
 
         {learner && (
           <>
-            <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm shadow-emerald-950/5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-sm font-medium text-emerald-700">
@@ -255,7 +256,7 @@ export default function StudentAccessClient() {
                 </div>
               </div>
 
-              <div className="mt-6 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+              <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-950">
@@ -275,7 +276,7 @@ export default function StudentAccessClient() {
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                  <div className="rounded-lg bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <p className="text-xs font-medium uppercase text-gray-500">
                       My Qur&apos;an Level
                     </p>
@@ -283,13 +284,13 @@ export default function StudentAccessClient() {
                       {learner.quran_level ?? 'Not set yet'}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <p className="text-xs font-medium uppercase text-gray-500">
                       My Badge
                     </p>
                     <p className="mt-1 font-semibold text-gray-950">{badge}</p>
                   </div>
-                  <div className="rounded-lg bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <p className="text-xs font-medium uppercase text-gray-500">
                       My Points
                     </p>
@@ -297,7 +298,7 @@ export default function StudentAccessClient() {
                       {learner.points ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-white p-3">
+                  <div className="rounded-2xl bg-white p-3">
                     <p className="text-xs font-medium uppercase text-gray-500">
                       Lessons Completed
                     </p>
@@ -324,7 +325,7 @@ export default function StudentAccessClient() {
                     {nextMilestone}
                   </p>
                   {learner.learning_goals && (
-                    <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-gray-700">
+                    <p className="mt-3 rounded-2xl bg-white p-3 text-sm leading-6 text-gray-700">
                       Learning milestone: {learner.learning_goals}
                     </p>
                   )}
@@ -332,13 +333,13 @@ export default function StudentAccessClient() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5 sm:p-6">
               <h2 className="text-xl font-semibold text-gray-950">
                 My Live Classes
               </h2>
 
               {student.classes.length === 0 ? (
-                <p className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                <p className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
                   No Live Classes are booked yet.
                 </p>
               ) : (
@@ -352,7 +353,7 @@ export default function StudentAccessClient() {
                     return (
                       <li
                         key={studentClass.id}
-                        className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                        className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
@@ -394,7 +395,7 @@ export default function StudentAccessClient() {
                               href={bookedClass.meeting_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
+                              className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                             >
                               Join Live Class
                             </a>
@@ -406,7 +407,7 @@ export default function StudentAccessClient() {
                         </div>
 
                         {progress && (
-                          <div className="mt-4 space-y-2 rounded-lg border border-gray-200 bg-white p-3 text-sm text-gray-700">
+                          <div className="mt-4 space-y-2 rounded-2xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
                             <p>Attendance: {progress.attendance_status}</p>
                             {(progress.covered ?? progress.notes) && (
                               <p>
@@ -432,7 +433,7 @@ export default function StudentAccessClient() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5 sm:p-6">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-gray-950">
@@ -445,7 +446,7 @@ export default function StudentAccessClient() {
               </div>
 
               {student.browseClasses.length === 0 ? (
-                <p className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                <p className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
                   No upcoming Live Classes are available yet.
                 </p>
               ) : (
@@ -453,7 +454,7 @@ export default function StudentAccessClient() {
                   {student.browseClasses.map((classRow) => (
                     <li
                       key={classRow.id}
-                      className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                      className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
@@ -514,7 +515,7 @@ export default function StudentAccessClient() {
                           classRow.available_spaces === 0 ||
                           bookingClassId === classRow.id
                         }
-                        className="mt-4 w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+                        className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
                       >
                         {classRow.is_booked
                           ? 'Already booked'
@@ -528,13 +529,13 @@ export default function StudentAccessClient() {
               )}
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5 sm:p-6">
               <h2 className="text-xl font-semibold text-gray-950">
                 What to Revise
               </h2>
 
               {student.progress.length === 0 ? (
-                <p className="mt-4 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+                <p className="mt-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
                   Revision notes will appear after a lesson update.
                 </p>
               ) : (
@@ -542,7 +543,7 @@ export default function StudentAccessClient() {
                   {student.progress.slice(0, 5).map((progress) => (
                     <li
                       key={progress.id}
-                      className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
+                      className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
                     >
                       <p className="font-semibold text-gray-950">
                         {progress.class?.title ?? 'Lesson update'}
@@ -568,22 +569,22 @@ export default function StudentAccessClient() {
               )}
             </section>
 
-            <section className="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm sm:p-6">
+            <section className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm shadow-emerald-950/5 sm:p-6">
               <h2 className="text-xl font-semibold text-gray-950">My Rewards</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-lg bg-emerald-50 p-4">
+                <div className="rounded-2xl bg-emerald-50 p-4">
                   <p className="text-sm font-medium text-emerald-900">Badge</p>
                   <p className="mt-1 text-lg font-semibold text-gray-950">
                     {badge}
                   </p>
                 </div>
-                <div className="rounded-lg bg-emerald-50 p-4">
+                <div className="rounded-2xl bg-emerald-50 p-4">
                   <p className="text-sm font-medium text-emerald-900">Points</p>
                   <p className="mt-1 text-lg font-semibold text-gray-950">
                     {learner.points ?? 0}
                   </p>
                 </div>
-                <div className="rounded-lg bg-emerald-50 p-4">
+                <div className="rounded-2xl bg-emerald-50 p-4">
                   <p className="text-sm font-medium text-emerald-900">
                     Lessons completed
                   </p>

@@ -99,44 +99,45 @@ export default async function SubscriptionPage({
   const isActive = data?.status === 'active' || data?.status === 'trialing';
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-4 sm:p-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-gray-950">Billing</h1>
-        <p className="text-sm leading-6 text-gray-600">
-          Subscribe so your children can book and attend live Qur&apos;an classes.
+    <main className="mx-auto max-w-2xl space-y-6 bg-transparent p-4 sm:p-6">
+      <div className="rounded-2xl border border-emerald-100 bg-white/90 p-6 shadow-sm shadow-emerald-950/5 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">Family plan</p>
+        <h1 className="mt-2 text-3xl font-bold text-gray-950">Billing</h1>
+        <p className="mt-2 text-sm leading-6 text-gray-600">
+          Simple access to Live Qur’an Classes for your children.
         </p>
       </div>
 
       {confirmationState === 'success' && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
           Your payment was confirmed and your subscription is being updated.
         </p>
       )}
       {confirmationState === 'pending' && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Your bank payment is processing. Your subscription will activate once
           Stripe confirms the payment.
         </p>
       )}
       {confirmationState === 'error' && (
-        <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           We could not confirm this checkout. Please try again or contact
           support.
         </p>
       )}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
         <h2 className="font-semibold text-gray-950">Family learning plan</h2>
         <ul className="mt-3 grid gap-2 text-sm text-gray-600 sm:grid-cols-2">
-          <li>Live Classes with approved Scholar / Ustass teachers</li>
-          <li>Child progress tracking</li>
-          <li>Attendance and revision notes</li>
-          <li>Learning rewards</li>
+          <li>✓ Live Qur’an Classes</li>
+          <li>✓ Trusted Scholar / Ustass teaching</li>
+          <li>✓ Learning Progress</li>
+          <li>✓ Attendance and revision notes</li>
         </ul>
       </section>
 
       {isActive ? (
-        <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <p className="font-medium text-gray-950">
             Your family subscription is active.
           </p>
@@ -147,7 +148,7 @@ export default async function SubscriptionPage({
           )}
         </div>
       ) : (
-        <div className="space-y-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <div>
             <h2 className="font-semibold text-gray-950">
               No active subscription yet
@@ -159,7 +160,7 @@ export default async function SubscriptionPage({
           </div>
           <Link
             href="/payments"
-            className="inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Start subscription
           </Link>

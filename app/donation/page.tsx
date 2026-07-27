@@ -65,33 +65,34 @@ export default async function DonationPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-4 sm:p-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-gray-950">Donation</h1>
-        <p className="text-sm leading-6 text-gray-600">
-          Thank you for helping diaspora children access Qur&apos;an learning.
+    <main className="mx-auto max-w-2xl space-y-6 bg-transparent p-4 sm:p-6">
+      <div className="rounded-2xl bg-emerald-950 p-6 text-white shadow-lg shadow-emerald-950/10 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-widest text-emerald-200">Give with purpose</p>
+        <h1 className="mt-2 text-3xl font-bold">Donation</h1>
+        <p className="mt-2 text-sm leading-6 text-emerald-100">
+          Help more children grow with the Qur’an.
         </p>
       </div>
 
       {confirmationState === 'success' && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
           Your donation was confirmed. Thank you for your support.
         </p>
       )}
       {confirmationState === 'pending' && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Your bank donation is processing. Thank you — Stripe will confirm the
           payment shortly.
         </p>
       )}
       {confirmationState === 'error' && (
-        <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           We could not confirm this donation checkout. Please try again or
           contact support.
         </p>
       )}
       {!confirmationState && (
-        <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+        <p className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
           Start a donation from the payment checkout page.
         </p>
       )}
@@ -99,13 +100,13 @@ export default async function DonationPage({
       <div className="flex flex-wrap gap-3">
         <Link
           href="/payments"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
         >
-          Back to payments
+          Donation options
         </Link>
         <Link
           href="/"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
+          className="rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
         >
           Return home
         </Link>
