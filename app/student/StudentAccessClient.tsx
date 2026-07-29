@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
+import Link from 'next/link';
 import {
   displayBadge,
   getMilestoneProgress,
@@ -26,7 +27,6 @@ type BookedClass = {
   language: string | null;
   start_time: string;
   duration_min: number | null;
-  meeting_url: string | null;
 };
 
 type StudentClass = {
@@ -390,15 +390,13 @@ export default function StudentAccessClient() {
                             </div>
                           </div>
 
-                          {bookedClass?.meeting_url ? (
-                            <a
-                              href={bookedClass.meeting_url}
-                              target="_blank"
-                              rel="noreferrer"
+                          {bookedClass ? (
+                            <Link
+                              href={`/live/classes/${bookedClass.id}`}
                               className="w-full rounded-2xl bg-emerald-600 px-4 py-3 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                             >
                               Join Live Class
-                            </a>
+                            </Link>
                           ) : (
                             <p className="text-sm font-medium text-gray-600">
                               Live link will be added before class.

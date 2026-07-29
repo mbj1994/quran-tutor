@@ -14,7 +14,6 @@ type BookedClass = {
   language: string | null;
   start_time: string;
   duration_min: number;
-  meeting_url: string | null;
 };
 
 type Learner = {
@@ -112,8 +111,7 @@ export default async function MyClasses() {
           level,
           language,
           start_time,
-          duration_min,
-          meeting_url
+          duration_min
         ),
         learner:learners!enrolments_learner_profile_id_fkey (
           id,
@@ -303,20 +301,12 @@ export default async function MyClasses() {
                 </div>
               )}
               {bookedClass && (
-                bookedClass.meeting_url ? (
-                  <a
-                    href={bookedClass.meeting_url}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    href={`/live/classes/${bookedClass.id}`}
                     className="mt-3 inline-block w-full rounded bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                   >
                     Join Live Class
-                  </a>
-                ) : (
-                  <p className="mt-3 text-sm font-medium text-gray-600">
-                    Live link will be added before class.
-                  </p>
-                )
+                  </Link>
               )}
               {progress && (
                 <div className="mt-3 space-y-1 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">

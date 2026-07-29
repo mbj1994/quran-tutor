@@ -15,16 +15,20 @@ export default function ClientBookButton({
   disabled,
   hasActiveSubscription,
   learners,
+  bookedLearnerIds,
 }: {
   classId: string;
   disabled?: boolean;
   hasActiveSubscription: boolean;
   learners: Learner[];
+  bookedLearnerIds: string[];
 }) {
   const sb = supabaseBrowser();
   const router = useRouter();
   const [status, setStatus] = useState<'idle' | 'saving' | 'done'>('idle');
   const [selectedLearnerId, setSelectedLearnerId] = useState('');
+  const [message, setMessage] = useState('');
+  const selectedLearnerIsBooked = bookedLearnerIds.includes(selectedLearnerId);
 
   async function book() {
     const {
@@ -44,10 +48,16 @@ export default function ClientBookButton({
     }
 
     if (!selectedLearnerId) {
-      alert('Please choose which learner is joining this class.');
+      setMessage('Please choose which learner is joining this class.');
       return;
     }
 
+    if (selectedLearnerIsBooked) {
+      setMessage('This child is already booked for this class.');
+      return;
+    }
+
+    setMessage('');
     setStatus('saving');
 
     const { error } = await sb
@@ -59,7 +69,17 @@ export default function ClientBookButton({
       });
 
     if (error) {
-      alert(error.message);
+      const isDuplicateBooking =
+        error.code === '23505' &&
+        `${error.message} ${error.details ?? ''}`.includes(
+          'enrolments_class_learner_profile_unique'
+        );
+
+      setMessage(
+        isDuplicateBooking
+          ? 'This child is already booked for this class.'
+          : 'We could not book this class right now. Please try again.'
+      );
       return setStatus('idle');
     }
 
@@ -94,10 +114,19 @@ export default function ClientBookButton({
   }
 
   return (
-    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+    <div className="flex w-full flex-col gap-2 sm:w-auto">
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <select
         value={selectedLearnerId}
-        onChange={(event) => setSelectedLearnerId(event.target.value)}
+        onChange={(event) => {
+          const learnerId = event.target.value;
+          setSelectedLearnerId(learnerId);
+          setMessage(
+            bookedLearnerIds.includes(learnerId)
+              ? 'This child is already booked for this class.'
+              : ''
+          );
+        }}
         disabled={disabled || status === 'saving'}
         className="w-full rounded-lg border px-2 py-2 text-sm sm:w-auto"
       >
@@ -105,17 +134,28 @@ export default function ClientBookButton({
         {learners.map((learner) => (
           <option key={learner.id} value={learner.id}>
             {learner.full_name}
+            {bookedLearnerIds.includes(learner.id) ? ' — Already booked' : ''}
           </option>
         ))}
       </select>
 
       <button
         onClick={book}
-        disabled={disabled || status === 'saving'}
+        disabled={disabled || status === 'saving' || selectedLearnerIsBooked}
         className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 sm:w-auto"
       >
-        {status === 'saving' ? 'Booking...' : 'Book class'}
+        {selectedLearnerIsBooked
+          ? 'Already booked'
+          : status === 'saving'
+            ? 'Booking...'
+            : 'Book class'}
       </button>
+      </div>
+      {message && (
+        <p role="status" className="text-sm font-medium text-amber-700">
+          {message}
+        </p>
+      )}
     </div>
   );
 }

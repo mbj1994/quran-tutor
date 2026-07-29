@@ -23,7 +23,6 @@ type BookedClass = {
   language: string | null;
   start_time: string;
   duration_min: number | null;
-  meeting_url: string | null;
 };
 
 type EnrolmentRow = {
@@ -159,8 +158,7 @@ export async function POST(request: Request) {
               level,
               language,
               start_time,
-              duration_min,
-              meeting_url
+              duration_min
             )
           `
         )
@@ -288,10 +286,20 @@ export async function POST(request: Request) {
     current_badge: learner.current_badge,
   };
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     learner: safeLearner,
     classes,
     progress,
     browseClasses,
   });
+
+  response.cookies.set('quran_tutor_student_access', code, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 8,
+    path: '/',
+  });
+
+  return response;
 }

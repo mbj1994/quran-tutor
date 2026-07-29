@@ -160,16 +160,12 @@ export default async function ScholarClasses() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {classRow.meeting_url && (
-                <a
-                  href={classRow.meeting_url}
-                  target="_blank"
-                  rel="noreferrer"
+              <Link
+                  href={`/live/classes/${classRow.id}`}
                   className="col-span-2 flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 sm:col-span-1"
                 >
                   Join Live Class
-                </a>
-              )}
+              </Link>
               <Link
                 href={`/scholar/classes/${classRow.id}/edit`}
                 className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"

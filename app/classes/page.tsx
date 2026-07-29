@@ -13,22 +13,10 @@ type Learner = {
   full_name: string;
 };
 
-type BookedClassLink = {
-  class:
-    | {
-        id: string;
-        meeting_url: string | null;
-      }
-    | {
-        id: string;
-        meeting_url: string | null;
-      }[]
-    | null;
+type BookedClass = {
+  class_id: string;
+  learner_profile_id: string;
 };
-
-function firstOrNull<T>(value: T | T[] | null) {
-  return Array.isArray(value) ? value[0] ?? null : value;
-}
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString('en-US', {
@@ -46,7 +34,7 @@ export default async function ClassesPage() {
 
   let hasActiveSubscription = false;
   let learners: Learner[] = [];
-  const bookedClassLinks = new Map<string, string | null>();
+  const bookedLearnersByClass = new Map<string, Set<string>>();
 
   if (user) {
     const { data: subscription } = await sb
@@ -71,24 +59,17 @@ export default async function ClassesPage() {
     if (learners.length > 0) {
       const { data: bookedRows } = await sb
         .from('enrolments')
-        .select(
-          `
-            class:classes (
-              id,
-              meeting_url
-            )
-          `
-        )
+        .select('class_id, learner_profile_id')
         .in(
           'learner_profile_id',
           learners.map((learner) => learner.id)
         );
 
-      ((bookedRows ?? []) as BookedClassLink[]).forEach((row) => {
-        const bookedClass = firstOrNull(row.class);
-        if (bookedClass?.id) {
-          bookedClassLinks.set(bookedClass.id, bookedClass.meeting_url);
-        }
+      ((bookedRows ?? []) as BookedClass[]).forEach((row) => {
+        const bookedLearners =
+          bookedLearnersByClass.get(row.class_id) ?? new Set<string>();
+        bookedLearners.add(row.learner_profile_id);
+        bookedLearnersByClass.set(row.class_id, bookedLearners);
       });
     }
   }
@@ -125,8 +106,10 @@ export default async function ClassesPage() {
         {classes?.map((classRow) => {
           const booked = classRow.enrolments[0]?.count ?? 0;
           const spots = classRow.capacity - booked;
-          const bookedByCurrentFamily = bookedClassLinks.has(classRow.id);
-          const meetingUrl = bookedClassLinks.get(classRow.id);
+          const bookedLearnerIds = Array.from(
+            bookedLearnersByClass.get(classRow.id) ?? []
+          );
+          const bookedByCurrentFamily = bookedLearnerIds.length > 0;
 
           return (
             <li
@@ -154,9 +137,7 @@ export default async function ClassesPage() {
                 </span>
                 <span className="rounded-full bg-gray-100 px-3 py-1">
                   {bookedByCurrentFamily
-                    ? meetingUrl
-                      ? 'Live link ready'
-                      : 'Live link after booking'
+                    ? 'Classroom ready'
                     : 'Live link available after booking'}
                 </span>
               </div>
@@ -166,11 +147,9 @@ export default async function ClassesPage() {
                   {bookedByCurrentFamily ? 'Already booked' : 'Choose a child to book'}
                 </span>
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-                  {bookedByCurrentFamily && meetingUrl && (
+                  {bookedByCurrentFamily && (
                     <a
-                      href={meetingUrl}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={`/live/classes/${classRow.id}`}
                       className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                     >
                       Join Live Class
@@ -181,6 +160,7 @@ export default async function ClassesPage() {
                     disabled={spots === 0}
                     hasActiveSubscription={hasActiveSubscription}
                     learners={learners}
+                    bookedLearnerIds={bookedLearnerIds}
                   />
                 </div>
               </div>

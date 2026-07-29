@@ -39,7 +39,6 @@ type BookedClass = {
   title: string;
   start_time: string;
   duration_min: number | null;
-  meeting_url: string | null;
 };
 
 type Enrolment = {
@@ -177,8 +176,7 @@ export default async function DashboardPage() {
                 id,
                 title,
                 start_time,
-                duration_min,
-                meeting_url
+                duration_min
               ),
               learner:learners!enrolments_learner_profile_id_fkey (
                 id,
@@ -529,15 +527,13 @@ export default async function DashboardPage() {
                   <div className="text-xs text-gray-500">
                     Status: {enrolment.status ?? 'booked'}
                   </div>
-                  {bookedClass?.meeting_url && (
-                    <a
-                      href={bookedClass.meeting_url}
-                      target="_blank"
-                      rel="noreferrer"
+                  {bookedClass && (
+                    <Link
+                      href={`/live/classes/${bookedClass.id}`}
                       className="mt-3 inline-block rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                     >
                       Join Live Class
-                    </a>
+                    </Link>
                   )}
                 </li>
               );

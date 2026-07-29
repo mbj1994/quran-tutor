@@ -318,16 +318,12 @@ export default async function ScholarClassRosterPage({
         >
           Back to classes
         </Link>
-        {classRow.meeting_url && (
-          <a
-            href={classRow.meeting_url}
-            target="_blank"
-            rel="noreferrer"
+        <Link
+            href={`/live/classes/${classRow.id}`}
             className="flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Join Live Class
-          </a>
-        )}
+        </Link>
       </div>
 
       <div className="mb-4 rounded-2xl border border-gray-200 bg-white p-4 text-sm font-medium text-gray-700 shadow-sm shadow-emerald-950/5">
