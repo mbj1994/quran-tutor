@@ -3,6 +3,13 @@
 import DailyIframe, { type DailyCall } from '@daily-co/daily-js';
 import { useEffect, useRef, useState } from 'react';
 
+let dailyFrameOperation = Promise.resolve();
+
+async function destroyCall(call: DailyCall) {
+  await call.leave().catch(() => undefined);
+  await call.destroy().catch(() => undefined);
+}
+
 export default function DailyClassroom({
   roomUrl,
   token,
@@ -15,25 +22,69 @@ export default function DailyClassroom({
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    if (!frameRef.current) return;
+    const container = frameRef.current;
+    if (!roomUrl || !container || callRef.current) return;
 
-    const call = DailyIframe.createFrame(frameRef.current, {
-      showLeaveButton: true,
-      iframeStyle: {
-        width: '100%',
-        height: '100%',
-        border: '0',
-        borderRadius: '1rem',
-      },
-    });
+    let cancelled = false;
+    let effectCall: DailyCall | null = null;
 
-    callRef.current = call;
-    call.on('error', () => setFailed(true));
-    call.join({ url: roomUrl, token }).catch(() => setFailed(true));
+    dailyFrameOperation = dailyFrameOperation
+      .catch(() => undefined)
+      .then(async () => {
+        if (cancelled || callRef.current) return;
+
+        const existingCall = DailyIframe.getCallInstance();
+        if (existingCall) {
+          await destroyCall(existingCall);
+        }
+
+        if (cancelled || callRef.current) return;
+
+        container.replaceChildren();
+
+        const call = DailyIframe.createFrame(container, {
+          showLeaveButton: true,
+          iframeStyle: {
+            width: '100%',
+            height: '100%',
+            border: '0',
+            borderRadius: '1rem',
+          },
+        });
+
+        effectCall = call;
+        callRef.current = call;
+        call.on('error', () => {
+          if (!cancelled) setFailed(true);
+        });
+
+        try {
+          await call.join({ url: roomUrl, token });
+        } catch {
+          if (!cancelled) setFailed(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
 
     return () => {
-      callRef.current = null;
-      call.destroy();
+      cancelled = true;
+
+      dailyFrameOperation = dailyFrameOperation
+        .catch(() => undefined)
+        .then(async () => {
+          const call = effectCall ?? callRef.current;
+          if (!call) return;
+
+          await destroyCall(call);
+
+          if (callRef.current === call) {
+            callRef.current = null;
+          }
+          effectCall = null;
+          container.replaceChildren();
+        });
     };
   }, [roomUrl, token]);
 
