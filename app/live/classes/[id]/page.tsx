@@ -197,7 +197,7 @@ export default async function LiveClassroomPage({ params }: PageProps) {
     firstOrNull(classRow.scholar)?.full_name ?? 'Approved scholar';
 
   return (
-    <main className="mx-auto max-w-6xl p-4 sm:p-6">
+    <main className="mx-auto max-w-6xl p-3 sm:p-6">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-emerald-700">
@@ -222,7 +222,7 @@ export default async function LiveClassroomPage({ params }: PageProps) {
         {classroom ? (
           <DailyClassroom roomUrl={classroom.roomUrl} token={classroom.token} />
         ) : (
-          <div className="flex min-h-[32rem] items-center justify-center rounded-2xl bg-gray-950 p-6 text-center text-white">
+          <div className="flex h-[clamp(24rem,68svh,44rem)] items-center justify-center rounded-2xl bg-gray-950 p-4 text-center text-white sm:p-6">
             <p className="max-w-md text-base leading-7">{classroomMessage}</p>
           </div>
         )}
@@ -237,7 +237,7 @@ export default async function LiveClassroomPage({ params }: PageProps) {
             href={classRow.meeting_url}
             target="_blank"
             rel="noreferrer"
-            className="text-sm font-semibold text-emerald-800 underline"
+            className="break-all rounded-lg px-2 py-2 text-sm font-semibold text-emerald-800 underline hover:bg-emerald-100"
           >
             Having trouble? Open backup class link
           </a>

@@ -90,7 +90,7 @@ export default function DailyClassroom({
 
   if (failed) {
     return (
-      <div className="flex min-h-[32rem] items-center justify-center rounded-2xl bg-gray-950 p-6 text-center text-white">
+      <div className="flex h-[clamp(24rem,68svh,44rem)] items-center justify-center rounded-2xl bg-gray-950 p-4 text-center text-white sm:p-6">
         <div>
           <p className="text-lg font-semibold">
             We could not open the classroom right now.
@@ -106,7 +106,7 @@ export default function DailyClassroom({
   return (
     <div
       ref={frameRef}
-      className="min-h-[32rem] overflow-hidden rounded-2xl bg-gray-950 sm:min-h-[38rem]"
+      className="h-[clamp(24rem,68svh,44rem)] w-full overflow-hidden rounded-2xl bg-gray-950"
     />
   );
 }

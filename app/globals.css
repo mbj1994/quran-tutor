@@ -13,6 +13,8 @@
 }
 
 body {
+  min-width: 0;
+  overflow-x: hidden;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
@@ -20,6 +22,29 @@ body {
     radial-gradient(circle at 8% 0%, rgb(209 250 229 / 55%), transparent 28rem),
     radial-gradient(circle at 96% 12%, rgb(254 243 199 / 45%), transparent 24rem);
   background-attachment: fixed;
+}
+
+main,
+header,
+nav,
+section,
+article,
+form,
+ul,
+li,
+div {
+  min-width: 0;
+}
+
+p,
+h1,
+h2,
+h3,
+a,
+button,
+label,
+span {
+  overflow-wrap: anywhere;
 }
 
 ::selection {
@@ -40,7 +65,17 @@ button:not(:disabled) {
 input,
 select,
 textarea {
+  max-width: 100%;
   background-color: #fff;
+}
+
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
 }
 
 :focus-visible {

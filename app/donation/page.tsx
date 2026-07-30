@@ -97,16 +97,16 @@ export default async function DonationPage({
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="grid gap-3 sm:flex sm:flex-wrap">
         <Link
           href="/payments"
-          className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          className="flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-emerald-800"
         >
           Donation options
         </Link>
         <Link
           href="/"
-          className="rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-white"
+          className="flex min-h-11 items-center justify-center rounded-2xl border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-white"
         >
           Return home
         </Link>

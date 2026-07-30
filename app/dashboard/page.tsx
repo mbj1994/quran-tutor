@@ -349,14 +349,14 @@ export default async function DashboardPage() {
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-950">Children</h2>
-          <div className="flex gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
             <Link
               href="/learners"
-              className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+              className="flex min-h-11 items-center justify-center rounded border border-gray-300 px-3 py-2 text-center text-sm hover:bg-gray-50"
             >
               View Children
             </Link>
-            <Link href="/learners/new" className="rounded bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700">
+            <Link href="/learners/new" className="flex min-h-11 items-center justify-center rounded bg-emerald-600 px-3 py-2 text-center text-sm text-white hover:bg-emerald-700">
               Add a child
             </Link>
           </div>

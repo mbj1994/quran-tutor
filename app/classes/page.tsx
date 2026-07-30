@@ -150,7 +150,7 @@ export default async function ClassesPage() {
                   {bookedByCurrentFamily && (
                     <a
                       href={`/live/classes/${classRow.id}`}
-                      className="rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                      className="flex min-h-11 w-full items-center justify-center rounded bg-emerald-600 px-3 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-auto"
                     >
                       Join Live Class
                     </a>

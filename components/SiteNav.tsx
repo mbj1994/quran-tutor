@@ -69,7 +69,7 @@ export default async function SiteNav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-emerald-100/80 bg-white/90 shadow-sm backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
+      <nav className="mx-auto flex max-w-6xl flex-col gap-3 px-3 py-3 sm:px-6 md:flex-row md:items-center md:justify-between">
         <Link
           href="/"
           className="flex w-fit items-center gap-2 text-lg font-bold leading-tight tracking-tight text-emerald-950"
@@ -80,12 +80,12 @@ export default async function SiteNav() {
           Qur’an Tutor
         </Link>
 
-        <div className="flex gap-1 overflow-x-auto pb-1 text-sm sm:flex-wrap sm:items-center sm:overflow-visible sm:pb-0 md:justify-end">
+        <div className="grid w-full grid-cols-2 gap-1 text-sm sm:flex sm:flex-wrap sm:items-center md:w-auto md:justify-end">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex min-h-10 shrink-0 items-center rounded-xl px-3 py-2 font-medium leading-5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-800"
+              className="flex min-h-11 min-w-0 items-center justify-center rounded-xl px-2 py-2 text-center font-medium leading-5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-800 sm:justify-start sm:px-3 sm:text-left"
             >
               {link.label}
             </Link>

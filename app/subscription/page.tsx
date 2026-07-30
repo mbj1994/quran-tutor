@@ -160,7 +160,7 @@ export default async function SubscriptionPage({
           </div>
           <Link
             href="/payments"
-            className="inline-block rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="flex min-h-11 w-full items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-emerald-700 sm:w-fit"
           >
             Start subscription
           </Link>
