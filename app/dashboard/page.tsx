@@ -9,6 +9,7 @@ import {
 } from '@/lib/gamification';
 import { appLanguages } from '@/lib/languages';
 import CopyCodeButton from '@/app/learners/CopyCodeButton';
+import { getRoleCode, type ProfileRole } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ type Subscription = {
   created_at: string | null;
 };
 
-type Profile = {
+type Profile = ProfileRole & {
   app_language: string | null;
 };
 
@@ -138,7 +139,7 @@ export default async function DashboardPage() {
         .order('full_name', { ascending: true }),
       sb
         .from('profiles')
-        .select('app_language')
+        .select('app_language, role:roles(code)')
         .eq('id', user.id)
         .maybeSingle<Profile>(),
     ]);
@@ -154,6 +155,9 @@ export default async function DashboardPage() {
   if (profileError) {
     return <p className="p-4 text-red-600">{profileError.message}</p>;
   }
+
+  if (getRoleCode(profile) === 'admin') redirect('/admin');
+  if (getRoleCode(profile) === 'scholar') redirect('/scholar/overview');
 
   const learners = (learnerRows ?? []) as Learner[];
   const learnerIds = learners.map((learner) => learner.id);

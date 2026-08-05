@@ -31,8 +31,8 @@ const scholarLinks: NavLink[] = [
 ];
 
 const adminLinks: NavLink[] = [
-  { href: '/admin', label: 'Admin' },
-  { href: '/admin/scholars', label: 'Scholar Approvals' },
+  { href: '/admin', label: 'Admin Dashboard' },
+  { href: '/classes', label: 'Browse Classes' },
 ];
 
 export default async function SiteNav() {

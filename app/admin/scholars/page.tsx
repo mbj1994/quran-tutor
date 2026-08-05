@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import AdminUnauthorized from '@/components/AdminUnauthorized';
 import { createSupabaseAdminClient } from '@/lib/supabaseAdmin';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
 import {
@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 
 type ScholarProfile = ProfileRole & {
   id: string;
+  full_name: string | null;
   created_at: string | null;
   app_language: string | null;
   scholar_status: string | null;
@@ -24,13 +25,13 @@ type UserEmail = {
   email: string | null;
 };
 
-async function requireAdmin() {
+async function getAdminAccess() {
   const sb = createServerComponentClient({ cookies });
   const {
     data: { user },
   } = await sb.auth.getUser();
 
-  if (!user) redirect('/login');
+  if (!user) return { allowed: false, signedIn: false };
 
   const { data: profile } = await sb
     .from('profiles')
@@ -38,7 +39,7 @@ async function requireAdmin() {
     .eq('id', user.id)
     .maybeSingle<ProfileRole>();
 
-  if (getRoleCode(profile) !== 'admin') redirect('/dashboard');
+  return { allowed: getRoleCode(profile) === 'admin', signedIn: true };
 }
 
 function statusBadgeClass(status: ScholarStatus) {
@@ -83,25 +84,34 @@ async function listAuthUserEmails() {
 }
 
 export default async function AdminScholarsPage() {
-  await requireAdmin();
+  const access = await getAdminAccess();
+  if (!access.allowed) return <AdminUnauthorized signedIn={access.signedIn} />;
 
   const supabaseAdmin = createSupabaseAdminClient();
-  const [{ data: profiles, error }, users] = await Promise.all([
+  const [{ data: profiles, error }, { data: classRows, error: classesError }, users] = await Promise.all([
     supabaseAdmin
       .from('profiles')
-      .select('id, created_at, app_language, scholar_status, role:roles(code)')
+      .select('id, full_name, created_at, app_language, scholar_status, role:roles(code)')
       .order('created_at', { ascending: false }),
+    supabaseAdmin.from('classes').select('scholar_id'),
     listAuthUserEmails(),
   ]);
 
-  if (error) {
-    return <p className="p-4 text-red-600">{error.message}</p>;
+  if (error || classesError) {
+    return <p className="p-4 text-red-600">Could not load scholar accounts.</p>;
   }
 
   const emailByUserId = new Map(users.map((user) => [user.id, user.email]));
   const scholars = ((profiles ?? []) as ScholarProfile[]).filter(
     (profile) => getRoleCode(profile) === 'scholar'
   );
+  const classCountByScholar = new Map<string, number>();
+  for (const classRow of classRows ?? []) {
+    classCountByScholar.set(
+      classRow.scholar_id,
+      (classCountByScholar.get(classRow.scholar_id) ?? 0) + 1
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl bg-gray-50 p-4 sm:p-6">
@@ -139,8 +149,11 @@ export default async function AdminScholarsPage() {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <h2 className="font-semibold text-gray-950">
-                      {emailByUserId.get(profile.id) ?? 'Email unavailable'}
+                      {profile.full_name ?? emailByUserId.get(profile.id) ?? 'Scholar'}
                     </h2>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {emailByUserId.get(profile.id) ?? 'Email unavailable'}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-700">
                       <span className="rounded-full bg-gray-100 px-3 py-1">
                         Role: scholar
@@ -157,6 +170,9 @@ export default async function AdminScholarsPage() {
                       </span>
                       <span className="rounded-full bg-gray-100 px-3 py-1">
                         App language: {profile.app_language ?? '-'}
+                      </span>
+                      <span className="rounded-full bg-gray-100 px-3 py-1">
+                        Classes: {classCountByScholar.get(profile.id) ?? 0}
                       </span>
                     </div>
                   </div>

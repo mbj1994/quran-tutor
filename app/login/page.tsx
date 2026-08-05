@@ -59,7 +59,11 @@ function LoginForm() {
       .eq('id', user.id)
       .maybeSingle<ProfileRole>();
 
-    return getRoleCode(profile) === 'scholar' ? '/scholar/overview' : '/dashboard';
+    const roleCode = getRoleCode(profile);
+
+    if (roleCode === 'admin') return '/admin';
+    if (roleCode === 'scholar') return '/scholar/overview';
+    return '/dashboard';
   }, [supabase]);
 
   const redirectAfterLogin = useCallback(async () => {
