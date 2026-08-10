@@ -14,6 +14,7 @@ type DailyToken = {
 export type DailyClassroom = {
   roomUrl: string;
   token: string;
+  recordingAvailable: boolean;
 };
 
 export class DailyConfigurationError extends Error {}
@@ -105,19 +106,53 @@ export async function createDailyClassroom({
   const roomName = `quran-tutor-class-${classId}`;
   const room = await getOrCreateRoom(roomName);
   const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 4;
-  const meetingToken = await dailyRequest<DailyToken>('/meeting-tokens', {
-    method: 'POST',
-    body: JSON.stringify({
-      properties: {
-        room_name: roomName,
-        user_name: participantName,
-        is_owner: isOwner,
-        exp: expiresAt,
-        eject_at_token_exp: true,
-        enable_prejoin_ui: true,
-      },
-    }),
-  });
+  const baseTokenProperties = {
+    room_name: roomName,
+    user_name: participantName,
+    is_owner: isOwner,
+    exp: expiresAt,
+    eject_at_token_exp: true,
+    enable_prejoin_ui: true,
+    permissions: {
+      canAdmin: isOwner,
+    },
+  };
+  let recordingAvailable = isOwner;
+  let meetingToken: DailyToken;
+
+  try {
+    meetingToken = await dailyRequest<DailyToken>('/meeting-tokens', {
+      method: 'POST',
+      body: JSON.stringify({
+        properties: {
+          ...baseTokenProperties,
+          ...(isOwner
+            ? {
+                enable_recording: 'cloud',
+                enable_recording_ui: true,
+              }
+            : {
+                enable_recording_ui: false,
+              }),
+        },
+      }),
+    });
+  } catch (error) {
+    if (!isOwner) throw error;
+
+    // Keep the live class usable when cloud recording is unavailable for the
+    // Daily account. The scholar sees a friendly recording-specific message.
+    recordingAvailable = false;
+    meetingToken = await dailyRequest<DailyToken>('/meeting-tokens', {
+      method: 'POST',
+      body: JSON.stringify({
+        properties: {
+          ...baseTokenProperties,
+          enable_recording_ui: false,
+        },
+      }),
+    });
+  }
 
   const roomUrl = room.url || getConfiguredRoomUrl(roomName);
 
@@ -128,5 +163,6 @@ export async function createDailyClassroom({
   return {
     roomUrl,
     token: meetingToken.token,
+    recordingAvailable,
   };
 }

@@ -63,6 +63,16 @@ type BrowseClassRow = {
   enrolments: { count: number }[];
 };
 
+type ClassRecordingRow = {
+  id: string;
+  class_id: string;
+  learner_id: string | null;
+  title: string;
+  recording_url: string;
+  notes: string | null;
+  created_at: string;
+};
+
 function firstOrNull<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
@@ -242,6 +252,27 @@ export async function POST(request: Request) {
   const bookedClassIds = new Set(
     classes.map((row) => row.class?.id).filter(Boolean) as string[]
   );
+  let recordings: ClassRecordingRow[] = [];
+
+  if (bookedClassIds.size > 0) {
+    const { data: recordingRows, error: recordingError } = await sb
+      .from('class_recordings')
+      .select(
+        'id, class_id, learner_id, title, recording_url, notes, created_at'
+      )
+      .in('class_id', [...bookedClassIds])
+      .or(`learner_id.is.null,learner_id.eq.${learner.id}`)
+      .order('created_at', { ascending: false });
+
+    if (recordingError) {
+      console.error('[student-access] Could not load class recordings', {
+        learnerId: learner.id,
+        error: recordingError,
+      });
+    } else {
+      recordings = (recordingRows ?? []) as ClassRecordingRow[];
+    }
+  }
 
   const browseClasses = ((browseRows ?? []) as BrowseClassRow[])
     .map((classRow) => {
@@ -291,6 +322,7 @@ export async function POST(request: Request) {
     classes,
     progress,
     browseClasses,
+    recordings,
   });
 
   response.cookies.set('quran_tutor_student_access', code, {

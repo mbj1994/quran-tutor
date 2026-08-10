@@ -46,6 +46,16 @@ type LessonProgress = {
   parent_note: string | null;
 };
 
+type ClassRecording = {
+  id: string;
+  class_id: string;
+  learner_id: string | null;
+  title: string;
+  recording_url: string;
+  notes: string | null;
+  created_at: string;
+};
+
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString('en-US', {
     dateStyle: 'medium',
@@ -148,17 +158,31 @@ export default async function MyClasses() {
     .filter((learnerId): learnerId is string => Boolean(learnerId));
 
   let progressRows: LessonProgress[] = [];
+  let recordingRows: ClassRecording[] = [];
 
   if (classIds.length > 0 && learnerProfileIds.length > 0) {
-    const { data: progressData } = await sb
-      .from('lesson_progress')
-      .select(
-        'class_id, learner_profile_id, attendance_status, notes, homework, covered, revision, parent_note'
-      )
-      .in('class_id', classIds)
-      .in('learner_profile_id', learnerProfileIds);
+    const [{ data: progressData }, { data: recordingData, error: recordingError }] =
+      await Promise.all([
+        sb
+          .from('lesson_progress')
+          .select(
+            'class_id, learner_profile_id, attendance_status, notes, homework, covered, revision, parent_note'
+          )
+          .in('class_id', classIds)
+          .in('learner_profile_id', learnerProfileIds),
+        sb
+          .from('class_recordings')
+          .select(
+            'id, class_id, learner_id, title, recording_url, notes, created_at'
+          )
+          .in('class_id', classIds)
+          .order('created_at', { ascending: false }),
+      ]);
 
     progressRows = (progressData ?? []) as LessonProgress[];
+    recordingRows = recordingError
+      ? []
+      : ((recordingData ?? []) as ClassRecording[]);
   }
 
   const progressByBooking = new Map(
@@ -219,6 +243,15 @@ export default async function MyClasses() {
             progress?.revision ?? progress?.homework ?? 'Revision notes will appear after a lesson update.';
           const latestNote =
             progress?.parent_note ?? progress?.covered ?? progress?.notes ?? null;
+          const recordings =
+            bookedClass && enrolment.learner_profile_id
+              ? recordingRows.filter(
+                  (recording) =>
+                    recording.class_id === bookedClass.id &&
+                    (!recording.learner_id ||
+                      recording.learner_id === enrolment.learner_profile_id)
+                )
+              : [];
 
           return (
             <li
@@ -307,6 +340,45 @@ export default async function MyClasses() {
                   >
                     Join Live Class
                   </Link>
+              )}
+              {recordings.length > 0 && (
+                <section className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                  <h3 className="text-sm font-semibold text-gray-950">
+                    Lesson Recordings
+                  </h3>
+                  <p className="mt-1 text-xs text-emerald-900">
+                    Private recordings for lesson review
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {recordings.map((recording) => (
+                      <li
+                        key={recording.id}
+                        className="rounded-xl border border-emerald-100 bg-white p-3"
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-950">
+                              {recording.title}
+                            </p>
+                            {recording.notes && (
+                              <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-600">
+                                {recording.notes}
+                              </p>
+                            )}
+                          </div>
+                          <a
+                            href={recording.recording_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                          >
+                            Watch Recording
+                          </a>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               )}
               {progress && (
                 <div className="mt-3 space-y-1 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">

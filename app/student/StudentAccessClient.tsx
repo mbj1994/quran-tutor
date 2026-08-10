@@ -67,11 +67,22 @@ type LessonProgress = {
   } | null;
 };
 
+type ClassRecording = {
+  id: string;
+  class_id: string;
+  learner_id: string | null;
+  title: string;
+  recording_url: string;
+  notes: string | null;
+  created_at: string;
+};
+
 type StudentPayload = {
   learner: Learner;
   classes: StudentClass[];
   progress: LessonProgress[];
   browseClasses: BrowseClass[];
+  recordings: ClassRecording[];
 };
 
 function formatDateTime(value: string) {
@@ -95,6 +106,18 @@ export default function StudentAccessClient() {
       if (!map.has(progress.class_id)) {
         map.set(progress.class_id, progress);
       }
+    });
+
+    return map;
+  }, [student]);
+
+  const recordingsByClass = useMemo(() => {
+    const map = new Map<string, ClassRecording[]>();
+
+    student?.recordings.forEach((recording) => {
+      const classRecordings = map.get(recording.class_id) ?? [];
+      classRecordings.push(recording);
+      map.set(recording.class_id, classRecordings);
     });
 
     return map;
@@ -349,6 +372,9 @@ export default function StudentAccessClient() {
                     const progress = bookedClass
                       ? progressByClass.get(bookedClass.id)
                       : undefined;
+                    const recordings = bookedClass
+                      ? (recordingsByClass.get(bookedClass.id) ?? [])
+                      : [];
 
                     return (
                       <li
@@ -423,6 +449,46 @@ export default function StudentAccessClient() {
                               <p>Scholar / Ustass note: {progress.parent_note}</p>
                             )}
                           </div>
+                        )}
+
+                        {recordings.length > 0 && (
+                          <section className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                            <h4 className="text-sm font-semibold text-gray-950">
+                              Lesson Recordings
+                            </h4>
+                            <p className="mt-1 text-xs text-emerald-900">
+                              Private recordings for lesson review
+                            </p>
+                            <ul className="mt-3 space-y-2">
+                              {recordings.map((recording) => (
+                                <li
+                                  key={recording.id}
+                                  className="rounded-xl border border-emerald-100 bg-white p-3"
+                                >
+                                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-950">
+                                        {recording.title}
+                                      </p>
+                                      {recording.notes && (
+                                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-gray-600">
+                                          {recording.notes}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <a
+                                      href={recording.recording_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                                    >
+                                      Watch Recording
+                                    </a>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </section>
                         )}
                       </li>
                     );

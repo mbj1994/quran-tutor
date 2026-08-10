@@ -330,6 +330,21 @@ export default async function ScholarClassRosterPage({
         Learners enrolled: {enrolments.length}
       </div>
 
+      <section className="mb-4 flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-semibold text-gray-950">Lesson Recordings</h2>
+          <p className="mt-1 text-sm text-emerald-900">
+            Add a private recording link for lesson review.
+          </p>
+        </div>
+        <Link
+          href={`/scholar/classes/${classRow.id}/recordings`}
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+        >
+          Add Recording
+        </Link>
+      </section>
+
       {enrolments.length === 0 ? (
         <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
           <h2 className="font-semibold text-gray-950">

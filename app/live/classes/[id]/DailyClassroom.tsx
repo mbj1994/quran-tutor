@@ -13,13 +13,18 @@ async function destroyCall(call: DailyCall) {
 export default function DailyClassroom({
   roomUrl,
   token,
+  isScholar,
+  recordingAvailable,
 }: {
   roomUrl: string;
   token: string;
+  isScholar: boolean;
+  recordingAvailable: boolean;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const callRef = useRef<DailyCall | null>(null);
   const [failed, setFailed] = useState(false);
+  const [recordingMessage, setRecordingMessage] = useState('');
 
   useEffect(() => {
     const container = frameRef.current;
@@ -57,6 +62,25 @@ export default function DailyClassroom({
         call.on('error', () => {
           if (!cancelled) setFailed(true);
         });
+        if (isScholar && recordingAvailable) {
+          call.on('recording-started', () => {
+            if (!cancelled) {
+              setRecordingMessage('Class recording has started.');
+            }
+          });
+          call.on('recording-stopped', () => {
+            if (!cancelled) {
+              setRecordingMessage('Class recording has stopped.');
+            }
+          });
+          call.on('recording-error', () => {
+            if (!cancelled) {
+              setRecordingMessage(
+                'Recording is unavailable right now. You can continue the class and add a private recording link afterward.'
+              );
+            }
+          });
+        }
 
         try {
           await call.join({ url: roomUrl, token });
@@ -86,7 +110,7 @@ export default function DailyClassroom({
           container.replaceChildren();
         });
     };
-  }, [roomUrl, token]);
+  }, [isScholar, recordingAvailable, roomUrl, token]);
 
   if (failed) {
     return (
@@ -104,9 +128,19 @@ export default function DailyClassroom({
   }
 
   return (
-    <div
-      ref={frameRef}
-      className="h-[clamp(24rem,68svh,44rem)] w-full overflow-hidden rounded-2xl bg-gray-950"
-    />
+    <div>
+      <div
+        ref={frameRef}
+        className="h-[clamp(24rem,68svh,44rem)] w-full overflow-hidden rounded-2xl bg-gray-950"
+      />
+      {recordingMessage && (
+        <p
+          role="status"
+          className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+        >
+          {recordingMessage}
+        </p>
+      )}
+    </div>
   );
 }

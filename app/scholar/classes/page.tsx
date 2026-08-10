@@ -184,6 +184,12 @@ export default async function ScholarClasses() {
               >
                 Progress
               </Link>
+              <Link
+                href={`/scholar/classes/${classRow.id}/recordings`}
+                className="col-span-2 flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100 sm:col-span-1"
+              >
+                Recordings
+              </Link>
             </div>
           </li>
         ))}

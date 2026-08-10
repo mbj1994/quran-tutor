@@ -220,13 +220,34 @@ export default async function LiveClassroomPage({ params }: PageProps) {
 
       <section className="rounded-[1.5rem] border border-gray-200 bg-white p-3 shadow-lg shadow-emerald-950/5 sm:p-4">
         {classroom ? (
-          <DailyClassroom roomUrl={classroom.roomUrl} token={classroom.token} />
+          <DailyClassroom
+            roomUrl={classroom.roomUrl}
+            token={classroom.token}
+            isScholar={viewer.isOwner}
+            recordingAvailable={classroom.recordingAvailable}
+          />
         ) : (
           <div className="flex h-[clamp(24rem,68svh,44rem)] items-center justify-center rounded-2xl bg-gray-950 p-4 text-center text-white sm:p-6">
             <p className="max-w-md text-base leading-7">{classroomMessage}</p>
           </div>
         )}
       </section>
+
+      {viewer.isOwner && (
+        <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <h2 className="font-semibold text-amber-950">Class Recording</h2>
+          <p className="mt-1 text-sm leading-6 text-amber-900">
+            Recording should only be used for lesson review and child learning
+            support.
+          </p>
+          <p className="mt-1 text-sm leading-6 text-amber-800">
+            {classroom?.recordingAvailable
+              ? 'Use the recording control inside the classroom when you are ready. Recording never starts automatically.'
+              : 'Cloud recording is unavailable right now. You can continue the class and add a private recording link afterward.'}
+          </p>
+          {/* TODO: Add explicit parent recording consent when a consent field or workflow is introduced. */}
+        </section>
+      )}
 
       <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-emerald-950">
