@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Quran Tutor app icon</title>
+  <rect width="512" height="512" rx="96" fill="#065f46"/>
+  <circle cx="221" cy="139" r="58" fill="#fcd34d"/>
+  <circle cx="253" cy="119" r="56" fill="#065f46"/>
+  <path d="M256 361V221c-38-29-91-39-136-17v139c48-18 99-10 136 18Z" fill="#fff7db" stroke="#fcd34d" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M256 361V221c38-29 91-39 136-17v139c-48-18-99-10-136 18Z" fill="#fff7db" stroke="#fcd34d" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M256 221v140" fill="none" stroke="#fcd34d" stroke-width="12" stroke-linecap="round"/>
+</svg>

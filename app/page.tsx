@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import InstallApp from '@/components/InstallApp';
 
 const highlights = [
   ['☾', 'Live Qur’an Classes', 'Small, welcoming lessons that fit family life.'],
@@ -37,6 +38,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <InstallApp />
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {highlights.map(([icon, title, body]) => (
