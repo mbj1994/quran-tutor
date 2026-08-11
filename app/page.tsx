@@ -23,7 +23,7 @@ export default function Home() {
             Help your child grow with the Qur’an.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-emerald-50/85 sm:text-lg">
-            Trusted live teaching and clear progress, all in one warm Family Dashboard.
+            Trusted live teaching and clear progress, all in one welcoming family dashboard.
           </p>
           <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
             <Link href="/login" className="flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-emerald-950 shadow-sm hover:bg-amber-200">
@@ -65,6 +65,10 @@ export default function Home() {
           Make a Donation →
         </Link>
       </section>
+
+      <p className="mt-6 text-center text-xs leading-5 text-gray-500">
+        Pilot version for testing with selected families and scholars.
+      </p>
     </main>
   );
 }

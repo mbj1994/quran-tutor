@@ -434,7 +434,15 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <main className="flex min-h-[55vh] items-center justify-center p-4">
+          <p className="rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-medium text-gray-700 shadow-sm">
+            Preparing sign in…
+          </p>
+        </main>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

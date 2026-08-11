@@ -8,6 +8,7 @@ import {
   getNextMilestone,
 } from '@/lib/gamification';
 import CopyCodeButton from './CopyCodeButton';
+import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export default async function LearnersPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <p className="p-4 text-red-600">{error.message}</p>;
+    return <FriendlyError />;
   }
 
   const learners = (data ?? []) as Learner[];

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { displayBadge } from '@/lib/gamification';
+import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,7 @@ export default async function MyClasses() {
     .eq('parent_id', user.id);
 
   if (learnerError) {
-    return <p className="p-4 text-red-600">{learnerError.message}</p>;
+    return <FriendlyError />;
   }
 
   const ownedLearnerIds = ((learnerRows ?? []) as LearnerSummary[]).map(
@@ -140,7 +141,7 @@ export default async function MyClasses() {
     });
 
   if (error) {
-    return <p className="p-4 text-red-600">{error.message}</p>;
+    return <FriendlyError />;
   }
 
   const enrolments = (data ?? []) as Enrolment[];
@@ -347,7 +348,8 @@ export default async function MyClasses() {
                     Lesson Recordings
                   </h3>
                   <p className="mt-1 text-xs text-emerald-900">
-                    Private recordings for lesson review
+                    For lesson review and learning support. Do not share private
+                    recordings publicly.
                   </p>
                   <ul className="mt-3 space-y-2">
                     {recordings.map((recording) => (

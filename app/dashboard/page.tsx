@@ -9,6 +9,7 @@ import {
 } from '@/lib/gamification';
 import { appLanguages } from '@/lib/languages';
 import CopyCodeButton from '@/app/learners/CopyCodeButton';
+import FriendlyError from '@/components/FriendlyError';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
@@ -145,15 +146,15 @@ export default async function DashboardPage() {
     ]);
 
   if (subscriptionError) {
-    return <p className="p-4 text-red-600">{subscriptionError.message}</p>;
+    return <FriendlyError />;
   }
 
   if (learnerError) {
-    return <p className="p-4 text-red-600">{learnerError.message}</p>;
+    return <FriendlyError />;
   }
 
   if (profileError) {
-    return <p className="p-4 text-red-600">{profileError.message}</p>;
+    return <FriendlyError />;
   }
 
   if (getRoleCode(profile) === 'admin') redirect('/admin');
@@ -221,11 +222,11 @@ export default async function DashboardPage() {
       ]);
 
     if (enrolmentError) {
-      return <p className="p-4 text-red-600">{enrolmentError.message}</p>;
+      return <FriendlyError />;
     }
 
     if (progressError) {
-      return <p className="p-4 text-red-600">{progressError.message}</p>;
+      return <FriendlyError />;
     }
 
     enrolments = (enrolmentRows ?? []) as Enrolment[];

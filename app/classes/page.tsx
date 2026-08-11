@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ClientBookButton from './BookButton';
+import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,12 +75,16 @@ export default async function ClassesPage() {
     }
   }
 
-  const { data: classes } = await sb
+  const { data: classes, error: classesError } = await sb
     .from('classes')
     .select(
       'id,title,subject,level,language,start_time,duration_min,capacity,scholar_id,enrolments(count)'
     )
     .order('start_time', { ascending: true });
+
+  if (classesError) {
+    return <FriendlyError />;
+  }
 
   return (
     <main className="mx-auto max-w-4xl bg-transparent p-4 sm:p-6">

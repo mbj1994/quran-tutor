@@ -457,7 +457,8 @@ export default function StudentAccessClient() {
                               Lesson Recordings
                             </h4>
                             <p className="mt-1 text-xs text-emerald-900">
-                              Private recordings for lesson review
+                              For lesson review and learning support. Do not share
+                              private recordings publicly.
                             </p>
                             <ul className="mt-3 space-y-2">
                               {recordings.map((recording) => (

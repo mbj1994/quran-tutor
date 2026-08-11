@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import PwaRegistration from '@/components/PwaRegistration';
 import SiteNav from '@/components/SiteNav';
+import SiteFooter from '@/components/SiteFooter';
 import { Providers } from './providers';
 import './globals.css';
 
@@ -16,9 +17,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Qur’an Tutor',
-  description: 'Live Qur’an learning for Gambian diaspora children',
+  title: {
+    default: 'Qur’an Tutor | Live Qur’an Learning',
+    template: '%s | Qur’an Tutor',
+  },
+  description:
+    'Live Qur’an classes, lesson review, and learning progress for children and families.',
   applicationName: 'Qur’an Tutor',
+  openGraph: {
+    title: 'Qur’an Tutor | Live Qur’an Learning',
+    description:
+      'Live Qur’an classes, lesson review, and learning progress for children and families.',
+    siteName: 'Qur’an Tutor',
+    type: 'website',
+  },
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
@@ -55,11 +67,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} overflow-x-hidden antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col overflow-x-hidden antialiased`}>
         <Providers>
           <PwaRegistration />
           <SiteNav />
-          {children}
+          <div className="flex-1">{children}</div>
+          <SiteFooter />
         </Providers>
       </body>
     </html>

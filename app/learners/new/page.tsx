@@ -82,6 +82,12 @@ export default async function NewLearnerPage({
 
   const params = await searchParams;
   const error = params?.error;
+  const friendlyError =
+    error === 'Full name is required.' || error === 'Age must be a valid number.'
+      ? error
+      : error
+        ? 'We could not save this child right now. Please try again.'
+        : null;
 
   return (
     <main className="mx-auto max-w-xl bg-transparent p-4 sm:p-6">
@@ -185,7 +191,11 @@ export default async function NewLearnerPage({
           Save child
         </button>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {friendlyError && (
+          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {friendlyError}
+          </p>
+        )}
       </form>
     </main>
   );

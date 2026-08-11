@@ -5,6 +5,7 @@ import AdminUnauthorized from '@/components/AdminUnauthorized';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
 import { createSupabaseAdminClient } from '@/lib/supabaseAdmin';
 import { displayBadge } from '@/lib/gamification';
+import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,7 +109,7 @@ export default async function AdminPage() {
 
   const queryError =
     profilesResult.error ?? classesResult.error ?? learnersResult.error ?? enrolmentsResult.error;
-  if (queryError) return <p className="p-4 text-red-600">Could not load admin data.</p>;
+  if (queryError) return <FriendlyError />;
 
   const profiles = (profilesResult.data ?? []) as Profile[];
   const classes = (classesResult.data ?? []) as ClassRow[];

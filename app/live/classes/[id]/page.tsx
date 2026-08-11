@@ -250,9 +250,13 @@ export default async function LiveClassroomPage({ params }: PageProps) {
       )}
 
       <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-emerald-950">
-          Allow camera and microphone when your browser asks.
-        </p>
+        <div className="text-sm leading-6 text-emerald-950">
+          <p>Allow camera and microphone when your browser asks.</p>
+          <p className="mt-1">
+            Parents should supervise children during live classes. Do not share
+            private class links or recordings publicly.
+          </p>
+        </div>
         {classRow.meeting_url && (
           <a
             href={classRow.meeting_url}

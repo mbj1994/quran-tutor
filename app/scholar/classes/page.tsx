@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
+import FriendlyError from '@/components/FriendlyError';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
 import { isApprovedScholar } from '@/lib/scholarApproval';
 
@@ -61,7 +62,7 @@ export default async function ScholarClasses() {
     .eq('scholar_id', user.id)
     .order('start_time', { ascending: true });
 
-  if (error) return <p className="p-4 text-red-600">{error.message}</p>;
+  if (error) return <FriendlyError />;
 
   const teachingClasses = (classes ?? []) as ClassRow[];
 

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { getStripe } from '@/lib/stripe';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
+import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,7 @@ export default async function SubscriptionPage({
     .maybeSingle<Subscription>();
 
   if (error) {
-    return <p className="p-4 text-red-600">{error.message}</p>;
+    return <FriendlyError />;
   }
 
   const isActive = data?.status === 'active' || data?.status === 'trialing';

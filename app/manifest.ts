@@ -2,9 +2,11 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Quran Tutor',
+    name: 'Qur’an Tutor',
     short_name: 'Quran Tutor',
-    description: 'Live Qur’an learning for Gambian diaspora children',
+    description:
+      'Live Qur’an classes, lesson review, and learning progress for children and families.',
+    id: '/',
     start_url: '/',
     scope: '/',
     display: 'standalone',
