@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
 import { isApprovedScholar } from '@/lib/scholarApproval';
 
@@ -54,7 +53,7 @@ function recordingsPath(classId: string, query = '') {
 async function addRecording(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();
@@ -121,7 +120,7 @@ async function addRecording(formData: FormData) {
 async function removeRecording(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();
@@ -178,7 +177,7 @@ export default async function ScholarClassRecordingsPage({
 }: PageProps) {
   const { id } = await params;
   const notices = await searchParams;
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import {
   displayBadge,
   getMilestoneProgress,
@@ -27,7 +26,7 @@ type Learner = {
 };
 
 export default async function LearnersPage() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { getStripe } from '@/lib/stripe';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
 import FriendlyError from '@/components/FriendlyError';
 
@@ -33,7 +32,7 @@ function formatDate(value: string) {
 export default async function SubscriptionPage({
   searchParams,
 }: SubscriptionPageProps) {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

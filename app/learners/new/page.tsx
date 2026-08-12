@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { appLanguages } from '@/lib/languages';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +24,7 @@ type NewLearnerPageProps = {
 async function createLearner(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -72,7 +71,7 @@ async function createLearner(formData: FormData) {
 export default async function NewLearnerPage({
   searchParams,
 }: NewLearnerPageProps) {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

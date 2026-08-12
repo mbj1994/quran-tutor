@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { createSupabaseAdminClient } from '@/lib/supabaseAdmin';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import {
   createDailyClassroom,
   DailyConfigurationError,
@@ -65,7 +65,7 @@ function AccessMessage({
 export default async function LiveClassroomPage({ params }: PageProps) {
   const { id } = await params;
   const cookieStore = await cookies();
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

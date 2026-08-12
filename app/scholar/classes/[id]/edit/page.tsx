@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
 import { isApprovedScholar } from '@/lib/scholarApproval';
@@ -81,7 +80,7 @@ function formatDateTimeLocal(value: string) {
 async function updateClass(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -186,7 +185,7 @@ export default async function EditClassPage({
   searchParams,
 }: EditClassPageProps) {
   const { id } = await params;
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

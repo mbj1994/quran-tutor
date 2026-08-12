@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
+import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
 
 const ALLOWED_NEXT_PATHS = new Set([
   '/dashboard',
@@ -44,7 +43,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createRouteHandlerSupabaseClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {

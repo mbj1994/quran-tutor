@@ -1,9 +1,8 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { unstable_noStore as noStore } from 'next/cache';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import LogoutButton from './LogoutButton';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 
 type NavLink = {
   href: string;
@@ -38,7 +37,7 @@ const adminLinks: NavLink[] = [
 export default async function SiteNav() {
   noStore();
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

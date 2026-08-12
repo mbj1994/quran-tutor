@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { getStripe } from '@/lib/stripe';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +32,7 @@ export default async function DonationPage({
           'session.payment_status': session.payment_status,
         });
 
-        const sb = createServerComponentClient({ cookies });
+        const sb = await createServerSupabaseClient();
         const {
           data: { user },
         } = await sb.auth.getUser();

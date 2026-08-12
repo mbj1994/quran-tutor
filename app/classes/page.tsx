@@ -1,7 +1,6 @@
-import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ClientBookButton from './BookButton';
 import FriendlyError from '@/components/FriendlyError';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +26,7 @@ function formatDateTime(value: string) {
 }
 
 export default async function ClassesPage() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

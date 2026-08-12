@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import FriendlyError from '@/components/FriendlyError';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
 import { isApprovedScholar } from '@/lib/scholarApproval';
@@ -35,7 +34,7 @@ function formatDateTime(value: string) {
 }
 
 export default async function ScholarClasses() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

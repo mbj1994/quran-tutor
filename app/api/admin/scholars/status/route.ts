@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { createSupabaseAdminClient } from '@/lib/supabaseAdmin';
+import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
 import { scholarStatuses, type ScholarStatus } from '@/lib/scholarApproval';
 
@@ -24,7 +23,7 @@ function isScholarStatus(value: string): value is ScholarStatus {
 }
 
 export async function POST(request: Request) {
-  const sb = createRouteHandlerClient({ cookies });
+  const sb = await createRouteHandlerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

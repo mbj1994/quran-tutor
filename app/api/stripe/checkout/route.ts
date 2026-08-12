@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
     }
 
     let user: { id: string; email?: string | null } | null = null;
-    const sb = createRouteHandlerClient({ cookies });
+    const sb = await createRouteHandlerSupabaseClient();
     const {
       data: { user: authenticatedUser },
     } = await sb.auth.getUser();

@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import AdminUnauthorized from '@/components/AdminUnauthorized';
 import { createSupabaseAdminClient } from '@/lib/supabaseAdmin';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
 import {
   normalizeScholarStatus,
@@ -26,7 +25,7 @@ type UserEmail = {
 };
 
 async function getAdminAccess() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { deriveBadgeFromLessons } from '@/lib/gamification';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
@@ -71,7 +70,7 @@ function formatDateTime(value: string) {
 async function saveRosterProgress(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -197,7 +196,7 @@ export default async function ScholarClassRosterPage({
   params,
 }: RosterPageProps) {
   const { id } = await params;
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

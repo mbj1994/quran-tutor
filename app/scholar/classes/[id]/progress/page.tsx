@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { badgeOptions, deriveBadgeFromLessons } from '@/lib/gamification';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
 import { getRoleCode, type ProfileRole as BaseProfileRole } from '@/lib/roles';
@@ -68,7 +67,7 @@ function formatDateTime(value: string) {
 async function saveProgress(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -184,7 +183,7 @@ export default async function ScholarClassProgressPage({
   params,
 }: ProgressPageProps) {
   const { id } = await params;
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },

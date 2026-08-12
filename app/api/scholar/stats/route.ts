@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
 
 // GET /api/scholar/stats
 export async function GET() {
-  const sb = createRouteHandlerClient({ cookies });
+  const sb = await createRouteHandlerSupabaseClient();
 
   // current user
   const { data: { user } } = await sb.auth.getUser();

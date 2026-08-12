@@ -1,7 +1,6 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { appLanguages } from '@/lib/languages';
 import ScholarStatusCard from '@/components/ScholarStatusCard';
 import { getRoleCode } from '@/lib/roles';
@@ -16,7 +15,7 @@ type ProfileRole = {
 async function updateScholarAppLanguage(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();
@@ -46,7 +45,7 @@ async function updateScholarAppLanguage(formData: FormData) {
 }
 
 export default async function ScholarOverview() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
   const {
     data: { user },
   } = await sb.auth.getUser();

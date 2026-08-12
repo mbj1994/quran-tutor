@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import {
   displayBadge,
   getMilestoneProgress,
@@ -87,7 +86,7 @@ function formatDateTime(value: string) {
 async function updateAppLanguage(formData: FormData) {
   'use server';
 
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -110,7 +109,7 @@ async function updateAppLanguage(formData: FormData) {
 }
 
 export default async function DashboardPage() {
-  const sb = createServerComponentClient({ cookies });
+  const sb = await createServerSupabaseClient();
 
   const {
     data: { user },
