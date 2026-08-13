@@ -1,9 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
+import { getBrowserSiteOrigin } from '@/lib/siteUrl';
+
+type RecoveryState = 'checking' | 'valid' | 'invalid';
+
+const EXPIRED_MESSAGE =
+  'This password reset link has expired. Please request a new one.';
 
 function getHashParams() {
   if (typeof window === 'undefined' || !window.location.hash) {
@@ -13,59 +19,87 @@ function getHashParams() {
   return new URLSearchParams(window.location.hash.replace(/^#/, ''));
 }
 
+function clearRecoveryParameters() {
+  window.history.replaceState({}, '', '/auth/update-password');
+}
+
 function UpdatePasswordForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = useMemo(() => supabaseBrowser(), []);
+  const exchangeStarted = useRef(false);
+  const [recoveryState, setRecoveryState] = useState<RecoveryState>('checking');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
+    if (resendCooldown <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setResendCooldown((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
+
+  useEffect(() => {
+    if (exchangeStarted.current) return;
+    exchangeStarted.current = true;
+
     async function prepareRecoverySession() {
       const hashParams = getHashParams();
-      const errorCode = searchParams.get('error_code') || hashParams.get('error_code');
-      const code = searchParams.get('code') || hashParams.get('code');
+      const errorCode =
+        searchParams.get('error_code') ||
+        searchParams.get('error') ||
+        hashParams.get('error_code') ||
+        hashParams.get('error');
+      const code = searchParams.get('code');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const isRecoveryHash = hashParams.get('type') === 'recovery';
+      const cameFromCallback = searchParams.get('recovery') === '1';
 
       if (errorCode) {
-        router.replace('/login?auth_message=expired-reset');
+        setRecoveryState('invalid');
         return;
       }
 
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const hasRecoveryParameters =
+        Boolean(code) ||
+        (isRecoveryHash && Boolean(accessToken) && Boolean(refreshToken)) ||
+        cameFromCallback;
 
-        if (error) {
-          router.replace('/login?auth_message=expired-reset');
+      if (hasRecoveryParameters) {
+        // The browser Supabase helper uses PKCE with URL detection enabled. Its
+        // initialization owns the one-time code exchange, and getSession waits
+        // for that initialization instead of consuming the code a second time.
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (!error && session) {
+          clearRecoveryParameters();
+          setRecoveryState('valid');
           return;
         }
-
-        router.replace('/auth/update-password');
-        setCheckingSession(false);
-        return;
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.replace('/login?auth_message=expired-reset');
-        return;
-      }
-
-      setCheckingSession(false);
+      setRecoveryState('invalid');
     }
 
     void prepareRecoverySession();
-  }, [router, searchParams, supabase]);
+  }, [searchParams, supabase]);
 
-  async function handleUpdatePassword(e: React.FormEvent) {
-    e.preventDefault();
-    if (loading) return;
+  async function handleUpdatePassword(event: React.FormEvent) {
+    event.preventDefault();
+    if (loading || recoveryState !== 'valid') return;
 
     setMessage(null);
     setSuccess(false);
@@ -76,7 +110,7 @@ function UpdatePasswordForm() {
     }
 
     if (password !== confirmPassword) {
-      setMessage('Passwords do not match.');
+      setMessage('Passwords do not match. Please enter the same password twice.');
       return;
     }
 
@@ -85,13 +119,14 @@ function UpdatePasswordForm() {
 
     if (error) {
       setLoading(false);
-      const errorText = error.message.toLowerCase();
-      if (errorText.includes('same password')) {
+
+      if (error.message.toLowerCase().includes('same password')) {
         setMessage('Choose a new password that is different from your old password.');
         return;
       }
 
-      setMessage('We could not update your password. Please request a new reset link.');
+      setRecoveryState('invalid');
+      setMessage(null);
       return;
     }
 
@@ -103,47 +138,91 @@ function UpdatePasswordForm() {
     setMessage('Password updated. Please sign in with your new password.');
   }
 
+  async function handleResend(event: React.FormEvent) {
+    event.preventDefault();
+    if (resending || resendCooldown > 0) return;
+
+    const email = resetEmail.trim();
+    if (!email) {
+      setResendMessage('Enter your email address to request a new reset link.');
+      return;
+    }
+
+    setResending(true);
+    setResendMessage(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${getBrowserSiteOrigin()}/auth/update-password`,
+    });
+
+    setResending(false);
+
+    if (error) {
+      setResendMessage(
+        'We could not send a new link right now. Please wait a few minutes and try again.'
+      );
+      return;
+    }
+
+    setResendCooldown(60);
+    setResendMessage(
+      'A new password reset link has been sent. Please use the newest email.'
+    );
+  }
+
   return (
     <main className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-emerald-50 px-4 py-10">
       <section className="w-full max-w-sm rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm sm:p-8">
-        <h1 className="text-center text-2xl font-semibold text-gray-950">Set a new password</h1>
-        <p className="mt-2 text-center text-sm leading-6 text-gray-600">
-          Choose a new password with at least 6 characters.
-        </p>
+        <h1 className="text-center text-2xl font-semibold text-gray-950">
+          Set a new password
+        </h1>
 
-        {checkingSession ? (
-          <p className="mt-6 text-center text-sm text-gray-600">Checking your reset link...</p>
-        ) : (
+        {recoveryState === 'checking' && (
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Checking your reset link...
+          </p>
+        )}
+
+        {recoveryState === 'valid' && (
           <>
+            <p className="mt-2 text-center text-sm leading-6 text-gray-600">
+              Choose a new password with at least 6 characters.
+            </p>
             <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-800">New password</span>
+                <span className="mb-1 block text-sm font-medium text-gray-800">
+                  New password
+                </span>
                 <input
                   type="password"
                   required
-                  placeholder="New password"
+                  minLength={6}
+                  autoComplete="new-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) => setPassword(event.target.value)}
                   disabled={loading || success}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-800">Confirm password</span>
+                <span className="mb-1 block text-sm font-medium text-gray-800">
+                  Confirm password
+                </span>
                 <input
                   type="password"
                   required
-                  placeholder="Confirm password"
+                  minLength={6}
+                  autoComplete="new-password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
                   disabled={loading || success}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                  className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
                 />
               </label>
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="min-h-11 w-full rounded-lg bg-emerald-600 py-2.5 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
               >
                 {loading ? 'Updating...' : 'Update password'}
               </button>
@@ -152,7 +231,9 @@ function UpdatePasswordForm() {
             {message && (
               <p
                 className={`mt-4 rounded-lg p-3 text-center text-sm leading-6 ${
-                  success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'
+                  success
+                    ? 'bg-emerald-50 text-emerald-800'
+                    : 'bg-red-50 text-red-700'
                 }`}
               >
                 {message}
@@ -171,6 +252,57 @@ function UpdatePasswordForm() {
             )}
           </>
         )}
+
+        {recoveryState === 'invalid' && (
+          <>
+            <p className="mt-5 rounded-lg bg-amber-50 p-3 text-center text-sm leading-6 text-amber-900">
+              {EXPIRED_MESSAGE}
+            </p>
+            <form onSubmit={handleResend} className="mt-5 space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-gray-800">
+                  Email
+                </span>
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={resetEmail}
+                  onChange={(event) => setResetEmail(event.target.value)}
+                  disabled={resending}
+                  placeholder="you@example.com"
+                  className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={resending || resendCooldown > 0}
+                className="min-h-11 w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {resending
+                  ? 'Sending...'
+                  : resendCooldown > 0
+                    ? `Send again in ${resendCooldown}s`
+                    : 'Send a new reset link'}
+              </button>
+            </form>
+
+            {resendMessage && (
+              <p className="mt-4 rounded-lg bg-gray-50 p-3 text-center text-sm leading-6 text-gray-700">
+                {resendMessage}
+              </p>
+            )}
+
+            <div className="mt-4 text-center">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-emerald-700 hover:text-emerald-900"
+              >
+                Back to login
+              </Link>
+            </div>
+          </>
+        )}
       </section>
     </main>
   );
@@ -178,7 +310,13 @@ function UpdatePasswordForm() {
 
 export default function UpdatePasswordPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <main className="flex min-h-[55vh] items-center justify-center p-4">
+          <p className="text-sm text-gray-600">Checking your reset link...</p>
+        </main>
+      }
+    >
       <UpdatePasswordForm />
     </Suspense>
   );

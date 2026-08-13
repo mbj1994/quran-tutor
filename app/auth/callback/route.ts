@@ -36,6 +36,12 @@ export async function GET(request: Request) {
   const next = getSafeNext(searchParams.get('next') || searchParams.get('redirect_to'));
 
   if (errorCode) {
+    if (next === '/auth/update-password') {
+      return NextResponse.redirect(
+        `${origin}/auth/update-password?error_code=${encodeURIComponent(errorCode)}`
+      );
+    }
+
     return NextResponse.redirect(`${origin}/login?auth_message=${getAuthErrorMessage(errorCode)}`);
   }
 
@@ -47,11 +53,17 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    if (next === '/auth/update-password') {
+      return NextResponse.redirect(
+        `${origin}/auth/update-password?error_code=invalid_recovery`
+      );
+    }
+
     return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
   if (next === '/auth/update-password') {
-    return NextResponse.redirect(`${origin}${next}`);
+    return NextResponse.redirect(`${origin}${next}?recovery=1`);
   }
 
   const {

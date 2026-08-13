@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getUserSubscriptionStatus } from '@/lib/payments/subscriptionStatus';
 
 export const dynamic = 'force-dynamic';
 
 type LearnerRow = {
   id: string;
   parent_id: string;
-};
-
-type SubscriptionRow = {
-  status: string | null;
 };
 
 type ClassRow = {
@@ -93,27 +90,26 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: subscription, error: subscriptionError } = await sb
-    .from('subscriptions')
-    .select('status')
-    .eq('user_id', learner.parent_id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle<SubscriptionRow>();
+  const subscriptionStatus = await getUserSubscriptionStatus(
+    sb,
+    learner.parent_id
+  );
 
-  if (subscriptionError) {
+  if (subscriptionStatus.error) {
     return NextResponse.json(
       { error: 'We could not check family booking access right now.' },
       { status: 500 }
     );
   }
 
-  const hasActiveSubscription =
-    subscription?.status === 'active' || subscription?.status === 'trialing';
-
-  if (!hasActiveSubscription) {
+  if (subscriptionStatus.state !== 'active') {
     return NextResponse.json(
-      { error: 'Your family needs an active subscription to book live classes.' },
+      {
+        error:
+          subscriptionStatus.state === 'pending'
+            ? 'Your family bank payment is still processing. Booking will be available once Stripe confirms it.'
+            : 'Your family needs an active subscription to book live classes.',
+      },
       { status: 402 }
     );
   }

@@ -1,53 +1,18 @@
-'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
-import { useSession } from '@supabase/auth-helpers-react';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import { getUserSubscriptionStatus } from '@/lib/payments/subscriptionStatus';
+import FriendlyError from '@/components/FriendlyError';
+import SubscriptionCheckoutButton from './SubscriptionCheckoutButton';
 
-export default function PaymentsPage() {
-  const session = useSession();
-  const [loading, setLoading] = useState<string | null>(null);
+export const dynamic = 'force-dynamic';
 
-  async function startCheckout(type: 'subscription' | 'donation') {
-    setLoading(type);
+export default async function PaymentsPage() {
+  const sb = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
 
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type }),
-      });
-
-      const text = await res.text();
-      let data: { error?: string; url?: string } = {};
-
-      if (text) {
-        try {
-          data = JSON.parse(text);
-        } catch {
-          // Keep the raw response available for a useful error below.
-        }
-      }
-
-      if (!res.ok) {
-        alert(data.error || text || 'Payment failed to start.');
-        return;
-      }
-
-      if (!data.url) {
-        alert('Checkout started, but no checkout URL was returned.');
-        return;
-      }
-
-      window.location.href = data.url;
-    } catch {
-      alert('Could not connect to the payment service. Please try again.');
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  if (!session) {
+  if (!user) {
     return (
       <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
         <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -64,30 +29,62 @@ export default function PaymentsPage() {
           >
             Login
           </Link>
+          <div className="mt-5 border-t border-gray-200 pt-5">
+            <h2 className="font-semibold text-gray-950">Support Quran Tutor</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Donations are separate from subscriptions and do not require an
+              account.
+            </p>
+            <Link
+              href="/donation"
+              className="mt-3 inline-block rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            >
+              Make a Donation
+            </Link>
+          </div>
         </section>
       </main>
     );
   }
 
+  const subscriptionStatus = await getUserSubscriptionStatus(sb, user.id);
+
+  if (subscriptionStatus.error) {
+    return <FriendlyError />;
+  }
+
   return (
     <main className="mx-auto max-w-2xl space-y-6 bg-gray-50 p-6">
-      <h1 className="text-2xl font-semibold text-gray-950">
-        Payment Checkout
-      </h1>
+      <h1 className="text-2xl font-semibold text-gray-950">Payment Checkout</h1>
 
       <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="text-xl font-medium text-gray-950">Family Subscription</h2>
-        <p className="text-sm text-gray-600">
-          Subscribe monthly to book live Qur&apos;an classes and support approved
-          Scholars/Ustass.
-        </p>
-        <button
-          onClick={() => startCheckout('subscription')}
-          disabled={loading !== null}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-white disabled:opacity-50"
-        >
-          {loading === 'subscription' ? 'Opening...' : 'Subscribe'}
-        </button>
+        {subscriptionStatus.state === 'active' ? (
+          <>
+            <p className="font-medium text-emerald-800">Subscription active</p>
+            <Link href="/subscription" className="text-sm font-medium text-emerald-700 underline">
+              Manage billing
+            </Link>
+          </>
+        ) : subscriptionStatus.state === 'pending' ? (
+          <>
+            <p className="text-sm leading-6 text-amber-900">
+              Your bank payment is processing. We&apos;ll activate access once Stripe
+              confirms it.
+            </p>
+            <Link href="/subscription" className="text-sm font-medium text-amber-900 underline">
+              View payment status
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-600">
+              Subscribe monthly to book live Qur&apos;an classes and support approved
+              Scholars/Ustass.
+            </p>
+            <SubscriptionCheckoutButton />
+          </>
+        )}
       </div>
 
       <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -95,13 +92,9 @@ export default function PaymentsPage() {
         <p className="text-sm text-gray-600">
           Make a donation to help diaspora children access Qur&apos;an learning.
         </p>
-        <button
-          onClick={() => startCheckout('donation')}
-          disabled={loading !== null}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-white disabled:opacity-50"
-        >
-          {loading === 'donation' ? 'Opening...' : 'Donate'}
-        </button>
+        <Link href="/donation" className="inline-block rounded-lg bg-indigo-600 px-4 py-2 text-white">
+          Make a Donation
+        </Link>
       </div>
     </main>
   );

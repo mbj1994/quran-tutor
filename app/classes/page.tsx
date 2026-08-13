@@ -1,12 +1,12 @@
 import ClientBookButton from './BookButton';
 import FriendlyError from '@/components/FriendlyError';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import {
+  getUserSubscriptionStatus,
+  type SubscriptionState,
+} from '@/lib/payments/subscriptionStatus';
 
 export const dynamic = 'force-dynamic';
-
-type Subscription = {
-  status: string | null;
-};
 
 type Learner = {
   id: string;
@@ -32,21 +32,13 @@ export default async function ClassesPage() {
     data: { user },
   } = await sb.auth.getUser();
 
-  let hasActiveSubscription = false;
+  let subscriptionState: SubscriptionState = 'inactive';
   let learners: Learner[] = [];
   const bookedLearnersByClass = new Map<string, Set<string>>();
 
   if (user) {
-    const { data: subscription } = await sb
-      .from('subscriptions')
-      .select('status')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle<Subscription>();
-
-    hasActiveSubscription =
-      subscription?.status === 'active' || subscription?.status === 'trialing';
+    const subscriptionStatus = await getUserSubscriptionStatus(sb, user.id);
+    subscriptionState = subscriptionStatus.state;
 
     const { data: learnerRows } = await sb
       .from('learners')
@@ -162,7 +154,7 @@ export default async function ClassesPage() {
                   <ClientBookButton
                     classId={classRow.id}
                     disabled={spots === 0}
-                    hasActiveSubscription={hasActiveSubscription}
+                    subscriptionState={subscriptionState}
                     learners={learners}
                     bookedLearnerIds={bookedLearnerIds}
                   />

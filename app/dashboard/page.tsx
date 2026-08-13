@@ -10,14 +10,9 @@ import { appLanguages } from '@/lib/languages';
 import CopyCodeButton from '@/app/learners/CopyCodeButton';
 import FriendlyError from '@/components/FriendlyError';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
+import { getUserSubscriptionStatus } from '@/lib/payments/subscriptionStatus';
 
 export const dynamic = 'force-dynamic';
-
-type Subscription = {
-  status: string | null;
-  current_period_end: string | null;
-  created_at: string | null;
-};
 
 type Profile = ProfileRole & {
   app_language: string | null;
@@ -118,18 +113,12 @@ export default async function DashboardPage() {
   if (!user) redirect('/login');
 
   const [
-    { data: subscription, error: subscriptionError },
+    subscriptionStatus,
     { data: learnerRows, error: learnerError },
     { data: profile, error: profileError },
   ] =
     await Promise.all([
-      sb
-        .from('subscriptions')
-        .select('status, current_period_end, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle<Subscription>(),
+      getUserSubscriptionStatus(sb, user.id),
       sb
         .from('learners')
         .select(
@@ -144,7 +133,7 @@ export default async function DashboardPage() {
         .maybeSingle<Profile>(),
     ]);
 
-  if (subscriptionError) {
+  if (subscriptionStatus.error) {
     return <FriendlyError />;
   }
 
@@ -232,8 +221,8 @@ export default async function DashboardPage() {
     progressRows = (progressData ?? []) as LessonProgress[];
   }
 
-  const hasActiveSubscription =
-    subscription?.status === 'active' || subscription?.status === 'trialing';
+  const { state: subscriptionState, subscription } = subscriptionStatus;
+  const hasActiveSubscription = subscriptionState === 'active';
   const latestProgressByLearner = new Map<string, LessonProgress>();
 
   progressRows.forEach((progress) => {
@@ -272,7 +261,11 @@ export default async function DashboardPage() {
         >
           <p className="text-sm text-gray-500">Billing status</p>
           <p className="mt-2 text-lg font-semibold text-gray-950">
-            {hasActiveSubscription ? 'Active' : 'Not active'}
+            {hasActiveSubscription
+              ? 'Subscription active'
+              : subscriptionState === 'pending'
+                ? 'Payment processing'
+                : 'Not active'}
           </p>
         </Link>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5">
@@ -311,14 +304,24 @@ export default async function DashboardPage() {
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">
         <h2 className="text-lg font-semibold text-gray-950">Billing</h2>
         <p className="mt-2 text-gray-700">
-          Subscription: {hasActiveSubscription ? 'Active' : 'Not active'}
+          {hasActiveSubscription
+            ? 'Subscription active'
+            : subscriptionState === 'pending'
+              ? 'Payment processing'
+              : 'Subscription: Not active'}
         </p>
+        {subscriptionState === 'pending' && (
+          <p className="mt-2 text-sm text-amber-800">
+            Your bank payment is processing. We&apos;ll activate access once Stripe
+            confirms it.
+          </p>
+        )}
         {subscription?.current_period_end && (
           <p className="mt-1 text-sm text-gray-600">
             Renews or ends on: {formatDate(subscription.current_period_end)}
           </p>
         )}
-        {!hasActiveSubscription && (
+        {subscriptionState === 'inactive' && (
           <Link
             href="/subscription"
             className="mt-4 inline-block rounded bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
@@ -326,6 +329,18 @@ export default async function DashboardPage() {
             Go to Billing
           </Link>
         )}
+        <div className="mt-4 border-t border-gray-200 pt-4">
+          <p className="text-sm text-gray-600">
+            Help sponsor Qur&apos;an learning for more children with an optional
+            donation.
+          </p>
+          <Link
+            href="/donation"
+            className="mt-3 inline-block rounded border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+          >
+            Support Quran Tutor
+          </Link>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-emerald-950/5 sm:p-5">

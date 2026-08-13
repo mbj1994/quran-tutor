@@ -1,5 +1,9 @@
 import Link from 'next/link';
 import InstallApp from '@/components/InstallApp';
+import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import { getUserSubscriptionStatus } from '@/lib/payments/subscriptionStatus';
+
+export const dynamic = 'force-dynamic';
 
 const highlights = [
   ['☾', 'Live Qur’an Classes', 'Small, welcoming lessons that fit family life.'],
@@ -9,7 +13,13 @@ const highlights = [
   ['♡', 'Support a Child', 'Donations can help more families access Qur’an learning.'],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const sb = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
+  const subscriptionStatus = await getUserSubscriptionStatus(sb, user?.id);
+
   return (
     <main className="mx-auto max-w-6xl overflow-hidden px-4 py-8 sm:px-6 sm:py-14">
       <section className="relative overflow-hidden rounded-[2rem] border border-emerald-200/70 bg-emerald-950 px-6 py-10 text-white shadow-xl shadow-emerald-950/10 sm:px-10 sm:py-16 lg:px-16">
@@ -26,8 +36,23 @@ export default function Home() {
             Trusted live teaching and clear progress, all in one welcoming family dashboard.
           </p>
           <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-            <Link href="/login" className="flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-emerald-950 shadow-sm hover:bg-amber-200">
-              Get Started
+            <Link
+              href={
+                !user
+                  ? '/login'
+                  : subscriptionStatus.state === 'inactive'
+                    ? '/payments'
+                    : '/subscription'
+              }
+              className="flex min-h-12 items-center justify-center rounded-xl bg-amber-300 px-6 py-3 font-semibold text-emerald-950 shadow-sm hover:bg-amber-200"
+            >
+              {!user
+                ? 'Get Started'
+                : subscriptionStatus.state === 'active'
+                  ? 'Subscription active'
+                  : subscriptionStatus.state === 'pending'
+                    ? 'Payment processing'
+                    : 'Subscribe'}
             </Link>
             <Link href="/classes" className="flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-white/10 px-6 py-3 font-semibold text-white hover:bg-white/15">
               Browse Classes

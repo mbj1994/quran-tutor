@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
+import { getServerSiteOrigin } from '@/lib/siteUrl';
+
+const MIN_DONATION_CENTS = 100;
+const MAX_DONATION_CENTS = 1_000_000;
+
+function getBodyValue(body: unknown, key: string) {
+  return typeof body === 'object' && body !== null && key in body
+    ? (body as Record<string, unknown>)[key]
+    : undefined;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,20 +34,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const price =
-      type === 'donation'
-        ? process.env.NEXT_PUBLIC_STRIPE_DONATION_PRICE
-        : process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY;
+    const subscriptionPrice = process.env.NEXT_PUBLIC_STRIPE_PRICE_MONTHLY;
 
-    if (!price) {
-      const priceName =
-        type === 'donation'
-          ? 'NEXT_PUBLIC_STRIPE_DONATION_PRICE'
-          : 'NEXT_PUBLIC_STRIPE_PRICE_MONTHLY';
-
+    if (type === 'subscription' && !subscriptionPrice) {
       return NextResponse.json(
-        { error: `${priceName} is not configured on the server.` },
+        { error: 'NEXT_PUBLIC_STRIPE_PRICE_MONTHLY is not configured on the server.' },
         { status: 500 }
+      );
+    }
+
+    const amountCents = getBodyValue(body, 'amountCents');
+    if (
+      type === 'donation' &&
+      (!Number.isInteger(amountCents) ||
+        Number(amountCents) < MIN_DONATION_CENTS ||
+        Number(amountCents) > MAX_DONATION_CENTS)
+    ) {
+      return NextResponse.json(
+        { error: 'Enter a valid donation amount between $1 and $10,000.' },
+        { status: 400 }
+      );
+    }
+
+    const suppliedDonorEmail = getBodyValue(body, 'donorEmail');
+    const donorEmail =
+      typeof suppliedDonorEmail === 'string'
+        ? suppliedDonorEmail.trim().toLowerCase()
+        : '';
+
+    if (
+      type === 'donation' &&
+      donorEmail &&
+      (donorEmail.length > 320 || !/^\S+@\S+\.\S+$/.test(donorEmail))
+    ) {
+      return NextResponse.json(
+        { error: 'Enter a valid email address for the donation receipt.' },
+        { status: 400 }
       );
     }
 
@@ -58,10 +90,14 @@ export async function POST(req: NextRequest) {
 
     user = authenticatedUser;
 
-    const origin =
-      req.headers.get('origin') ||
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      new URL(req.url).origin;
+    if (type === 'donation' && !user?.email && !donorEmail) {
+      return NextResponse.json(
+        { error: 'Enter an email address for the donation receipt.' },
+        { status: 400 }
+      );
+    }
+
+    const origin = getServerSiteOrigin(req.url, req.headers.get('origin'));
 
     let customer: string | undefined;
 
@@ -98,11 +134,29 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const lineItems =
+      type === 'donation'
+        ? [
+            {
+              price_data: {
+                currency: 'usd' as const,
+                product_data: {
+                  name: 'Donation to Quran Tutor',
+                },
+                unit_amount: Number(amountCents),
+              },
+              quantity: 1,
+            },
+          ]
+        : [{ price: subscriptionPrice as string, quantity: 1 }];
+
     const session = await getStripe().checkout.sessions.create({
       mode: type === 'donation' ? 'payment' : 'subscription',
-      line_items: [{ price, quantity: 1 }],
+      line_items: lineItems,
       customer,
-      customer_email: customer ? undefined : (user?.email ?? undefined),
+      customer_email: customer
+        ? undefined
+        : ((user?.email ?? donorEmail) || undefined),
       metadata: {
         user_id: user?.id ?? '',
         type,
@@ -112,6 +166,14 @@ export async function POST(req: NextRequest) {
           ? `${origin}/donation?session_id={CHECKOUT_SESSION_ID}`
           : `${origin}/subscription?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/payments/cancel`,
+    });
+
+    console.info('Stripe Checkout Session created:', {
+      sessionId: session.id,
+      mode: session.mode,
+      status: session.status,
+      paymentStatus: session.payment_status,
+      purpose: session.metadata?.purpose ?? session.metadata?.type,
     });
 
     if (!session.url) {

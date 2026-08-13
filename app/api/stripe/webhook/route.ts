@@ -10,6 +10,10 @@ type StripeEvent = {
 };
 type CheckoutSession = {
   id: string;
+  status?: string | null;
+  payment_status?: string | null;
+  mode?: string | null;
+  metadata?: Record<string, string> | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -47,11 +51,40 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (event.type === 'checkout.session.completed') {
+  if (
+    event.type === 'checkout.session.completed' ||
+    event.type === 'checkout.session.async_payment_succeeded' ||
+    event.type === 'checkout.session.async_payment_failed'
+  ) {
     const session = event.data.object as CheckoutSession;
 
+    console.info('Stripe Checkout Session webhook:', {
+      checkoutType: session.metadata?.type,
+      sessionStatus: session.status,
+      paymentStatus: session.payment_status,
+      sessionMode: session.mode,
+      eventType: event.type,
+    });
+
+    const isDonation = session.metadata?.type === 'donation';
+    const isSubscription = session.metadata?.type === 'subscription';
+    const isUnpaidDonation = isDonation && session.payment_status === 'unpaid';
+    const shouldWaitForDonationPayment =
+      event.type === 'checkout.session.completed' && isUnpaidDonation;
+    const asyncPaymentFailed =
+      event.type === 'checkout.session.async_payment_failed';
+
+    if (shouldWaitForDonationPayment || (asyncPaymentFailed && isDonation)) {
+      return NextResponse.json({ received: true });
+    }
+
     try {
-      await storeStripeCheckoutSession(session.id);
+      await storeStripeCheckoutSession(
+        session.id,
+        asyncPaymentFailed && isSubscription
+          ? { subscriptionStatus: 'inactive' }
+          : undefined
+      );
     } catch (error) {
       console.error('Unable to store Stripe checkout result:', error);
       return NextResponse.json(

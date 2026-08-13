@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from '@supabase/auth-helpers-react';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 import { getRoleCode, type ProfileRole } from '@/lib/roles';
+import { getBrowserSiteOrigin } from '@/lib/siteUrl';
 
 type AccountMode = 'sign-in' | 'create';
 type SignupRole = 'parent' | 'scholar';
@@ -220,10 +221,8 @@ function LoginForm() {
     setLoading('reset');
     setMessage(null);
 
-    // Keep recovery redirect simple. Supabase will append its auth code to this URL.
-    // This URL must be allow-listed in Supabase Auth redirect URLs.
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${window.location.origin}/auth/update-password`,
+      redirectTo: `${getBrowserSiteOrigin()}/auth/update-password`,
     });
 
     setLoading(null);
@@ -233,7 +232,7 @@ function LoginForm() {
       return;
     }
 
-    setMessage('Password reset email sent. Open the newest email from us and use the link soon.');
+    setMessage('Password reset email sent. Please open the newest email from us.');
   }
 
   return (

@@ -3,15 +3,11 @@ import { redirect } from 'next/navigation';
 import { getStripe } from '@/lib/stripe';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
+import { getCheckoutConfirmationState } from '@/lib/payments/checkoutStatus';
+import { getUserSubscriptionStatus } from '@/lib/payments/subscriptionStatus';
 import FriendlyError from '@/components/FriendlyError';
 
 export const dynamic = 'force-dynamic';
-
-type Subscription = {
-  status: string | null;
-  current_period_end: string | null;
-  created_at: string | null;
-};
 
 type ConfirmationState = 'success' | 'pending' | 'error' | null;
 
@@ -52,23 +48,28 @@ export default async function SubscriptionPage({
 
         console.info('Stripe Checkout Session confirmation:', {
           sessionId: session.id,
+          mode: session.mode,
           status: session.status,
           paymentStatus: session.payment_status,
+          purpose: session.metadata?.purpose ?? session.metadata?.type,
         });
 
         const belongsToCurrentUser =
           session.metadata?.type === 'subscription' &&
           session.metadata?.user_id === user.id;
 
-        if (!belongsToCurrentUser || session.status !== 'complete') {
+        const checkoutState = getCheckoutConfirmationState(
+          session.status,
+          session.payment_status
+        );
+
+        if (!belongsToCurrentUser) {
           confirmationState = 'error';
-        } else if (
-          session.payment_status === 'paid' ||
-          session.payment_status === 'no_payment_required'
-        ) {
+        } else if (checkoutState === 'success') {
           await storeStripeCheckoutSession(session.id);
           confirmationState = 'success';
-        } else if (session.payment_status === 'unpaid') {
+        } else if (checkoutState === 'pending') {
+          await storeStripeCheckoutSession(session.id);
           confirmationState = 'pending';
         } else {
           confirmationState = 'error';
@@ -84,19 +85,13 @@ export default async function SubscriptionPage({
   // webhooks: checkout.session.completed, checkout.session.async_payment_succeeded,
   // checkout.session.async_payment_failed, and invoice.payment_succeeded.
 
-  const { data, error } = await sb
-    .from('subscriptions')
-    .select('status, current_period_end, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle<Subscription>();
+  const subscriptionStatus = await getUserSubscriptionStatus(sb, user.id);
 
-  if (error) {
+  if (subscriptionStatus.error) {
     return <FriendlyError />;
   }
 
-  const isActive = data?.status === 'active' || data?.status === 'trialing';
+  const { state, subscription } = subscriptionStatus;
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 bg-transparent p-4 sm:p-6">
@@ -115,8 +110,8 @@ export default async function SubscriptionPage({
       )}
       {confirmationState === 'pending' && (
         <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          Your bank payment is processing. Your subscription will activate once
-          Stripe confirms the payment.
+          Your bank payment is processing. We&apos;ll activate access once Stripe
+          confirms it.
         </p>
       )}
       {confirmationState === 'error' && (
@@ -136,16 +131,22 @@ export default async function SubscriptionPage({
         </ul>
       </section>
 
-      {isActive ? (
+      {state === 'active' ? (
         <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
-          <p className="font-medium text-gray-950">
-            Your family subscription is active.
-          </p>
-          {data.current_period_end && (
+          <p className="font-medium text-gray-950">Subscription active</p>
+          {subscription?.current_period_end && (
             <p className="text-sm text-gray-600">
-              Renews or ends on: {formatDate(data.current_period_end)}
+              Renews or ends on: {formatDate(subscription.current_period_end)}
             </p>
           )}
+        </div>
+      ) : state === 'pending' ? (
+        <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <p className="font-medium text-amber-950">Payment processing</p>
+          <p className="text-sm leading-6 text-amber-900">
+            Your bank payment is processing. We&apos;ll activate access once Stripe
+            confirms it.
+          </p>
         </div>
       ) : (
         <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm shadow-emerald-950/5">
@@ -166,6 +167,20 @@ export default async function SubscriptionPage({
           </Link>
         </div>
       )}
+
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <h2 className="font-semibold text-emerald-950">Support Quran Tutor</h2>
+        <p className="mt-2 text-sm leading-6 text-gray-700">
+          Your subscription covers your family plan. A separate, optional donation
+          can help sponsor Qur&apos;an learning for more children.
+        </p>
+        <Link
+          href="/donation"
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-700 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-white"
+        >
+          Make a Donation
+        </Link>
+      </section>
     </main>
   );
 }

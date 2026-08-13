@@ -13,13 +13,13 @@ type Learner = {
 export default function ClientBookButton({
   classId,
   disabled,
-  hasActiveSubscription,
+  subscriptionState,
   learners,
   bookedLearnerIds,
 }: {
   classId: string;
   disabled?: boolean;
-  hasActiveSubscription: boolean;
+  subscriptionState: 'active' | 'pending' | 'inactive';
   learners: Learner[];
   bookedLearnerIds: string[];
 }) {
@@ -41,8 +41,12 @@ export default function ClientBookButton({
       return;
     }
 
-    if (!hasActiveSubscription) {
-      alert('Please start a family subscription before booking a class.');
+    if (subscriptionState !== 'active') {
+      const message =
+        subscriptionState === 'pending'
+          ? 'Your bank payment is still processing. Booking will be available once Stripe confirms it.'
+          : 'Please start a family subscription before booking a class.';
+      alert(message);
       router.push('/subscription');
       return;
     }
@@ -86,7 +90,7 @@ export default function ClientBookButton({
     router.push('/my-classes');
   }
 
-  if (hasActiveSubscription && learners.length === 0) {
+  if (subscriptionState === 'active' && learners.length === 0) {
     return (
       <Link
         href="/learners/new"
@@ -97,7 +101,23 @@ export default function ClientBookButton({
     );
   }
 
-  if (!hasActiveSubscription) {
+  if (subscriptionState === 'pending') {
+    return (
+      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+        <span className="text-sm font-medium text-amber-800">
+          Bank payment processing. Booking unlocks after Stripe confirms it.
+        </span>
+        <Link
+          href="/subscription"
+          className="w-full rounded-lg border border-amber-500 px-3 py-2 text-center text-sm font-medium text-amber-900 hover:bg-amber-50 sm:w-auto"
+        >
+          View Billing
+        </Link>
+      </div>
+    );
+  }
+
+  if (subscriptionState === 'inactive') {
     return (
       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
         <span className="text-sm font-medium text-gray-700">

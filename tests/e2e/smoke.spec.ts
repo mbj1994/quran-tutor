@@ -1,4 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
+import { getCheckoutConfirmationState } from '../../lib/payments/checkoutStatus';
+import {
+  getUserSubscriptionStatus,
+  normalizeSubscriptionState,
+} from '../../lib/payments/subscriptionStatus';
 
 const RAW_ERROR_TEXT = /duplicate key value violates|An error has occurred confirming the Checkout Session|DailyIframe instances are not allowed|column does not exist|Supabase error/i;
 const PAGE_CRASH_TEXT = /Application error|Internal Server Error|This page could not be found/i;
@@ -15,6 +20,37 @@ const adminCredentials = {
   email: process.env.E2E_ADMIN_EMAIL,
   password: process.env.E2E_ADMIN_PASSWORD,
 };
+
+test.describe('payment state helpers', () => {
+  test('treats a complete unpaid bank checkout as pending', () => {
+    expect(getCheckoutConfirmationState('complete', 'unpaid')).toBe('pending');
+    expect(getCheckoutConfirmationState('complete', 'paid')).toBe('success');
+    expect(getCheckoutConfirmationState('open', 'unpaid')).toBe('error');
+  });
+
+  test('normalizes subscription records consistently', () => {
+    expect(normalizeSubscriptionState('active')).toBe('active');
+    expect(normalizeSubscriptionState('trialing')).toBe('active');
+    expect(normalizeSubscriptionState('pending')).toBe('pending');
+    expect(normalizeSubscriptionState(null)).toBe('inactive');
+  });
+
+  test('returns inactive for an anonymous user without querying', async () => {
+    const queryMustNotRun = {
+      from() {
+        throw new Error('Anonymous subscription lookup queried Supabase.');
+      },
+    };
+
+    await expect(
+      getUserSubscriptionStatus(queryMustNotRun as never, null)
+    ).resolves.toEqual({
+      state: 'inactive',
+      subscription: null,
+      error: null,
+    });
+  });
+});
 
 async function expectHealthyPage(page: Page) {
   const body = page.locator('body');
@@ -58,6 +94,28 @@ test.describe('public pages', () => {
       await expect(page.getByRole('heading', { name: publicPage.heading }).first()).toBeVisible();
     });
   }
+
+  test('direct password reset page offers a new recovery link', async ({ page }) => {
+    await openPage(page, '/auth/update-password');
+    await expect(
+      page.getByText(
+        'This password reset link has expired. Please request a new one.'
+      )
+    ).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Send a new reset link' })
+    ).toBeVisible();
+  });
+
+  test('anonymous donor can enter an amount and receipt email', async ({ page }) => {
+    await openPage(page, '/donation');
+    await expect(page.getByLabel('Donation amount (USD)')).toHaveValue('25');
+    await expect(page.getByLabel('Receipt email')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Continue to Donation' })
+    ).toBeVisible();
+  });
 });
 
 test('parent authentication and core parent pages', async ({ page }) => {
@@ -94,7 +152,13 @@ test('parent authentication and core parent pages', async ({ page }) => {
 
   await openPage(page, '/payments');
   await expect(page.getByRole('heading', { name: 'Payment Checkout' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Subscribe' })).toBeVisible();
+  await expect(
+    page
+      .getByRole('button', { name: 'Subscribe' })
+      .or(page.getByText('Subscription active', { exact: true }))
+      .or(page.getByText(/Your bank payment is processing/))
+      .first()
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Logout' }).click();
   await page.waitForURL(/\/login(?:\?.*)?$/);
   await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();

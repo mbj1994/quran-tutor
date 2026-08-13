@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { getStripe } from '@/lib/stripe';
+import { getCheckoutConfirmationState } from '@/lib/payments/checkoutStatus';
 
 type PaymentRecord = Record<string, string | number | null>;
 type StripeRef = string | { id: string } | null | undefined;
 type CheckoutMetadata = Record<string, string> | null | undefined;
 type CheckoutSession = {
   id: string;
+  status?: string | null;
+  payment_status?: string | null;
   metadata?: CheckoutMetadata;
   customer?: StripeRef;
   payment_intent?: StripeRef;
@@ -69,6 +72,13 @@ function getCheckoutCustomerEmail(session: CheckoutSession) {
 }
 
 async function upsertDonation(session: CheckoutSession) {
+  if (
+    getCheckoutConfirmationState(session.status, session.payment_status) !==
+    'success'
+  ) {
+    throw new Error('Stripe donation payment is not confirmed.');
+  }
+
   const supabase = getPaymentStore();
   const paymentIntentId = getStripeId(session.payment_intent);
 
@@ -88,7 +98,10 @@ async function upsertDonation(session: CheckoutSession) {
   if (error) throw error;
 }
 
-async function upsertSubscription(session: CheckoutSession) {
+async function upsertSubscription(
+  session: CheckoutSession,
+  statusOverride?: string
+) {
   const subscriptionId = getStripeId(session.subscription);
   const userId = getMetadataUserId(session.metadata);
 
@@ -112,12 +125,24 @@ async function upsertSubscription(session: CheckoutSession) {
     subscription.current_period_end ??
     subscription.items?.data?.[0]?.current_period_end ??
     null;
+  const checkoutState = getCheckoutConfirmationState(
+    session.status,
+    session.payment_status
+  );
+  const checkoutConfirmedStatus =
+    checkoutState === 'success'
+      ? subscription.status === 'trialing'
+        ? 'trialing'
+        : 'active'
+      : checkoutState === 'pending'
+        ? 'pending'
+        : subscription.status;
 
   const subscriptionRecord: PaymentRecord = {
     user_id: userId,
     stripe_customer_id: customerId,
     stripe_subscription_id: subscription.id,
-    status: subscription.status,
+    status: statusOverride ?? checkoutConfirmedStatus,
     current_period_end: getTimestamp(currentPeriodEnd),
     updated_at: new Date().toISOString(),
   };
@@ -129,7 +154,10 @@ async function upsertSubscription(session: CheckoutSession) {
   if (error) throw error;
 }
 
-export async function storeStripeCheckoutSession(sessionId: string) {
+export async function storeStripeCheckoutSession(
+  sessionId: string,
+  options: { subscriptionStatus?: string } = {}
+) {
   getRequiredEnv('STRIPE_SECRET_KEY');
 
   const session = (await getStripe().checkout.sessions.retrieve(
@@ -150,7 +178,7 @@ export async function storeStripeCheckoutSession(sessionId: string) {
   }
 
   if (paymentType === 'subscription') {
-    await upsertSubscription(session);
+    await upsertSubscription(session, options.subscriptionStatus);
     return { type: paymentType };
   }
 

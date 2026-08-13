@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { getStripe } from '@/lib/stripe';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
+import { getCheckoutConfirmationState } from '@/lib/payments/checkoutStatus';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import DonationCheckoutForm from './DonationCheckoutForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +20,10 @@ export default async function DonationPage({
 }: DonationPageProps) {
   const { session_id: sessionId } = await searchParams;
   let confirmationState: ConfirmationState = null;
+  const sb = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await sb.auth.getUser();
 
   if (sessionId) {
     if (!sessionId.startsWith('cs_')) {
@@ -28,28 +34,28 @@ export default async function DonationPage({
 
         console.info('Stripe donation Checkout Session confirmation:', {
           sessionId: session.id,
-          'session.status': session.status,
-          'session.payment_status': session.payment_status,
+          mode: session.mode,
+          status: session.status,
+          paymentStatus: session.payment_status,
+          purpose: session.metadata?.purpose ?? session.metadata?.type,
         });
 
-        const sb = await createServerSupabaseClient();
-        const {
-          data: { user },
-        } = await sb.auth.getUser();
         const belongsToCurrentDonor =
           session.metadata?.type === 'donation' &&
           (!session.metadata.user_id ||
             session.metadata.user_id === (user?.id ?? ''));
 
-        if (!belongsToCurrentDonor || session.status !== 'complete') {
+        const checkoutState = getCheckoutConfirmationState(
+          session.status,
+          session.payment_status
+        );
+
+        if (!belongsToCurrentDonor) {
           confirmationState = 'error';
-        } else if (
-          session.payment_status === 'paid' ||
-          session.payment_status === 'no_payment_required'
-        ) {
+        } else if (checkoutState === 'success') {
           await storeStripeCheckoutSession(session.id);
           confirmationState = 'success';
-        } else if (session.payment_status === 'unpaid') {
+        } else if (checkoutState === 'pending') {
           confirmationState = 'pending';
         } else {
           confirmationState = 'error';
@@ -91,9 +97,7 @@ export default async function DonationPage({
         </p>
       )}
       {!confirmationState && (
-        <p className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          Start a donation from the payment checkout page.
-        </p>
+        <DonationCheckoutForm authenticatedEmail={user?.email} />
       )}
 
       <div className="grid gap-3 sm:flex sm:flex-wrap">
@@ -101,7 +105,7 @@ export default async function DonationPage({
           href="/payments"
           className="flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-emerald-800"
         >
-          Donation options
+          Payment options
         </Link>
         <Link
           href="/"
