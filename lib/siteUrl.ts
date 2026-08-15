@@ -10,6 +10,9 @@ function normalizeOrigin(value: string | undefined | null) {
   }
 }
 
+const LOCAL_SITE_ORIGIN = 'http://localhost:3000';
+const PRODUCTION_SITE_ORIGIN = 'https://quran-tutor-sigma.vercel.app';
+
 function isLocalOrigin(value: string) {
   try {
     const hostname = new URL(value).hostname;
@@ -22,19 +25,17 @@ function isLocalOrigin(value: string) {
 export function getBrowserSiteOrigin() {
   const runtimeOrigin =
     typeof window === 'undefined' ? null : normalizeOrigin(window.location.origin);
-  const configuredOrigin = normalizeOrigin(
-    process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL
-  );
+  const configuredOrigin = normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL);
 
-  if (
-    process.env.NODE_ENV === 'production' &&
-    configuredOrigin &&
-    isLocalOrigin(configuredOrigin)
-  ) {
-    return runtimeOrigin ?? configuredOrigin;
+  if (process.env.NODE_ENV === 'production') {
+    return configuredOrigin && !isLocalOrigin(configuredOrigin)
+      ? configuredOrigin
+      : PRODUCTION_SITE_ORIGIN;
   }
 
-  return configuredOrigin ?? runtimeOrigin ?? 'http://localhost:3000';
+  return runtimeOrigin && isLocalOrigin(runtimeOrigin)
+    ? runtimeOrigin
+    : LOCAL_SITE_ORIGIN;
 }
 
 export function getServerSiteOrigin(
@@ -45,8 +46,6 @@ export function getServerSiteOrigin(
     process.env.NEXT_PUBLIC_SITE_URL,
     process.env.APP_URL,
     process.env.VERCEL_PROJECT_PRODUCTION_URL,
-    process.env.VERCEL_BASE_URL,
-    process.env.VERCEL_URL,
   ];
   const developmentCandidates = [
     process.env.NEXT_PUBLIC_SITE_URL,
@@ -65,20 +64,20 @@ export function getServerSiteOrigin(
     }
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    return PRODUCTION_SITE_ORIGIN;
+  }
+
   const fallbackOrigins = [
     normalizeOrigin(requestOrigin),
     normalizeOrigin(requestUrl),
   ];
 
   for (const origin of fallbackOrigins) {
-    if (origin && (process.env.NODE_ENV !== 'production' || !isLocalOrigin(origin))) {
+    if (origin) {
       return origin;
     }
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('A production site URL is not configured.');
-  }
-
-  return 'http://localhost:3000';
+  return LOCAL_SITE_ORIGIN;
 }

@@ -1,6 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { getCheckoutConfirmationState } from '../../lib/payments/checkoutStatus';
 import {
+  buildDonationCheckoutSessionParams,
+  resolveDonationReceiptEmail,
+} from '../../lib/payments/donationCheckout';
+import {
   getUserSubscriptionStatus,
   normalizeSubscriptionState,
 } from '../../lib/payments/subscriptionStatus';
@@ -22,10 +26,65 @@ const adminCredentials = {
 };
 
 test.describe('payment state helpers', () => {
-  test('treats a complete unpaid bank checkout as pending', () => {
+  test('builds custom donation Checkout parameters without a Stripe customer or price id', () => {
+    const donationParams = buildDonationCheckoutSessionParams({
+      amountCents: 4250,
+      donorEmail: 'donor@example.com',
+      userId: 'parent-123',
+      siteUrl: 'https://quran-tutor.example',
+    });
+
+    expect(donationParams).toMatchObject({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: { name: 'Quran Tutor Donation' },
+            unit_amount: 4250,
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: 'donor@example.com',
+      metadata: {
+        purpose: 'donation',
+        donor_email: 'donor@example.com',
+        amount_cents: '4250',
+      },
+      success_url:
+        'https://quran-tutor.example/donation?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://quran-tutor.example/donation',
+    });
+    expect(donationParams).not.toHaveProperty('customer');
+    expect(donationParams.line_items?.[0]).not.toHaveProperty('price');
+  });
+
+  test('prefers a donor-entered receipt email for anonymous and logged-in donations', () => {
+    expect(
+      resolveDonationReceiptEmail(' Donor@Example.com ', 'parent@example.com')
+    ).toBe('donor@example.com');
+    expect(resolveDonationReceiptEmail('', 'parent@example.com')).toBe(
+      'parent@example.com'
+    );
+    expect(resolveDonationReceiptEmail('donor@example.com', null)).toBe(
+      'donor@example.com'
+    );
+  });
+
+  test('maps donation checkout states without conflating delayed payments and errors', () => {
     expect(getCheckoutConfirmationState('complete', 'unpaid')).toBe('pending');
     expect(getCheckoutConfirmationState('complete', 'paid')).toBe('success');
-    expect(getCheckoutConfirmationState('open', 'unpaid')).toBe('error');
+    expect(
+      getCheckoutConfirmationState('complete', 'no_payment_required')
+    ).toBe('success');
+    expect(getCheckoutConfirmationState('open', 'unpaid')).toBe('incomplete');
+    expect(getCheckoutConfirmationState('expired', 'unpaid')).toBe('expired');
+  });
+
+  test('keeps the working subscription confirmation inputs unchanged', () => {
+    expect(getCheckoutConfirmationState('complete', 'paid')).toBe('success');
+    expect(getCheckoutConfirmationState('complete', 'unpaid')).toBe('pending');
   });
 
   test('normalizes subscription records consistently', () => {
@@ -99,6 +158,19 @@ test.describe('public pages', () => {
     await openPage(page, '/auth/update-password');
     await expect(
       page.getByText(
+        'Please use the reset link from your email or request a new one.'
+      )
+    ).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Send a new reset link' })
+    ).toBeVisible();
+  });
+
+  test('expired password reset page shows a friendly error', async ({ page }) => {
+    await openPage(page, '/auth/update-password?error=expired');
+    await expect(
+      page.getByText(
         'This password reset link has expired. Please request a new one.'
       )
     ).toBeVisible();
@@ -112,6 +184,12 @@ test.describe('public pages', () => {
     await openPage(page, '/donation');
     await expect(page.getByLabel('Donation amount (USD)')).toHaveValue('25');
     await expect(page.getByLabel('Receipt email')).toBeVisible();
+    await page.getByLabel('Donation amount (USD)').fill('42.50');
+    await page.getByLabel('Receipt email').fill('donor@example.com');
+    await expect(page.getByLabel('Donation amount (USD)')).toHaveValue('42.50');
+    await expect(page.getByLabel('Receipt email')).toHaveValue(
+      'donor@example.com'
+    );
     await expect(
       page.getByRole('button', { name: 'Continue to Donation' })
     ).toBeVisible();

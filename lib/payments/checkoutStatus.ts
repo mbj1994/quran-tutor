@@ -1,9 +1,22 @@
-export type CheckoutConfirmationState = 'success' | 'pending' | 'error';
+export type CheckoutConfirmationState =
+  | 'success'
+  | 'pending'
+  | 'incomplete'
+  | 'expired'
+  | 'error';
 
 export function getCheckoutConfirmationState(
   sessionStatus: string | null | undefined,
   paymentStatus: string | null | undefined
 ): CheckoutConfirmationState {
+  if (sessionStatus === 'open') {
+    return 'incomplete';
+  }
+
+  if (sessionStatus === 'expired') {
+    return 'expired';
+  }
+
   if (sessionStatus !== 'complete') {
     return 'error';
   }

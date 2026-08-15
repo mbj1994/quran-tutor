@@ -33,37 +33,42 @@ export async function GET(request: Request) {
   const { searchParams, origin } = url;
   const code = searchParams.get('code');
   const errorCode = searchParams.get('error_code');
+  const authError = searchParams.get('error');
   const next = getSafeNext(searchParams.get('next') || searchParams.get('redirect_to'));
 
-  if (errorCode) {
+  if (errorCode || authError) {
     if (next === '/auth/update-password') {
-      return NextResponse.redirect(
-        `${origin}/auth/update-password?error_code=${encodeURIComponent(errorCode)}`
-      );
+      return NextResponse.redirect(`${origin}/auth/update-password?error=expired`);
     }
 
     return NextResponse.redirect(`${origin}/login?auth_message=${getAuthErrorMessage(errorCode)}`);
   }
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
-  }
-
-  const supabase = await createRouteHandlerSupabaseClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
     if (next === '/auth/update-password') {
-      return NextResponse.redirect(
-        `${origin}/auth/update-password?error_code=invalid_recovery`
-      );
+      return NextResponse.redirect(`${origin}/auth/update-password?error=expired`);
     }
 
     return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
   if (next === '/auth/update-password') {
-    return NextResponse.redirect(`${origin}${next}?recovery=1`);
+    const recoveryUrl = new URL('/auth/update-password', origin);
+    recoveryUrl.searchParams.set('code', code);
+
+    const recoveryType = searchParams.get('type');
+    if (recoveryType) {
+      recoveryUrl.searchParams.set('type', recoveryType);
+    }
+
+    return NextResponse.redirect(recoveryUrl);
+  }
+
+  const supabase = await createRouteHandlerSupabaseClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(`${origin}/login?auth_message=auth-error`);
   }
 
   const {

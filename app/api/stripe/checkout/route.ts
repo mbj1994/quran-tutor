@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { createRouteHandlerSupabaseClient } from '@/lib/supabaseServer';
 import { getServerSiteOrigin } from '@/lib/siteUrl';
-
-const MIN_DONATION_CENTS = 100;
-const MAX_DONATION_CENTS = 1_000_000;
+import {
+  buildDonationCheckoutSessionParams,
+  isValidDonationAmount,
+  isValidDonationEmail,
+  normalizeDonationEmail,
+  resolveDonationReceiptEmail,
+} from '@/lib/payments/donationCheckout';
 
 function getBodyValue(body: unknown, key: string) {
   return typeof body === 'object' && body !== null && key in body
@@ -44,12 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const amountCents = getBodyValue(body, 'amountCents');
-    if (
-      type === 'donation' &&
-      (!Number.isInteger(amountCents) ||
-        Number(amountCents) < MIN_DONATION_CENTS ||
-        Number(amountCents) > MAX_DONATION_CENTS)
-    ) {
+    if (type === 'donation' && !isValidDonationAmount(amountCents)) {
       return NextResponse.json(
         { error: 'Enter a valid donation amount between $1 and $10,000.' },
         { status: 400 }
@@ -57,15 +56,13 @@ export async function POST(req: NextRequest) {
     }
 
     const suppliedDonorEmail = getBodyValue(body, 'donorEmail');
-    const donorEmail =
-      typeof suppliedDonorEmail === 'string'
-        ? suppliedDonorEmail.trim().toLowerCase()
-        : '';
+    const donorEmail = normalizeDonationEmail(suppliedDonorEmail);
 
     if (
       type === 'donation' &&
-      donorEmail &&
-      (donorEmail.length > 320 || !/^\S+@\S+\.\S+$/.test(donorEmail))
+      suppliedDonorEmail !== undefined &&
+      (typeof suppliedDonorEmail !== 'string' ||
+        (donorEmail && !isValidDonationEmail(donorEmail)))
     ) {
       return NextResponse.json(
         { error: 'Enter a valid email address for the donation receipt.' },
@@ -90,7 +87,12 @@ export async function POST(req: NextRequest) {
 
     user = authenticatedUser;
 
-    if (type === 'donation' && !user?.email && !donorEmail) {
+    const donationReceiptEmail = resolveDonationReceiptEmail(
+      donorEmail,
+      user?.email
+    );
+
+    if (type === 'donation' && !isValidDonationEmail(donationReceiptEmail)) {
       return NextResponse.json(
         { error: 'Enter an email address for the donation receipt.' },
         { status: 400 }
@@ -134,47 +136,53 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const lineItems =
-      type === 'donation'
-        ? [
-            {
-              price_data: {
-                currency: 'usd' as const,
-                product_data: {
-                  name: 'Donation to Quran Tutor',
-                },
-                unit_amount: Number(amountCents),
-              },
-              quantity: 1,
-            },
-          ]
-        : [{ price: subscriptionPrice as string, quantity: 1 }];
+    let session;
 
-    const session = await getStripe().checkout.sessions.create({
-      mode: type === 'donation' ? 'payment' : 'subscription',
-      line_items: lineItems,
-      customer,
-      customer_email: customer
-        ? undefined
-        : ((user?.email ?? donorEmail) || undefined),
-      metadata: {
-        user_id: user?.id ?? '',
-        type,
-      },
-      success_url:
-        type === 'donation'
-          ? `${origin}/donation?session_id={CHECKOUT_SESSION_ID}`
-          : `${origin}/subscription?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/payments/cancel`,
-    });
+    if (type === 'donation') {
+      const donationSessionParams = buildDonationCheckoutSessionParams({
+        amountCents: Number(amountCents),
+        donorEmail: donationReceiptEmail,
+        userId: user?.id,
+        siteUrl: origin,
+      });
 
-    console.info('Stripe Checkout Session created:', {
-      sessionId: session.id,
-      mode: session.mode,
-      status: session.status,
-      paymentStatus: session.payment_status,
-      purpose: session.metadata?.purpose ?? session.metadata?.type,
-    });
+      session = await getStripe().checkout.sessions.create(
+        donationSessionParams
+      );
+
+      console.info('Stripe donation Checkout Session created:', {
+        purpose: 'donation',
+        mode: donationSessionParams.mode,
+        amount_cents: Number(amountCents),
+        donor_email_present: Boolean(donationReceiptEmail),
+        using_customer: false,
+        using_customer_email: Boolean(donationSessionParams.customer_email),
+        success_url: donationSessionParams.success_url,
+        cancel_url: donationSessionParams.cancel_url,
+      });
+    } else {
+      session = await getStripe().checkout.sessions.create({
+        mode: 'subscription',
+        line_items: [{ price: subscriptionPrice as string, quantity: 1 }],
+        customer,
+        customer_email: customer ? undefined : user?.email || undefined,
+        metadata: {
+          user_id: user?.id ?? '',
+          type,
+          purpose: type,
+        },
+        success_url: `${origin}/subscription?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/payments/cancel`,
+      });
+
+      console.info('Stripe Checkout Session created:', {
+        sessionId: session.id,
+        mode: session.mode,
+        status: session.status,
+        paymentStatus: session.payment_status,
+        purpose: session.metadata?.purpose ?? session.metadata?.type,
+      });
+    }
 
     if (!session.url) {
       return NextResponse.json(

@@ -164,7 +164,7 @@ function LoginForm() {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${getBrowserSiteOrigin()}/auth/callback`,
         data: {
           role: signupRole,
         },
@@ -232,7 +232,7 @@ function LoginForm() {
       return;
     }
 
-    setMessage('Password reset email sent. Please open the newest email from us.');
+    setMessage('If that email exists, we sent a new reset link.');
   }
 
   return (

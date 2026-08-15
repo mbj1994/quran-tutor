@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { getStripe } from '@/lib/stripe';
 import { storeStripeCheckoutSession } from '@/lib/payments/storeStripeCheckout';
-import { getCheckoutConfirmationState } from '@/lib/payments/checkoutStatus';
+import {
+  getCheckoutConfirmationState,
+  type CheckoutConfirmationState,
+} from '@/lib/payments/checkoutStatus';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import DonationCheckoutForm from './DonationCheckoutForm';
 
 export const dynamic = 'force-dynamic';
-
-type ConfirmationState = 'success' | 'pending' | 'error' | null;
 
 type DonationPageProps = {
   searchParams: Promise<{
@@ -19,7 +20,7 @@ export default async function DonationPage({
   searchParams,
 }: DonationPageProps) {
   const { session_id: sessionId } = await searchParams;
-  let confirmationState: ConfirmationState = null;
+  let confirmationState: CheckoutConfirmationState | null = null;
   const sb = await createServerSupabaseClient();
   const {
     data: { user },
@@ -33,32 +34,42 @@ export default async function DonationPage({
         const session = await getStripe().checkout.sessions.retrieve(sessionId);
 
         console.info('Stripe donation Checkout Session confirmation:', {
-          sessionId: session.id,
-          mode: session.mode,
-          status: session.status,
-          paymentStatus: session.payment_status,
-          purpose: session.metadata?.purpose ?? session.metadata?.type,
+          'session.id': session.id,
+          'session.mode': session.mode,
+          'session.status': session.status,
+          'session.payment_status': session.payment_status,
+          'session.metadata.purpose': session.metadata?.purpose,
+          amount_total: session.amount_total,
+          payment_method_types: session.payment_method_types,
         });
 
-        const belongsToCurrentDonor =
-          session.metadata?.type === 'donation' &&
-          (!session.metadata.user_id ||
-            session.metadata.user_id === (user?.id ?? ''));
+        const isDonationSession =
+          session.mode === 'payment' &&
+          (session.metadata?.purpose === 'donation' ||
+            session.metadata?.type === 'donation');
 
         const checkoutState = getCheckoutConfirmationState(
           session.status,
           session.payment_status
         );
 
-        if (!belongsToCurrentDonor) {
+        if (!isDonationSession) {
           confirmationState = 'error';
         } else if (checkoutState === 'success') {
-          await storeStripeCheckoutSession(session.id);
           confirmationState = 'success';
+          try {
+            await storeStripeCheckoutSession(session.id);
+          } catch {
+            // The signed Stripe result is still authoritative for this page.
+            // The webhook can safely retry persistence without exposing details.
+            console.error('Unable to store the confirmed donation Checkout Session.', {
+              sessionId: session.id,
+            });
+          }
         } else if (checkoutState === 'pending') {
           confirmationState = 'pending';
         } else {
-          confirmationState = 'error';
+          confirmationState = checkoutState;
         }
       } catch {
         console.error(
@@ -90,13 +101,23 @@ export default async function DonationPage({
           payment shortly.
         </p>
       )}
+      {confirmationState === 'incomplete' && (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Your donation checkout was not completed yet.
+        </p>
+      )}
+      {confirmationState === 'expired' && (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          This donation checkout session expired. Please start again.
+        </p>
+      )}
       {confirmationState === 'error' && (
         <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           We could not confirm this donation checkout. Please try again or
           contact support.
         </p>
       )}
-      {!confirmationState && (
+      {confirmationState !== 'success' && confirmationState !== 'pending' && (
         <DonationCheckoutForm authenticatedEmail={user?.email} />
       )}
 

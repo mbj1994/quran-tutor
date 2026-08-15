@@ -28,7 +28,9 @@ export default function DonationCheckoutForm({
       return;
     }
 
-    if (!authenticatedEmail && !donorEmail.trim()) {
+    const receiptEmail = donorEmail.trim();
+
+    if (!receiptEmail) {
       setMessage('Enter your email so Stripe can send your donation receipt.');
       return;
     }
@@ -43,7 +45,7 @@ export default function DonationCheckoutForm({
         body: JSON.stringify({
           type: 'donation',
           amountCents,
-          donorEmail: authenticatedEmail ? undefined : donorEmail.trim(),
+          donorEmail: receiptEmail,
         }),
       });
       const data: unknown = await response.json().catch(() => null);
@@ -101,27 +103,27 @@ export default function DonationCheckoutForm({
         </div>
       </label>
 
-      {authenticatedEmail ? (
-        <p className="text-sm text-gray-600">
-          Receipt email: <span className="font-medium">{authenticatedEmail}</span>
-        </p>
-      ) : (
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-gray-800">
-            Receipt email
+      <label className="block">
+        <span className="mb-1 block text-sm font-medium text-gray-800">
+          Receipt email
+        </span>
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          value={donorEmail}
+          onChange={(event) => setDonorEmail(event.target.value)}
+          disabled={loading}
+          placeholder="you@example.com"
+          className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
+        />
+        {authenticatedEmail && (
+          <span className="mt-1 block text-xs text-gray-500">
+            Your account email is prefilled. You can use a different receipt
+            email for this donation.
           </span>
-          <input
-            type="email"
-            required
-            autoComplete="email"
-            value={donorEmail}
-            onChange={(event) => setDonorEmail(event.target.value)}
-            disabled={loading}
-            placeholder="you@example.com"
-            className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-950 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:opacity-50"
-          />
-        </label>
-      )}
+        )}
+      </label>
 
       <button
         type="submit"

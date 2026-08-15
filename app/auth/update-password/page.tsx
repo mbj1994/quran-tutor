@@ -6,10 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseClient';
 import { getBrowserSiteOrigin } from '@/lib/siteUrl';
 
-type RecoveryState = 'checking' | 'valid' | 'invalid';
+type RecoveryState = 'checking' | 'valid' | 'expired' | 'direct';
 
 const EXPIRED_MESSAGE =
   'This password reset link has expired. Please request a new one.';
+const DIRECT_MESSAGE =
+  'Please use the reset link from your email or request a new one.';
 
 function getHashParams() {
   if (typeof window === 'undefined' || !window.location.hash) {
@@ -26,7 +28,7 @@ function clearRecoveryParameters() {
 function UpdatePasswordForm() {
   const searchParams = useSearchParams();
   const supabase = useMemo(() => supabaseBrowser(), []);
-  const exchangeStarted = useRef(false);
+  const recoveryStarted = useRef(false);
   const [recoveryState, setRecoveryState] = useState<RecoveryState>('checking');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,8 +51,8 @@ function UpdatePasswordForm() {
   }, [resendCooldown]);
 
   useEffect(() => {
-    if (exchangeStarted.current) return;
-    exchangeStarted.current = true;
+    if (recoveryStarted.current) return;
+    recoveryStarted.current = true;
 
     async function prepareRecoverySession() {
       const hashParams = getHashParams();
@@ -59,26 +61,40 @@ function UpdatePasswordForm() {
         searchParams.get('error') ||
         hashParams.get('error_code') ||
         hashParams.get('error');
-      const code = searchParams.get('code');
+      const code = searchParams.get('code') || hashParams.get('code');
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
-      const isRecoveryHash = hashParams.get('type') === 'recovery';
-      const cameFromCallback = searchParams.get('recovery') === '1';
+      const recoveryType =
+        searchParams.get('type') || hashParams.get('type');
+      const hasRecoveryParameters = Boolean(
+        code || accessToken || refreshToken || recoveryType === 'recovery'
+      );
 
       if (errorCode) {
-        setRecoveryState('invalid');
+        setRecoveryState('expired');
         return;
       }
 
-      const hasRecoveryParameters =
-        Boolean(code) ||
-        (isRecoveryHash && Boolean(accessToken) && Boolean(refreshToken)) ||
-        cameFromCallback;
+      if (!hasRecoveryParameters) {
+        setRecoveryState('direct');
+        return;
+      }
 
-      if (hasRecoveryParameters) {
-        // The browser Supabase helper uses PKCE with URL detection enabled. Its
-        // initialization owns the one-time code exchange, and getSession waits
-        // for that initialization instead of consuming the code a second time.
+      if (accessToken && refreshToken) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error && data.session) {
+          clearRecoveryParameters();
+          setRecoveryState('valid');
+          return;
+        }
+      } else if (code) {
+        // The PKCE-enabled browser helper owns URL detection and exchanges the
+        // code during initialization. getSession waits for that one exchange,
+        // which avoids consuming the recovery code a second time.
         const {
           data: { session },
           error,
@@ -91,7 +107,7 @@ function UpdatePasswordForm() {
         }
       }
 
-      setRecoveryState('invalid');
+      setRecoveryState('expired');
     }
 
     void prepareRecoverySession();
@@ -125,7 +141,7 @@ function UpdatePasswordForm() {
         return;
       }
 
-      setRecoveryState('invalid');
+      setRecoveryState('expired');
       setMessage(null);
       return;
     }
@@ -135,7 +151,7 @@ function UpdatePasswordForm() {
     setSuccess(true);
     setPassword('');
     setConfirmPassword('');
-    setMessage('Password updated. Please sign in with your new password.');
+    setMessage('Your password has been updated. You can now log in.');
   }
 
   async function handleResend(event: React.FormEvent) {
@@ -165,9 +181,7 @@ function UpdatePasswordForm() {
     }
 
     setResendCooldown(60);
-    setResendMessage(
-      'A new password reset link has been sent. Please use the newest email.'
-    );
+    setResendMessage('If that email exists, we sent a new reset link.');
   }
 
   return (
@@ -253,10 +267,10 @@ function UpdatePasswordForm() {
           </>
         )}
 
-        {recoveryState === 'invalid' && (
+        {(recoveryState === 'expired' || recoveryState === 'direct') && (
           <>
             <p className="mt-5 rounded-lg bg-amber-50 p-3 text-center text-sm leading-6 text-amber-900">
-              {EXPIRED_MESSAGE}
+              {recoveryState === 'expired' ? EXPIRED_MESSAGE : DIRECT_MESSAGE}
             </p>
             <form onSubmit={handleResend} className="mt-5 space-y-3">
               <label className="block">
